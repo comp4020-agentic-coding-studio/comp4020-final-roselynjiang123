@@ -8,6 +8,11 @@
     // Imports name the file they mean, extension and all --- which is what
     // node itself wants when it runs a .ts file directly.
     "allowImportingTsExtensions": true,
+    // spec/markdown.test.ts imports src/markdown.mjs directly (brief §9 item
+    // 11's rendering path has no fixture-swapping HTTP route to test
+    // against instead). allowJs without checkJs: TypeScript accepts the
+    // import without type-checking src/*.mjs, which stays untyped JS.
+    "allowJs": true,
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "types": ["node"],
     "strict": true,
