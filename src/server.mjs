@@ -1,16 +1,37 @@
 import express from "express";
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { openDatabase, resolveDatabasePath } from "./db.mjs";
+import { createRepo } from "./repo.mjs";
+import { sessionMiddleware, requireSameOrigin } from "./session.mjs";
+import { serializeSnapshot } from "./serializer.mjs";
+import { randomToken } from "./ids.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(__dirname, "..");
 
+const OUTCOME_STATUS = {
+  not_found: 404,
+  forbidden: 403,
+  full: 409,
+  stale: 409,
+};
+
 export function createApp(db) {
+  const repo = createRepo(db);
   const app = express();
   // Behind Fly's proxy (brief §7a).
   app.set("trust proxy", 1);
+  app.use(express.json({ limit: "16kb" }));
+  app.use(sessionMiddleware(repo));
+
+  const publicDir = join(repoRoot, "public");
+  if (existsSync(publicDir)) {
+    // Static assets only: never the case module, the database, test
+    // fixtures, or any repository file outside public/ (brief §5, §9 #4).
+    app.use(express.static(publicDir));
+  }
 
   app.get("/", (_req, res) => {
     res.sendFile(join(repoRoot, "placeholder", "index.html"));
@@ -34,13 +55,59 @@ export function createApp(db) {
     }
   });
 
-  return app;
+  app.get("/api/me/tables", (req, res) => {
+    res.set("Cache-Control", "no-store");
+    const rows = repo.listTablesForIdentity(req.identity);
+    res.json({
+      tables: rows.map((r) => ({ tableId: r.table_id, status: r.status, seat: r.seat })),
+    });
+  });
+
+  app.post("/api/tables", requireSameOrigin, (req, res) => {
+    res.set("Cache-Control", "no-store");
+    const tableId = randomToken();
+    const snapshot = repo.createTable(tableId, req.identity);
+    res.status(201).json(serializeSnapshot(snapshot));
+  });
+
+  // GET must not consume a seat (brief §4 step 3): this route only reports
+  // whether the table is joinable, never full table state for a non-member.
+  app.get("/api/tables/:id", (req, res) => {
+    res.set("Cache-Control", "no-store");
+    const { id } = req.params;
+    const snapshot = repo.getSnapshot(id, req.identity);
+    if (!snapshot) {
+      res.status(404).json({ error: "no such table" });
+      return;
+    }
+    if (!repo.isMember(id, req.identity)) {
+      const full = snapshot.members.length >= 2;
+      res.json({
+        table: { id, code: snapshot.table.id.slice(0, 4).toUpperCase() },
+        joinable: !full,
+      });
+      return;
+    }
+    res.json(serializeSnapshot(snapshot));
+  });
+
+  app.post("/api/tables/:id/join", requireSameOrigin, (req, res) => {
+    res.set("Cache-Control", "no-store");
+    const result = repo.joinTable(req.params.id, req.identity);
+    if (result.outcome !== "ok") {
+      res.status(OUTCOME_STATUS[result.outcome] ?? 400).json({ error: result.outcome });
+      return;
+    }
+    res.json(serializeSnapshot(result.snapshot));
+  });
+
+  return { app, repo };
 }
 
 export function start() {
   const port = Number(process.env.PORT ?? 8080);
   const db = openDatabase(resolveDatabasePath());
-  const app = createApp(db);
+  const { app } = createApp(db);
 
   const server = app.listen(port, "0.0.0.0", () => {
     console.log(`listening on 0.0.0.0:${port}`);

@@ -21,10 +21,20 @@ export function resolveDatabasePath() {
   return resolve(configured ?? "data/dev.db");
 }
 
-// Suggested durable entities (brief §7): sessions, tables, table_members,
-// rounds (frozen case data + reveal timestamp), submissions. Game logic is
-// out of scope for the walking skeleton; these just exist and migrate
-// idempotently so a restart has real state to prove persistence against.
+// Durable entities (brief §7): sessions, tables, table_members, rounds
+// (frozen case data + reveal timestamp), submissions.
+//
+// tables.id doubles as the invitation token: it is the only identifier, is
+// generated with enough entropy to be unguessable (src/ids.mjs), and the
+// "table code" shown in the UI is a display-only derivation of it (first 4
+// characters, uppercased) -- never a second secret to manage.
+//
+// tables.version increases on every state-changing write to that table, so
+// SSE subscribers and the client can detect and discard a stale response
+// that arrives after a newer one (brief §7). Added in 0002 rather than 0001:
+// 0001 already ran against the deployed Fly volume in Round 1, so changing it
+// in place would silently skip the column on that volume (migrations never
+// re-run once applied -- brief §7a).
 const MIGRATIONS = [
   {
     id: "0001_initial",
@@ -67,6 +77,10 @@ const MIGRATIONS = [
         UNIQUE (round_id, identity)
       );
     `,
+  },
+  {
+    id: "0002_table_version",
+    sql: `ALTER TABLE tables ADD COLUMN version INTEGER NOT NULL DEFAULT 0;`,
   },
 ];
 

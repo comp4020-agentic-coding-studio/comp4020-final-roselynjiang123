@@ -1,0 +1,608 @@
+spec/game.test.ts (brief §9 items 1-8, 11) run against commit a222b5e, the
+walking skeleton from Round 1 (Express serving the starter placeholder, no
+game routes). Captured before any game implementation was written.
+
+ RUN  v5.0.1 /home/roselyn/comp4020/comp4020-final-roselynjiang123
+
+ ❯ spec/game.test.ts (34 tests | 29 failed) 74ms
+   ❯ item 1: seats (3)
+     × same identity in two tabs cannot occupy both seats 25ms
+     × third identity cannot join a full table 3ms
+     × concurrent joins produce one B 3ms
+   ❯ item 2: nonmembers and forged identity (5)
+     × nonmembers cannot read full snapshots 2ms
+     × nonmembers cannot submit 3ms
+     × nonmembers cannot advance 2ms
+     × nonmembers cannot open the SSE stream 1ms
+     × forged identity in the body does not bypass session identity 2ms
+   ❯ item 3: pre-reveal payloads leak nothing (4)
+     × GET snapshot before reveal has no partner answers, correctness or answer key 2ms
+     × the first submitter's own POST response leaks nothing about the partner 2ms
+     × own per-field scoring does not leak before reveal 1ms
+     × SSE events before reveal carry no partner answers or answer key 2ms
+   ❯ item 5: answer validation (5)
+     × rejects a missing field without revealing correctness 1ms
+     × rejects an invalid value 1ms
+     × rejects an extra field 1ms
+     × rejects an inconsistent overall judgement 1ms
+     × accepts a valid answer regardless of correctness 1ms
+   ❯ item 6: duplicate and concurrent submissions (3)
+     × a duplicate identical submission is harmless 1ms
+     × a changed repeat cannot overwrite the original 1ms
+     × concurrent submissions from both members create exactly two rows and one reveal 1ms
+   ❯ item 7: agreement vs accuracy (4)
+     × correct consensus: both agree and both correct 1ms
+     × incorrect consensus: both agree and both wrong 1ms
+     × divergent answers: different, one correct 1ms
+     × differing partial errors: different, both wrong 1ms
+   ❯ item 8: advancing rounds (4)
+     × concurrent Next requests for one fromRoundId advance once 1ms
+     × an unrevealed round cannot be advanced 1ms
+     × a stale (already-advanced) round cannot be edited back 1ms
+     × all six cases can complete without skipping 1ms
+   ❯ item 11: / and /readme/ (2)
+     × /readme/ contains the try-it box and the full rendered README in the original response 3ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 29 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  spec/game.test.ts > item 1: seats > same identity in two tabs cannot occupy both seats
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ spec/game.test.ts:42:32
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/29]⎯
+
+ FAIL  spec/game.test.ts > item 1: seats > third identity cannot join a full table
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:52:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/29]⎯
+
+ FAIL  spec/game.test.ts > item 1: seats > concurrent joins produce one B
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ spec/game.test.ts:59:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/29]⎯
+
+ FAIL  spec/game.test.ts > item 2: nonmembers and forged identity > nonmembers cannot read full snapshots
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:73:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/29]⎯
+
+ FAIL  spec/game.test.ts > item 2: nonmembers and forged identity > nonmembers cannot submit
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:81:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/29]⎯
+
+ FAIL  spec/game.test.ts > item 2: nonmembers and forged identity > nonmembers cannot advance
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:90:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/29]⎯
+
+ FAIL  spec/game.test.ts > item 2: nonmembers and forged identity > nonmembers cannot open the SSE stream
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:97:25
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/29]⎯
+
+ FAIL  spec/game.test.ts > item 2: nonmembers and forged identity > forged identity in the body does not bypass session identity
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:104:28
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/29]⎯
+
+ FAIL  spec/game.test.ts > item 3: pre-reveal payloads leak nothing > GET snapshot before reveal has no partner answers, correctness or answer key
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:121:28
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/29]⎯
+
+ FAIL  spec/game.test.ts > item 3: pre-reveal payloads leak nothing > the first submitter's own POST response leaks nothing about the partner
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:130:28
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/29]⎯
+
+ FAIL  spec/game.test.ts > item 3: pre-reveal payloads leak nothing > own per-field scoring does not leak before reveal
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:143:28
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/29]⎯
+
+ FAIL  spec/game.test.ts > item 3: pre-reveal payloads leak nothing > SSE events before reveal carry no partner answers or answer key
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:154:31
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/29]⎯
+
+ FAIL  spec/game.test.ts > item 5: answer validation > rejects a missing field without revealing correctness
+ FAIL  spec/game.test.ts > item 5: answer validation > rejects an invalid value
+ FAIL  spec/game.test.ts > item 5: answer validation > rejects an extra field
+ FAIL  spec/game.test.ts > item 5: answer validation > rejects an inconsistent overall judgement
+ FAIL  spec/game.test.ts > item 5: answer validation > accepts a valid answer regardless of correctness
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:190:21
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/29]⎯
+
+ FAIL  spec/game.test.ts > item 6: duplicate and concurrent submissions > a duplicate identical submission is harmless
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:238:28
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/29]⎯
+
+ FAIL  spec/game.test.ts > item 6: duplicate and concurrent submissions > a changed repeat cannot overwrite the original
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:252:31
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/29]⎯
+
+ FAIL  spec/game.test.ts > item 6: duplicate and concurrent submissions > concurrent submissions from both members create exactly two rows and one reveal
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:270:31
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/29]⎯
+
+ FAIL  spec/game.test.ts > item 7: agreement vs accuracy > correct consensus: both agree and both correct
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:303:31
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/29]⎯
+
+ FAIL  spec/game.test.ts > item 7: agreement vs accuracy > incorrect consensus: both agree and both wrong
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:311:31
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/29]⎯
+
+ FAIL  spec/game.test.ts > item 7: agreement vs accuracy > divergent answers: different, one correct
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:320:31
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/29]⎯
+
+ FAIL  spec/game.test.ts > item 7: agreement vs accuracy > differing partial errors: different, both wrong
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:329:31
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/29]⎯
+
+ FAIL  spec/game.test.ts > item 8: advancing rounds > concurrent Next requests for one fromRoundId advance once
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:349:31
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/29]⎯
+
+ FAIL  spec/game.test.ts > item 8: advancing rounds > an unrevealed round cannot be advanced
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:362:28
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/29]⎯
+
+ FAIL  spec/game.test.ts > item 8: advancing rounds > a stale (already-advanced) round cannot be edited back
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:370:31
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/29]⎯
+
+ FAIL  spec/game.test.ts > item 8: advancing rounds > all six cases can complete without skipping
+AssertionError: expected 404 to be 201 // Object.is equality
+
+- Expected
++ Received
+
+- 201
++ 404
+
+ ❯ createTable spec/game.test.ts:23:22
+     21|   const owner = createClient(baseUrl);
+     22|   const res = await owner.post("/api/tables", {});
+     23|   expect(res.status).toBe(201);
+       |                      ^
+     24|   const body = await res.json();
+     25|   return { owner, tableId: body.table.id };
+ ❯ createAndJoinTable spec/game.test.ts:29:33
+ ❯ spec/game.test.ts:380:31
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/29]⎯
+
+ FAIL  spec/game.test.ts > item 11: / and /readme/ > /readme/ contains the try-it box and the full rendered README in the original response
+AssertionError: expected '<!doctype html>\n<html lang="en-AU">\…' to match /Try it in two browsers/
+
+- Expected:
+/Try it in two browsers/
+
++ Received:
+"<!doctype html>
+<html lang=\"en-AU\">
+  <head>
+    <meta charset=\"utf-8\" />
+    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />
+    <title>About</title>
+  </head>
+  <body>
+    <main>
+      <h1>About</h1>
+      <pre>
+# Your app
+
+&lt;!-- TEMPLATE: this file is yours, and the deployed app publishes it in full at
+     /readme/, where visitors and markers read it. The final project brief says
+     what it covers. Replace everything in it, this comment included. --&gt;
+
+Images are committed to the repo and linked relatively ---
+`![alt](docs/before.png)` --- so they render on GitHub; making them resolve at
+`/readme/` too is your app's job.
+
+      </pre>
+    </main>
+  </body>
+</html>
+"
+
+ ❯ spec/game.test.ts:407:18
+    405|     expect(res.status).toBe(200);
+    406|     const html = await res.text();
+    407|     expect(html).toMatch(/Try it in two browsers/);
+       |                  ^
+    408|
+    409|     const expected = headings(readFileSync("README.md", "utf8"));
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/29]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  29 failed | 5 passed (34)
+   Start at  02:58:50
+   Duration  994ms (import 86%, tests 9%, transform 4%)
+
+npm notice
+npm notice New major version of npm available! 11.19.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice
