@@ -1,0 +1,26 @@
+Measured against https://comp4020-final-roselynjiang123.fly.dev with
+scripts/smoke-deployed.mjs, per brief §9 item 12: milliseconds from the
+second submission's POST response to the first client's SSE reveal
+snapshot, both timestamped on the measuring client.
+
+Near-zero and slightly negative values are real, not a measurement bug: the
+server calls sse.notify() before sending the second submitter's own HTTP
+response (src/server.mjs), so the SSE push and that POST response leave the
+server within the same event-loop tick and race back over two independent
+TCP connections -- confirmed by direct inspection (B's own request RTT was
+~240ms against this same deployment; the SSE push regularly won that race by
+a few ms). This is well inside the "about one second" target in brief §7.
+
+run 1: 0ms
+run 2: 0ms
+run 3: -2ms
+run 4: -1ms
+run 5: 1ms
+run 6: -3ms
+run 7: 1ms
+run 8: 1ms
+run 9: -3ms
+run 10: 0ms
+
+median: 0ms
+max: 1ms
