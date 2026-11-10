@@ -1,3 +1,8 @@
+---
+import { readFileSync } from "node:fs";
+
+const readme = readFileSync(new URL("../../../README.md", import.meta.url), "utf8");
+---
 <!doctype html>
 <html lang="en-AU">
   <head>
@@ -8,9 +13,7 @@
   <body>
     <main>
       <h1>About</h1>
-      <pre>
-@README@
-      </pre>
+      <pre>{readme}</pre>
     </main>
   </body>
 </html>
