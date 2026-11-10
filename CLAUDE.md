@@ -35,6 +35,18 @@ Scope and contract: [build brief](docs/build-brief.md). Visual spec:
 - MUST log every agent mistake a test/check/student caught in
   `docs/evidence-log.md`, with the fix landing in `spec/` or here, not only a
   retry. judged: human review of docs/evidence-log.md.
+- MUST score every case for its actual discrepancy count (0-5 fields), never
+  assume exactly one. judged: spec test 7 (two-discrepancy case).
+- NEVER say or imply a pair review result makes a medication safe; agreement,
+  accuracy and a combined pair result are three separate concepts. judged:
+  spec test 7 (pair-review categories), human review of pair-review copy.
+
+## Process rule
+
+- NEVER change stack or architecture before reporting the concrete conflict
+  to the student and getting their answer (brief §1). ADR 0001's stack
+  revert was carried out first and reported after; that was the wrong order.
+  judged: human review of ADRs and evidence-log against commit order.
 
 ## Carried forward from Assignment 2
 
