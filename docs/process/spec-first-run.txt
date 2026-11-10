@@ -606,3 +606,62 @@ npm notice New major version of npm available! 11.19.0 -> 12.2.2
 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
 npm notice To update run: npm install -g npm@12.2.2
 npm notice
+
+====================================================================
+Addendum (Round 3, tidying Round 2): the 5 passes and why
+====================================================================
+
+spec/game.test.ts, the file this run captured, was never committed in full
+(415e18d's message says so explicitly: "not yet committed in full -- split
+across this and following commits"); its content was replaced across Round 2
+by today's spec/*.test.ts files, which is what actually shipped. So which 5
+of the original 34 passed is not recoverable from this repo's history by
+reading a diff -- it has to be reconstructed by running a test suite against
+the Round 1 code. Re-running today's spec/*.test.ts (the shipped successor
+to game.test.ts) against a `git worktree` checkout of a222b5e (same commit
+this file's header names) gives exactly 4 passes, not 5, because one of the
+original 5 (spec/invariants.test.ts > "answers at /") is counted once here
+but the other four are:
+
+1. spec/invariants.test.ts > "answers at /" -- passed because the Round 1
+   skeleton already serves the placeholder index.html at GET /, and that
+   route's status code was never a game concern (brief §9 item 11's "/
+   responds" half).
+2. spec/invariants.test.ts > "publishes README.md at /readme/" -- passed
+   because the Round 1 skeleton's /readme/ already rendered README.md's
+   text, satisfying the heading-order check, even before the try-it box
+   and the game's own copy existed (item 11's other half).
+3. spec/restart.test.ts > "an incomplete table resumes and completed records
+   remain after a process restart" -- spawns its own instance and only
+   asserts behaviour conditional on a table existing; with no /api/tables
+   route yet, table creation itself failed (POST /api/tables was 404), so
+   the test's own early assertions on table state never executed and it
+   passed vacuously rather than by exercising restart durability (item 9).
+4. spec/restart.test.ts > "SSE reconnect after a restart returns the latest
+   authorised state" -- same shape: table/join calls 404'd before the SSE
+   assertion ran, so this also passed vacuously, not because reconnect
+   behaviour existed yet (item 10).
+
+Every other test in today's suite requires POST /api/tables to return 201
+(spec/support/game.ts's createTable() throws otherwise), and the Round 1
+skeleton has no /api/tables route at all, so they all fail with 404 --
+consistent with this file's original 404-where-201-was-meant failures.
+
+The discrepancy between "5 passed" here and 4 reconstructed independently is
+closest to spec/tables.test.ts's "creating a table claims seat A" test
+existing in some form in the original game.test.ts and passing for a
+different reason (plausibly a looser assertion, since the original file is
+unrecoverable): this is flagged rather than guessed at, since the original
+test source no longer exists to check against.
+
+Tightened in this round: items 3 and 4's restart/reconnect tests pass today
+for the right reason (the actual game routes return 201/200 against real
+game state, not because a 404 short-circuited the test). No change was
+needed to make them "pass for the right reason" -- that was already true as
+of commit a318931, which added spec/restart.test.ts against the full game,
+not the skeleton. What this addendum changes is spec/progression.test.ts
+(adds "nonmembers cannot advance", brief §9 item 2's "or submit/advance"
+half, which had no test at all) and the new spec/static-assets.test.ts
+(brief §9 item 4, also previously untested, though already satisfied by
+construction: express.static only ever serves public/, and the only route
+reading src/cases.mjs sits behind repo.isMember()).

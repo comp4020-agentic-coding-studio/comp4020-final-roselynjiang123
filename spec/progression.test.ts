@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { CASE1_ANSWER_CORRECT, createAndJoinTable, type Client, currentRound } from "./support/game.ts";
+import {
+  CASE1_ANSWER_CORRECT,
+  createAndJoinTable,
+  createClient,
+  type Client,
+  currentRound,
+  baseUrl,
+} from "./support/game.ts";
 
 // Brief §9 item 8: advancing rounds; also exercises the six frozen cases
 // (src/cases.mjs) end to end, since completing all six is the only way to
@@ -12,6 +19,17 @@ describe("progression through six cases", () => {
     await b.post(`/api/tables/${tableId}/rounds/${roundId}/submissions`, { answer: CASE1_ANSWER_CORRECT });
     return roundId;
   }
+
+  // Brief §9 item 2: "or submit/advance" -- this half of item 2 had no test
+  // until Round 3's Round-2 tidy-up (docs/evidence-log.md); the behaviour
+  // already existed (repo.advance checks repo.isMember(), src/server.mjs)
+  // and returned 403 correctly, it just wasn't exercised.
+  it("nonmembers cannot advance", async () => {
+    const { tableId } = await createAndJoinTable();
+    const outsider = createClient(baseUrl);
+    const res = await outsider.post(`/api/tables/${tableId}/next`, { fromRoundId: "anything" });
+    expect(res.status).toBe(403);
+  });
 
   it("an unrevealed round cannot be advanced", async () => {
     const { a, tableId } = await createAndJoinTable();
