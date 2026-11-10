@@ -1,3 +1,6 @@
+import { caseSnapshot } from "./cases.mjs";
+import { uuid } from "./ids.mjs";
+
 // All SQL lives here, as prepared-statement functions bound to one database.
 // Every state-changing operation is a transaction (brief §7: "Use
 // transactions for competing joins, recording/revealing submissions and
@@ -11,6 +14,7 @@ export function createRepo(db) {
 
     insertTable: db.prepare("INSERT INTO tables (id) VALUES (?)"),
     getTable: db.prepare("SELECT * FROM tables WHERE id = ?"),
+    bumpTableVersion: db.prepare("UPDATE tables SET version = version + 1 WHERE id = ?"),
     setTableStatus: db.prepare("UPDATE tables SET status = ? WHERE id = ?"),
 
     insertMember: db.prepare(
@@ -20,17 +24,35 @@ export function createRepo(db) {
     memberByIdentity: db.prepare(
       "SELECT * FROM table_members WHERE table_id = ? AND identity = ?",
     ),
+
+    insertRound: db.prepare(
+      "INSERT INTO rounds (id, table_id, round_index, case_data) VALUES (?, ?, ?, ?)",
+    ),
+    currentRound: db.prepare(
+      "SELECT * FROM rounds WHERE table_id = ? ORDER BY round_index DESC LIMIT 1",
+    ),
+    roundById: db.prepare("SELECT * FROM rounds WHERE id = ?"),
+    roundsForTable: db.prepare("SELECT * FROM rounds WHERE table_id = ? ORDER BY round_index"),
+    revealRound: db.prepare(
+      "UPDATE rounds SET revealed_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now') WHERE id = ?",
+    ),
+
+    insertSubmission: db.prepare(
+      "INSERT OR IGNORE INTO submissions (id, round_id, identity, answer) VALUES (?, ?, ?, ?)",
+    ),
+    submissionsForRound: db.prepare("SELECT * FROM submissions WHERE round_id = ?"),
   };
 
   function ensureSession(token) {
     stmt.insertSession.run(token);
   }
 
-  // Creates a table and claims seat A, in one transaction so a table is
-  // never observed without its creator's seat.
+  // Creates a table, claims seat A, and starts round 1 -- one transaction so
+  // a table is never observed without its creator's seat or its first round.
   const createTable = db.transaction((tableId, identity) => {
     stmt.insertTable.run(tableId);
     stmt.insertMember.run(tableId, "A", identity);
+    stmt.insertRound.run(uuid(), tableId, 1, JSON.stringify(caseSnapshot(1)));
     return getSnapshot(tableId, identity);
   });
 
@@ -51,14 +73,53 @@ export function createRepo(db) {
 
     stmt.insertMember.run(tableId, "B", identity);
     stmt.setTableStatus.run("playing", tableId);
+    stmt.bumpTableVersion.run(tableId);
     return { outcome: "ok", snapshot: getSnapshot(tableId, identity) };
   });
 
+  // Records one member's immutable submission for a round. If both members
+  // now have a submission, reveals the round in the same transaction, so a
+  // snapshot read can never observe "two submissions, not yet revealed"
+  // (brief §6: "Only a round with two immutable submissions is revealed").
+  // INSERT OR IGNORE makes a duplicate identical POST harmless and a changed
+  // repeat a no-op rather than an overwrite (brief §9 item 6).
+  const submitAnswer = db.transaction((tableId, roundId, identity, answer) => {
+    const round = stmt.roundById.get(roundId);
+    if (!round || round.table_id !== tableId) return { outcome: "not_found" };
+
+    const member = stmt.memberByIdentity.get(tableId, identity);
+    if (!member) return { outcome: "forbidden" };
+
+    const current = stmt.currentRound.get(tableId);
+    if (!current || current.id !== roundId || current.revealed_at) {
+      return { outcome: "stale" };
+    }
+
+    stmt.insertSubmission.run(uuid(), roundId, identity, JSON.stringify(answer));
+    const submissions = stmt.submissionsForRound.all(roundId);
+    if (submissions.length === 2) {
+      stmt.revealRound.run(roundId);
+    }
+    stmt.bumpTableVersion.run(tableId);
+    return { outcome: "ok", snapshot: getSnapshot(tableId, identity) };
+  });
+
+  // The one allowlist-based read path (brief §7): builds exactly what a
+  // given identity is allowed to see, for GET and POST responses alike.
+  // See src/serializer.mjs for the shape and what it withholds pre-reveal.
   function getSnapshot(tableId, identity) {
     const table = stmt.getTable.get(tableId);
     if (!table) return null;
     const members = stmt.membersForTable.all(tableId);
-    return { table, members, viewerIdentity: identity };
+    const rounds = stmt.roundsForTable.all(tableId).map((round) => ({
+      ...round,
+      case: JSON.parse(round.case_data),
+      submissions: stmt.submissionsForRound.all(round.id).map((s) => ({
+        ...s,
+        answer: JSON.parse(s.answer),
+      })),
+    }));
+    return { table, members, rounds, viewerIdentity: identity };
   }
 
   function listTablesForIdentity(identity) {
@@ -80,6 +141,7 @@ export function createRepo(db) {
     sessionExists: (token) => Boolean(stmt.sessionExists.get(token)),
     createTable,
     joinTable,
+    submitAnswer,
     getSnapshot,
     listTablesForIdentity,
     isMember,

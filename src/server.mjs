@@ -6,6 +6,7 @@ import { openDatabase, resolveDatabasePath } from "./db.mjs";
 import { createRepo } from "./repo.mjs";
 import { sessionMiddleware, requireSameOrigin } from "./session.mjs";
 import { serializeSnapshot } from "./serializer.mjs";
+import { validateAnswer } from "./scoring.mjs";
 import { randomToken } from "./ids.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -94,6 +95,26 @@ export function createApp(db) {
   app.post("/api/tables/:id/join", requireSameOrigin, (req, res) => {
     res.set("Cache-Control", "no-store");
     const result = repo.joinTable(req.params.id, req.identity);
+    if (result.outcome !== "ok") {
+      res.status(OUTCOME_STATUS[result.outcome] ?? 400).json({ error: result.outcome });
+      return;
+    }
+    res.json(serializeSnapshot(result.snapshot));
+  });
+
+  app.post("/api/tables/:id/rounds/:roundId/submissions", requireSameOrigin, (req, res) => {
+    res.set("Cache-Control", "no-store");
+    const { id, roundId } = req.params;
+    if (!repo.isMember(id, req.identity)) {
+      res.status(403).json({ error: "forbidden" });
+      return;
+    }
+    const error = validateAnswer(req.body?.answer);
+    if (error) {
+      res.status(400).json({ error });
+      return;
+    }
+    const result = repo.submitAnswer(id, roundId, req.identity, req.body.answer);
     if (result.outcome !== "ok") {
       res.status(OUTCOME_STATUS[result.outcome] ?? 400).json({ error: result.outcome });
       return;

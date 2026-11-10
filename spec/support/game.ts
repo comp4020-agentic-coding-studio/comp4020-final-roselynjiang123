@@ -19,5 +19,18 @@ export async function createAndJoinTable(): Promise<{ a: Client; b: Client; tabl
   return { a, b, tableId };
 }
 
-export { createClient };
+export function currentRound(snapshot: any) {
+  return snapshot.rounds[snapshot.rounds.length - 1];
+}
+
+export const CASE1_ANSWER_CORRECT = {
+  patient: "match",
+  medicine: "match",
+  dose: "match",
+  route: "match",
+  time: "match",
+  overall: "match",
+};
+
+export { createClient, type Client };
 export { baseUrl };
