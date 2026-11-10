@@ -126,6 +126,23 @@ export function createApp(db) {
     res.json(serializeSnapshot(result.snapshot));
   });
 
+  app.post("/api/tables/:id/next", requireSameOrigin, (req, res) => {
+    res.set("Cache-Control", "no-store");
+    const { id } = req.params;
+    const fromRoundId = req.body?.fromRoundId;
+    if (typeof fromRoundId !== "string" || fromRoundId.length === 0) {
+      res.status(400).json({ error: "fromRoundId is required" });
+      return;
+    }
+    const result = repo.advance(id, req.identity, fromRoundId);
+    if (result.outcome !== "ok") {
+      res.status(OUTCOME_STATUS[result.outcome] ?? 400).json({ error: result.outcome });
+      return;
+    }
+    sse.notify(id);
+    res.json(serializeSnapshot(result.snapshot));
+  });
+
   // SSE: authorise membership, then send a fresh database-derived snapshot
   // on connect and on every subsequent notify() for this table (brief §7).
   app.get("/api/tables/:id/events", (req, res) => {

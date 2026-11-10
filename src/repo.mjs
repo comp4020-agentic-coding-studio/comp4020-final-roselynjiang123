@@ -1,4 +1,4 @@
-import { caseSnapshot } from "./cases.mjs";
+import { caseSnapshot, CASE_COUNT } from "./cases.mjs";
 import { uuid } from "./ids.mjs";
 
 // All SQL lives here, as prepared-statement functions bound to one database.
@@ -99,7 +99,42 @@ export function createRepo(db) {
     const submissions = stmt.submissionsForRound.all(roundId);
     if (submissions.length === 2) {
       stmt.revealRound.run(roundId);
+      if (current.round_index === CASE_COUNT) {
+        stmt.setTableStatus.run("completed", tableId);
+      }
     }
+    stmt.bumpTableVersion.run(tableId);
+    return { outcome: "ok", snapshot: getSnapshot(tableId, identity) };
+  });
+
+  // Advances from a revealed round to the next case. Idempotent per
+  // fromRoundId: a second concurrent call for the same already-applied
+  // fromRoundId returns the current snapshot rather than creating a second
+  // round (brief §6, §9 item 8).
+  const advance = db.transaction((tableId, identity, fromRoundId) => {
+    const member = stmt.memberByIdentity.get(tableId, identity);
+    if (!member) return { outcome: "forbidden" };
+
+    const current = stmt.currentRound.get(tableId);
+    if (!current) return { outcome: "not_found" };
+
+    if (current.id !== fromRoundId) {
+      // Either already advanced past fromRoundId (idempotent replay) or
+      // fromRoundId never was current for this table.
+      const target = stmt.roundById.get(fromRoundId);
+      if (target && target.table_id === tableId && target.round_index < current.round_index) {
+        return { outcome: "ok", snapshot: getSnapshot(tableId, identity) };
+      }
+      return { outcome: "stale" };
+    }
+    if (!current.revealed_at) return { outcome: "stale" };
+
+    if (current.round_index >= CASE_COUNT) {
+      return { outcome: "ok", snapshot: getSnapshot(tableId, identity) };
+    }
+
+    const nextIndex = current.round_index + 1;
+    stmt.insertRound.run(uuid(), tableId, nextIndex, JSON.stringify(caseSnapshot(nextIndex)));
     stmt.bumpTableVersion.run(tableId);
     return { outcome: "ok", snapshot: getSnapshot(tableId, identity) };
   });
@@ -142,6 +177,7 @@ export function createRepo(db) {
     createTable,
     joinTable,
     submitAnswer,
+    advance,
     getSnapshot,
     listTablesForIdentity,
     isMember,
