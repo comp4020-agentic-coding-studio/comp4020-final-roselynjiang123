@@ -3,42 +3,46 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Second Pair of Eyes — UI reference</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='5' width='17' height='22' rx='3' fill='%23e7eff6' stroke='%231e5a85' stroke-width='2'/%3E%3Crect x='12' y='5' width='17' height='22' rx='3' fill='%23ffffff' stroke='%231e5a85' stroke-width='2'/%3E%3Cpath d='M16 16l3 3 6-7' fill='none' stroke='%231e5a85' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<title>Second Pair of Eyes — UI reference v2.1</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='5' width='17' height='22' rx='3' fill='%23e3eff4' stroke='%230d5c7a' stroke-width='2'/%3E%3Crect x='12' y='5' width='17' height='22' rx='3' fill='%23ffffff' stroke='%230d5c7a' stroke-width='2'/%3E%3Cpath d='M16 16l3 3 6-7' fill='none' stroke='%230d5c7a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <!--
-  REFERENCE FOR THE BUILD AGENT (docs/reference/ui-reference.html)
-  1. Copy everything inside <style id="app-css"> verbatim into public/style.css.
+  REFERENCE FOR THE BUILD AGENT (docs/reference/ui-reference.html) — v2, clinical-document style
+  1. Copy everything inside <style id="app-css"> verbatim into public/style.css (replace the v1 file).
   2. Do NOT copy <style id="ref-css">, or any element whose class starts with "ref-".
   3. Each <section class="ref-state"> shows one app state inside .ref-frame.
      Reuse that markup, its class names and its English copy. Values shown are examples.
-  4. Copy the <link rel="icon"> line above as the favicon. No other icons or images.
+  4. Copy the <link rel="icon"> line above as the favicon. The only other graphics are the
+     inline header SVG and the CSS barcode stripe (decorative, aria-hidden). No images.
   5. No new colours, fonts, shadows or animation. If a state is missing, compose it
      from existing classes only and mention it in your report.
 -->
 <style id="app-css">
-/* Second Pair of Eyes — app styles (copy verbatim) */
+/* Second Pair of Eyes — app styles v2 (copy verbatim) */
 :root{
-  --bg:#f6f5f1;
+  --bg:#edf1f3;
   --surface:#ffffff;
-  --surface-2:#fafaf7;
-  --ink:#1c2329;
-  --ink-2:#4f5b66;
-  --line:#d9dcd5;
-  --line-strong:#b9bfb6;
-  --accent:#1e5a85;
-  --accent-hover:#174a6e;
-  --accent-soft:#e7eff6;
-  --ok:#25643a;
-  --ok-soft:#e8f3eb;
-  --ok-line:#bcd9c5;
-  --bad:#8f3a10;
-  --bad-soft:#fbeee5;
-  --bad-line:#ebc6b1;
-  --note-soft:#fff7df;
-  --note-line:#e7d49a;
-  --focus:#1e5a85;
-  --radius:8px;
-  --radius-sm:6px;
+  --surface-2:#f5f7f8;
+  --ink:#14212b;
+  --ink-2:#4a5a66;
+  --line:#d3dbe0;
+  --line-strong:#a7b4bd;
+  --header:#10283a;
+  --header-ink:#c9d6df;
+  --accent:#0d5c7a;
+  --accent-hover:#094a63;
+  --accent-soft:#e3eff4;
+  --ok:#1f6b45;
+  --ok-soft:#e6f2eb;
+  --ok-line:#b7d6c3;
+  --bad:#9a3412;
+  --bad-soft:#fbede4;
+  --bad-line:#ecc3ad;
+  --note-soft:#fff4d6;
+  --note-line:#e6cb7d;
+  --note-ink:#5c4300;
+  --focus:#0d5c7a;
+  --radius:6px;
+  --radius-sm:4px;
   --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
   --font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
@@ -62,16 +66,20 @@ a:hover{color:var(--accent-hover)}
 .wrap{max-width:var(--max);margin:0 auto;padding:0 var(--s4)}
 
 /* page shell */
-.site-header{background:var(--surface);border-bottom:1px solid var(--line)}
+.site-header{background:var(--header);color:#fff}
 .site-header .wrap{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--s2) var(--s4);min-height:56px;padding-top:var(--s2);padding-bottom:var(--s2)}
-.brand{display:inline-flex;align-items:center;gap:var(--s2);font-weight:700;font-size:17px;color:var(--ink);text-decoration:none}
-.brand svg{width:22px;height:22px;flex:none}
+.brand{display:inline-flex;align-items:center;gap:var(--s2);font-weight:700;font-size:17px;color:#fff;text-decoration:none}
+.brand:hover{color:#fff}
+.brand svg{width:24px;height:24px;flex:none}
+.brand .sub{font-weight:400;font-size:13px;color:var(--header-ink);border-left:1px solid #34506a;padding-left:var(--s2);margin-left:var(--s1)}
 .nav{display:flex;gap:var(--s4);font-size:15px}
-.nav a{color:var(--ink-2);text-decoration:none}
-.nav a:hover{color:var(--ink);text-decoration:underline}
-.nav a[aria-current="page"]{color:var(--ink);font-weight:600;text-decoration:underline;text-underline-offset:4px}
-.disclaimer{background:var(--note-soft);border-bottom:1px solid var(--note-line);font-size:14px}
+.nav a{color:var(--header-ink);text-decoration:none}
+.nav a:hover{color:#fff;text-decoration:underline}
+.nav a[aria-current="page"]{color:#fff;font-weight:600;text-decoration:underline;text-underline-offset:4px}
+.site-header :focus-visible{outline-color:#fff}
+.disclaimer{background:var(--note-soft);border-bottom:1px solid var(--note-line);color:var(--note-ink);font-size:14px}
 .disclaimer .wrap{padding-top:var(--s2);padding-bottom:var(--s2)}
+.badge{display:inline-block;margin-right:var(--s2);padding:1px 6px;border:1px solid var(--note-line);border-radius:3px;background:var(--surface);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;vertical-align:1px}
 main{padding:var(--s6) 0 var(--s7)}
 .site-footer{border-top:1px solid var(--line);color:var(--ink-2);font-size:14px;padding:var(--s5) 0}
 
@@ -79,6 +87,7 @@ main{padding:var(--s6) 0 var(--s7)}
 .lead{font-size:19px;color:var(--ink-2);max-width:60ch}
 .muted{color:var(--ink-2)}
 .small{font-size:14px}
+.eyebrow{display:block;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:var(--s1)}
 
 /* buttons and actions */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);min-height:44px;padding:0 var(--s5);border:1px solid var(--accent);border-radius:var(--radius-sm);background:var(--accent);color:#fff;font:600 16px/1.2 var(--font);text-decoration:none;cursor:pointer}
@@ -100,39 +109,58 @@ main{padding:var(--s6) 0 var(--s7)}
 .invite{display:flex;flex-wrap:wrap;gap:var(--s2);align-items:center;margin-top:var(--s2)}
 .invite input{flex:1 1 260px;min-width:0;min-height:44px;padding:0 var(--s3);border:1px solid var(--line-strong);border-radius:var(--radius-sm);background:var(--surface-2);color:var(--ink);font:15px var(--mono)}
 
-/* table meta and seats */
+/* table meta and sign-off strip */
 .table-meta{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s5);font-size:15px;color:var(--ink-2);margin-bottom:var(--s3)}
 .table-meta strong{color:var(--ink)}
 .conn{color:var(--ink-2)}
 .conn.is-reconnecting{color:var(--bad);font-weight:600}
-.seats{display:flex;flex-wrap:wrap;gap:var(--s2);list-style:none;margin:0 0 var(--s5);padding:0}
-.seat{display:inline-flex;align-items:center;gap:var(--s2);padding:6px var(--s3);border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:15px}
-.seat .dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--line-strong);flex:none}
-.seat .state{color:var(--ink-2)}
-.seat.is-done .dot{background:var(--accent);border-color:var(--accent)}
-.seat.is-done .state{color:var(--ink);font-weight:600}
+.signoff{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3);margin:0 0 var(--s5)}
+.sig{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);padding:var(--s2) var(--s4) var(--s3)}
+.sig-role{display:block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
+.sig-line{display:block;margin-top:var(--s2);padding-bottom:2px;border-bottom:1px dashed var(--line-strong);font-weight:600;color:var(--ink-2)}
+.sig-note{display:block;margin-top:var(--s1);font-size:13px;color:var(--ink-2)}
+.sig.is-signed{background:var(--accent-soft);border-color:var(--accent)}
+.sig.is-signed .sig-line{color:var(--accent);border-bottom:1px solid var(--accent)}
 
-/* the two records */
-.records{display:grid;grid-template-columns:1fr;gap:var(--s4);margin-bottom:var(--s5)}
-.record{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:var(--s4) var(--s5)}
-.record h2{font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2);margin-bottom:var(--s3)}
-.record dl{display:grid;grid-template-columns:minmax(7.5em,auto) 1fr;gap:var(--s2) var(--s4);margin:0}
-.record dt{color:var(--ink-2);font-size:15px}
+.progress{display:grid;grid-template-columns:repeat(6,1fr);gap:var(--s1);list-style:none;margin:0 0 var(--s4);padding:0}
+.progress li{padding:2px 0;border:2px solid transparent;border-radius:var(--radius-sm);background:var(--line);color:var(--ink-2);font-size:13px;font-weight:600;text-align:center}
+.progress li.is-done{background:var(--accent);color:#fff}
+.progress li.is-current{background:var(--surface);border-color:var(--accent);color:var(--accent)}
+
+/* the two records: medication chart and pharmacy label */
+.records{display:grid;grid-template-columns:1fr;align-items:start;gap:var(--s4);margin-bottom:var(--s5)}
+.record{background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden}
+.record-head{display:flex;justify-content:space-between;align-items:baseline;gap:var(--s2);padding:var(--s2) var(--s4);background:var(--accent);color:#fff}
+.record-head h2{margin:0;font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff}
+.record-head .kind{font-size:13px;color:#d7e7ee}
+.record dl{display:grid;grid-template-columns:minmax(8.5em,auto) 1fr;margin:0}
+.record dt,.record dd{padding:10px var(--s4);border-bottom:1px solid var(--line)}
+.record dt{background:var(--surface-2);border-right:1px solid var(--line);color:var(--ink-2);font-size:14px}
 .record dd{margin:0;font-family:var(--mono);font-size:16px;overflow-wrap:anywhere}
-.record-label{background:#fdfcf8;border:2px dashed var(--line-strong)}
+.record dl > :nth-last-child(-n+2){border-bottom:0}
+.record-label .record-head{background:var(--header)}
+.record-label .record-head .kind{color:var(--header-ink)}
+.label-foot{display:flex;align-items:center;gap:var(--s3);padding:var(--s2) var(--s4) var(--s3);border-top:1px dashed var(--line-strong)}
+.barcode{flex:1 1 auto;height:26px;max-width:220px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 4px,var(--ink) 4px 5px,transparent 5px 8px,var(--ink) 8px 11px,transparent 11px 13px,var(--ink) 13px 14px,transparent 14px 17px);opacity:.7}
+.label-foot .code{font:12px var(--mono);color:var(--ink-2);letter-spacing:.04em}
 
 /* the check form */
-.check{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:var(--s5)}
-.check h2{margin-bottom:var(--s1)}
-.field{border:0;border-top:1px solid var(--line);margin:0;padding:var(--s3) 0;min-width:0}
-.field legend{padding:0;font-weight:600;margin-bottom:var(--s2)}
-.field.overall{border-top:2px solid var(--ink);margin-top:var(--s2)}
+.check{background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden}
+.check-head{padding:var(--s3) var(--s5);background:var(--surface-2);border-bottom:1px solid var(--line)}
+.check-head h2{margin:0;font-size:18px}
+.check-head p{margin:2px 0 0;font-size:14px;color:var(--ink-2)}
+.check-body{padding:var(--s1) var(--s5) var(--s5)}
+.field{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s4);border:0;border-bottom:1px solid var(--line);margin:0;padding:var(--s3) 0;min-width:0}
+.field legend{float:left;width:10em;padding:0;font-weight:600}
+.field.overall{border-top:2px solid var(--ink);margin-top:-1px}
 .choices{display:flex;flex-wrap:wrap;gap:var(--s2)}
 .choice{display:inline-flex;align-items:center;gap:var(--s2);min-height:44px;padding:0 var(--s4);border:1px solid var(--line-strong);border-radius:var(--radius-sm);background:var(--surface);font-size:16px;cursor:pointer}
 .choice input{width:18px;height:18px;margin:0;accent-color:var(--accent)}
 .choice:has(input:checked){border-color:var(--accent);background:var(--accent-soft);font-weight:600}
 .choice:has(input:focus-visible){outline:3px solid var(--focus);outline-offset:2px}
 .choice:has(input:disabled){cursor:default;opacity:.8}
+.sign{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s3) var(--s4);margin-top:var(--s4);padding:var(--s4);border:1px dashed var(--line-strong);border-radius:var(--radius-sm);background:var(--surface-2)}
+.sign-label{flex:1 1 260px;font-size:14px;color:var(--ink-2)}
 
 /* glossary */
 .glossary{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:var(--s2) var(--s5);margin-top:var(--s5)}
@@ -146,27 +174,33 @@ main{padding:var(--s6) 0 var(--s7)}
 .tag{display:inline-block;padding:4px var(--s3);border:1px solid var(--line);border-radius:999px;font-size:14px;font-weight:600}
 .tag-ok{background:var(--ok-soft);border-color:var(--ok-line);color:var(--ok)}
 .tag-bad{background:var(--bad-soft);border-color:var(--bad-line);color:var(--bad)}
-.tag-neutral{background:var(--accent-soft);border-color:#c3d6e6;color:var(--accent)}
-.reveal{width:100%;border-collapse:separate;border-spacing:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:var(--s4);font-size:16px}
+.tag-neutral{background:var(--accent-soft);border-color:#b9d4e0;color:var(--accent)}
+.reveal{width:100%;border-collapse:separate;border-spacing:0;background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--radius);margin-bottom:var(--s4);font-size:16px}
 .reveal caption{caption-side:top;text-align:left;font-weight:650;padding:0 0 var(--s2)}
 .reveal th,.reveal td{padding:var(--s3) var(--s4);text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
-.reveal thead th{background:var(--surface-2);color:var(--ink-2);font-size:14px;font-weight:600}
+.reveal thead th{background:var(--header);color:#fff;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 .reveal thead th:first-child{border-top-left-radius:var(--radius)}
 .reveal thead th:last-child{border-top-right-radius:var(--radius)}
 .reveal tbody tr:last-child th,.reveal tbody tr:last-child td{border-bottom:0}
+.reveal th[scope="row"]{white-space:nowrap}
 .reveal tr.overall-row th,.reveal tr.overall-row td{border-top:2px solid var(--ink)}
 .vals{display:block;font-family:var(--mono);font-size:14px;color:var(--ink-2)}
 .res{display:block;font-size:14px;font-weight:600;margin-top:2px}
 .res-ok{color:var(--ok)}
 .res-bad{color:var(--bad)}
-.explain{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:var(--s4) var(--s5);margin-bottom:var(--s5)}
+.explain{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:var(--radius-sm);padding:var(--s4) var(--s5);margin-bottom:var(--s5)}
 .explain h3{margin-bottom:var(--s2)}
 .explain p:last-child{margin-bottom:0}
 
+.pair{background:var(--surface);border:1px solid var(--accent);border-radius:var(--radius-sm);padding:var(--s3) var(--s4);margin:0 0 var(--s4)}
+.pair .eyebrow{margin-bottom:2px}
+.pair p{margin:0;font-weight:600}
+.pair p.detail{margin-top:var(--s1);font-size:14px;font-weight:400;color:var(--ink-2)}
+
 /* review and lists */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--s4);list-style:none;margin:0 0 var(--s6);padding:0}
-.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:var(--s4)}
-.stat .num{display:block;font-size:28px;font-weight:700;line-height:1.1}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--s4);list-style:none;margin:0 0 var(--s4);padding:0}
+.stat{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:var(--radius-sm);padding:var(--s4)}
+.stat .num{display:block;font-size:28px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
 .stat .lbl{color:var(--ink-2);font-size:15px}
 .item-list{list-style:none;margin:0 0 var(--s4);padding:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}
 .item-list li{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:var(--s2) var(--s4);padding:var(--s3) var(--s4);border-bottom:1px solid var(--line)}
@@ -180,7 +214,7 @@ main{padding:var(--s6) 0 var(--s7)}
 .prose ul,.prose ol{padding-left:1.4em;margin:0 0 var(--s4)}
 .prose li{margin-bottom:var(--s1)}
 .prose blockquote{margin:0 0 var(--s4);padding-left:var(--s4);border-left:3px solid var(--line-strong);color:var(--ink-2)}
-.prose code{font-family:var(--mono);font-size:.92em;background:#efeee8;padding:1px 4px;border-radius:4px}
+.prose code{font-family:var(--mono);font-size:.92em;background:#e4e9ec;padding:1px 4px;border-radius:3px}
 .prose table{display:block;max-width:100%;overflow-x:auto;border-collapse:collapse;margin:0 0 var(--s4)}
 .prose th,.prose td{border:1px solid var(--line);padding:var(--s2) var(--s3);text-align:left}
 
@@ -196,8 +230,13 @@ main{padding:var(--s6) 0 var(--s7)}
   h1{font-size:24px}
   main{padding:var(--s5) 0 var(--s6)}
   .lead{font-size:17px}
-  .panel,.check{padding:var(--s4)}
-  .record{padding:var(--s4)}
+  .brand .sub{display:none}
+  .panel{padding:var(--s4)}
+  .check-head{padding:var(--s3) var(--s4)}
+  .check-body{padding:var(--s1) var(--s4) var(--s4)}
+  .field legend{width:100%}
+  .record dl{grid-template-columns:7.5em 1fr}
+  .record dt,.record dd{padding:var(--s2) var(--s3)}
   .glossary{padding:var(--s2) var(--s4)}
   .glossary dl{grid-template-columns:1fr;gap:0}
   .glossary dd{margin-bottom:var(--s2)}
@@ -230,7 +269,7 @@ main{padding:var(--s6) 0 var(--s7)}
 <body>
 
 <div class="ref-intro">
-  <b>UI reference — Second Pair of Eyes.</b> Copy the CSS in &lt;style id="app-css"&gt; verbatim to public/style.css.
+  <b>UI reference v2 — Second Pair of Eyes (clinical-document style).</b> Copy the CSS in &lt;style id="app-css"&gt; verbatim to public/style.css, replacing v1.
   Everything with an orange dashed frame or a class starting with "ref-" is reference-only.
   Reuse each state's markup, class names and copy. Target viewports: 1920×1080 and 390×844.
 </div>
@@ -243,8 +282,9 @@ main{padding:var(--s6) 0 var(--s7)}
     <header class="site-header">
       <div class="wrap">
         <a class="brand" href="/">
-          <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="5" width="17" height="22" rx="3" fill="#e7eff6" stroke="#1e5a85" stroke-width="2"/><rect x="12" y="5" width="17" height="22" rx="3" fill="#ffffff" stroke="#1e5a85" stroke-width="2"/><path d="M16 16l3 3 6-7" fill="none" stroke="#1e5a85" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="5" width="17" height="22" rx="3" fill="#0d5c7a" stroke="#ffffff" stroke-width="2"/><rect x="12" y="5" width="17" height="22" rx="3" fill="#10283a" stroke="#ffffff" stroke-width="2"/><path d="M16 16l3 3 6-7" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Second Pair of Eyes
+          <span class="sub">Medication double-check simulation</span>
         </a>
         <nav class="nav" aria-label="Main">
           <a href="/" aria-current="page">Play</a>
@@ -253,7 +293,7 @@ main{padding:var(--s6) 0 var(--s7)}
         </nav>
       </div>
     </header>
-    <div class="disclaimer"><div class="wrap">Educational simulation. All records are fictional. Compare the supplied records; do not use this game to make clinical decisions.</div></div>
+    <div class="disclaimer"><div class="wrap"><span class="badge">Training</span>Educational simulation. All records are fictional. Compare the supplied records; do not use this game to make clinical decisions.</div></div>
     <main id="main"><div class="wrap"><p class="muted">Page content goes here. One polite live region per page: <code>&lt;p class="sr-only" aria-live="polite" id="announcer"&gt;&lt;/p&gt;</code></p></div></main>
     <footer class="site-footer"><div class="wrap">Two checkers, one record, answers revealed together. <a href="/readme/">Why it works this way</a></div></footer>
   </div>
@@ -264,14 +304,15 @@ main{padding:var(--s6) 0 var(--s7)}
   <p class="ref-label">State 1 · Landing ( / )</p>
   <div class="ref-frame">
     <main><div class="wrap">
+      <span class="eyebrow">Independent double check</span>
       <h1>Second Pair of Eyes</h1>
-      <p class="lead">Two people check the same medication record on their own. Neither sees the other's answer until both have submitted. Then you compare: did you agree, and were you right?</p>
+      <p class="lead">You and another learner are a checking pair for six fictional medication records. Each of you checks on your own; neither sees the other's answer until both have signed. Then you review together: did you agree, and were you right?</p>
       <div class="panel">
         <h2>How to play</h2>
         <ol class="steps">
           <li>Open this site in two Chrome profiles or two browsers. An incognito window works but forgets who you are when it closes.</li>
           <li>In the first, choose Create a table, then Copy invite link.</li>
-          <li>Open the link in the second and choose Join. Check each case on your own; both answers appear once you have both submitted.</li>
+          <li>Open the link in the second and choose Join. Check each case on your own; both answers appear once you have both signed.</li>
         </ol>
         <p class="small muted">Six short cases. No timer, no leaderboard.</p>
         <div class="actions">
@@ -289,10 +330,10 @@ main{padding:var(--s6) 0 var(--s7)}
   <div class="ref-frame">
     <main><div class="wrap">
       <div class="table-meta"><span>Table <strong>HK3V</strong></span><span>You are <strong>Checker A</strong></span><span class="conn">Connected</span></div>
-      <ul class="seats" aria-label="Seats">
-        <li class="seat is-done"><span class="dot" aria-hidden="true"></span>Checker A (you) <span class="state">Joined</span></li>
-        <li class="seat"><span class="dot" aria-hidden="true"></span>Checker B <span class="state">Not joined yet</span></li>
-      </ul>
+      <div class="signoff" aria-label="Checkers">
+        <div class="sig is-signed"><span class="sig-role">Checker A (you)</span><span class="sig-line">Joined</span></div>
+        <div class="sig"><span class="sig-role">Checker B</span><span class="sig-line">Not joined yet</span></div>
+      </div>
       <h1>Waiting for your partner</h1>
       <p>This table has two seats. Send the invite link to one other person; the first case starts when they join.</p>
       <div class="panel">
@@ -313,8 +354,9 @@ main{padding:var(--s6) 0 var(--s7)}
   <p class="ref-label">State 3 · Invite link opened by a new browser (GET never claims the seat)</p>
   <div class="ref-frame">
     <main><div class="wrap">
+      <span class="eyebrow">Invitation</span>
       <h1>You're invited to check records</h1>
-      <p>Checker A has started table <strong>HK3V</strong>. Join as Checker B to check six short cases together. Neither of you sees the other's answers until you have both submitted.</p>
+      <p>Checker A has started table <strong>HK3V</strong>. Join as Checker B to check six short cases together. Neither of you sees the other's answers until you have both signed.</p>
       <div class="actions">
         <button class="btn" type="button">Join as Checker B</button>
         <a class="btn btn-secondary" href="/">Start my own table instead</a>
@@ -329,83 +371,89 @@ main{padding:var(--s6) 0 var(--s7)}
 
 <!-- ============ STATE 4: CHECKING ============ -->
 <section class="ref-state">
-  <p class="ref-label">State 4 · Checking (Case 2; partner has submitted, you have not)</p>
+  <p class="ref-label">State 4 · Checking (Case 3; partner has signed, you have not)</p>
   <div class="ref-frame">
     <main><div class="wrap">
-      <div class="table-meta"><span>Table <strong>HK3V</strong></span><span>You are <strong>Checker A</strong></span><span>Case <strong>2</strong> of 6</span><span class="conn">Connected</span></div>
-      <ul class="seats" aria-label="Submission status">
-        <li class="seat"><span class="dot" aria-hidden="true"></span>Checker A (you) <span class="state">Not submitted</span></li>
-        <li class="seat is-done"><span class="dot" aria-hidden="true"></span>Checker B <span class="state">Submitted</span></li>
-      </ul>
-      <h1>Case 2</h1>
-      <p class="muted">Compare the two records. Your partner cannot see your answers until you have both submitted.</p>
+      <div class="table-meta"><span>Table <strong>HK3V</strong></span><span>You are <strong>Checker A</strong></span><span>Case <strong>3</strong> of 6</span><span class="conn">Connected</span></div>
+      <ol class="progress" aria-label="Progress, case 3 of 6"><li class="is-done"><span class="sr-only">Case </span>1<span class="sr-only">, done</span></li><li class="is-done"><span class="sr-only">Case </span>2<span class="sr-only">, done</span></li><li class="is-current" aria-current="step"><span class="sr-only">Case </span>3<span class="sr-only">, current</span></li><li><span class="sr-only">Case </span>4</li><li><span class="sr-only">Case </span>5</li><li><span class="sr-only">Case </span>6</li></ol>
+      <div class="signoff" aria-label="Sign-off">
+        <div class="sig"><span class="sig-role">Checker A (you)</span><span class="sig-line">Awaiting signature</span></div>
+        <div class="sig is-signed"><span class="sig-role">Checker B</span><span class="sig-line"><span aria-hidden="true">✓</span> Signed</span><span class="sig-note">Sealed until you sign</span></div>
+      </div>
+      <h1>Case 3</h1>
+      <p class="muted">Compare the order with the prepared record. Your partner cannot see your answers until you have both signed.</p>
 
       <div class="records">
         <section class="record" aria-labelledby="order-h">
-          <h2 id="order-h">Order</h2>
+          <div class="record-head"><h2 id="order-h">Order</h2><span class="kind">Medication chart</span></div>
           <dl>
-            <dt>Patient</dt><dd>SIM-014</dd>
-            <dt>Medicine</dt><dd>Training Medicine A</dd>
-            <dt>Dose</dt><dd>0.5 training units</dd>
-            <dt>Route</dt><dd>Oral (by mouth)</dd>
-            <dt>Scheduled time</dt><dd>09:00</dd>
+            <dt>Patient</dt><dd>SIM-037</dd>
+            <dt>Medicine</dt><dd>Training Medicine C</dd>
+            <dt>Dose</dt><dd>1 training unit</dd>
+            <dt>Route</dt><dd>Intravenous (into a vein)</dd>
+            <dt>Scheduled time</dt><dd>08:00</dd>
           </dl>
         </section>
         <section class="record record-label" aria-labelledby="prep-h">
-          <h2 id="prep-h">Prepared record</h2>
+          <div class="record-head"><h2 id="prep-h">Prepared record</h2><span class="kind">Pharmacy label ℞</span></div>
           <dl>
-            <dt>Medicine</dt><dd>Training Medicine A</dd>
-            <dt>Dose</dt><dd>0.5 training units</dd>
-            <dt>Route</dt><dd>Oral (by mouth)</dd>
-            <dt>Patient</dt><dd>SIM-041</dd>
-            <dt>Scheduled time</dt><dd>09:00</dd>
+            <dt>Medicine</dt><dd>Training Medicine C</dd>
+            <dt>Dose</dt><dd>1 training unit</dd>
+            <dt>Route</dt><dd>Intravenous (into a vein)</dd>
+            <dt>Patient</dt><dd>SIM-073</dd>
+            <dt>Scheduled time</dt><dd>20:00</dd>
           </dl>
+          <div class="label-foot" aria-hidden="true"><span class="barcode"></span><span class="code">TRAINING LABEL · NOT FOR USE</span></div>
         </section>
       </div>
 
       <form class="check" aria-labelledby="check-h">
-        <h2 id="check-h">Your check</h2>
-        <p class="hint" style="margin:0 0 12px">Choose one answer for every field.</p>
-        <fieldset class="field"><legend>Patient</legend>
-          <div class="choices">
-            <label class="choice"><input type="radio" name="patient" value="match"> Matches</label>
-            <label class="choice"><input type="radio" name="patient" value="mismatch" checked> Does not match</label>
+        <div class="check-head">
+          <h2 id="check-h">Independent double check</h2>
+          <p>Checker A · choose one answer for every line, then sign.</p>
+        </div>
+        <div class="check-body">
+          <fieldset class="field"><legend>Patient</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="patient" value="match"> Matches</label>
+              <label class="choice"><input type="radio" name="patient" value="mismatch" checked> Does not match</label>
+            </div>
+          </fieldset>
+          <fieldset class="field"><legend>Medicine</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="medicine" value="match" checked> Matches</label>
+              <label class="choice"><input type="radio" name="medicine" value="mismatch"> Does not match</label>
+            </div>
+          </fieldset>
+          <fieldset class="field"><legend>Dose</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="dose" value="match"> Matches</label>
+              <label class="choice"><input type="radio" name="dose" value="mismatch"> Does not match</label>
+            </div>
+          </fieldset>
+          <fieldset class="field"><legend>Route</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="route" value="match"> Matches</label>
+              <label class="choice"><input type="radio" name="route" value="mismatch"> Does not match</label>
+            </div>
+          </fieldset>
+          <fieldset class="field"><legend>Scheduled time</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="time" value="match"> Matches</label>
+              <label class="choice"><input type="radio" name="time" value="mismatch"> Does not match</label>
+            </div>
+          </fieldset>
+          <fieldset class="field overall"><legend>Overall</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="overall" value="match"> Records match</label>
+              <label class="choice"><input type="radio" name="overall" value="discrepancy"> Discrepancy found</label>
+            </div>
+          </fieldset>
+          <div class="form-error" role="alert">Choose an answer for every line before signing. Missing: Dose, Route, Scheduled time, Overall.</div>
+          <div class="sign">
+            <button class="btn" type="submit">Sign and submit</button>
+            <span class="sign-label">Signing seals your check. You can't change it afterwards, and your partner sees it only once they have signed too.</span>
           </div>
-        </fieldset>
-        <fieldset class="field"><legend>Medicine</legend>
-          <div class="choices">
-            <label class="choice"><input type="radio" name="medicine" value="match" checked> Matches</label>
-            <label class="choice"><input type="radio" name="medicine" value="mismatch"> Does not match</label>
-          </div>
-        </fieldset>
-        <fieldset class="field"><legend>Dose</legend>
-          <div class="choices">
-            <label class="choice"><input type="radio" name="dose" value="match"> Matches</label>
-            <label class="choice"><input type="radio" name="dose" value="mismatch"> Does not match</label>
-          </div>
-        </fieldset>
-        <fieldset class="field"><legend>Route</legend>
-          <div class="choices">
-            <label class="choice"><input type="radio" name="route" value="match"> Matches</label>
-            <label class="choice"><input type="radio" name="route" value="mismatch"> Does not match</label>
-          </div>
-        </fieldset>
-        <fieldset class="field"><legend>Scheduled time</legend>
-          <div class="choices">
-            <label class="choice"><input type="radio" name="time" value="match"> Matches</label>
-            <label class="choice"><input type="radio" name="time" value="mismatch"> Does not match</label>
-          </div>
-        </fieldset>
-        <fieldset class="field overall"><legend>Overall</legend>
-          <div class="choices">
-            <label class="choice"><input type="radio" name="overall" value="match"> Records match</label>
-            <label class="choice"><input type="radio" name="overall" value="discrepancy"> Discrepancy found</label>
-          </div>
-        </fieldset>
-        <div class="form-error" role="alert">Choose an answer for every field before submitting. Missing: Dose, Route, Scheduled time, Overall.</div>
-        <div class="actions">
-          <button class="btn" type="submit">Submit my check</button>
-          <span class="small muted">You can't change your answers after submitting.</span>
         </div>
       </form>
 
@@ -426,56 +474,66 @@ main{padding:var(--s6) 0 var(--s7)}
   <p class="ref-note">Radios start unselected; two are checked here only to show the selected style. Errors appear only after a rejected submit, and only describe the learner's own selections. Other server messages (same box): "Overall must agree with your field answers: you marked a field as not matching, so choose Discrepancy found." / "Overall must agree with your field answers: every field matches, so choose Records match." / "Couldn't reach the server. Your choices are kept; try again."</p>
 </section>
 
-<!-- ============ STATE 5: SUBMITTED, WAITING ============ -->
+<!-- ============ STATE 5: SIGNED, WAITING ============ -->
 <section class="ref-state">
-  <p class="ref-label">State 5 · You submitted, partner has not</p>
+  <p class="ref-label">State 5 · You signed, partner has not</p>
   <div class="ref-frame">
     <main><div class="wrap">
-      <div class="table-meta"><span>Table <strong>HK3V</strong></span><span>You are <strong>Checker A</strong></span><span>Case <strong>3</strong> of 6</span><span class="conn is-reconnecting">Reconnecting…</span></div>
-      <ul class="seats" aria-label="Submission status">
-        <li class="seat is-done"><span class="dot" aria-hidden="true"></span>Checker A (you) <span class="state">Submitted</span></li>
-        <li class="seat"><span class="dot" aria-hidden="true"></span>Checker B <span class="state">Not submitted</span></li>
-      </ul>
-      <div class="notice" role="status"><strong>Submitted.</strong> Your answers are locked. Both answers appear together when Checker B submits. If they closed their browser, they can come back to this table from the same browser.</div>
-      <form class="check" aria-label="Your check (locked)">
-        <h2>Your check</h2>
-        <fieldset class="field" disabled><legend>Patient</legend>
-          <div class="choices">
-            <label class="choice"><input type="radio" name="p5" value="match" checked> Matches</label>
-            <label class="choice"><input type="radio" name="p5" value="mismatch"> Does not match</label>
-          </div>
-        </fieldset>
-        <fieldset class="field overall" disabled><legend>Overall</legend>
-          <div class="choices">
-            <label class="choice"><input type="radio" name="o5" value="match"> Records match</label>
-            <label class="choice"><input type="radio" name="o5" value="discrepancy" checked> Discrepancy found</label>
-          </div>
-        </fieldset>
+      <div class="table-meta"><span>Table <strong>HK3V</strong></span><span>You are <strong>Checker A</strong></span><span>Case <strong>4</strong> of 6</span><span class="conn is-reconnecting">Reconnecting…</span></div>
+      <ol class="progress" aria-label="Progress, case 4 of 6"><li class="is-done"><span class="sr-only">Case </span>1<span class="sr-only">, done</span></li><li class="is-done"><span class="sr-only">Case </span>2<span class="sr-only">, done</span></li><li class="is-done"><span class="sr-only">Case </span>3<span class="sr-only">, done</span></li><li class="is-current" aria-current="step"><span class="sr-only">Case </span>4<span class="sr-only">, current</span></li><li><span class="sr-only">Case </span>5</li><li><span class="sr-only">Case </span>6</li></ol>
+      <div class="signoff" aria-label="Sign-off">
+        <div class="sig is-signed"><span class="sig-role">Checker A (you)</span><span class="sig-line"><span aria-hidden="true">✓</span> Signed</span><span class="sig-note">Sealed until both sign</span></div>
+        <div class="sig"><span class="sig-role">Checker B</span><span class="sig-line">Awaiting signature</span></div>
+      </div>
+      <div class="notice" role="status"><strong>Signed.</strong> Your check is sealed. Both checks open together when Checker B signs. If they closed their browser, they can come back to this table from the same browser.</div>
+      <form class="check" aria-label="Your check (sealed)">
+        <div class="check-head"><h2>Independent double check</h2><p>Checker A · sealed</p></div>
+        <div class="check-body">
+          <fieldset class="field" disabled><legend>Patient</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="p5" value="match" checked> Matches</label>
+              <label class="choice"><input type="radio" name="p5" value="mismatch"> Does not match</label>
+            </div>
+          </fieldset>
+          <fieldset class="field overall" disabled><legend>Overall</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="o5" value="match"> Records match</label>
+              <label class="choice"><input type="radio" name="o5" value="discrepancy" checked> Discrepancy found</label>
+            </div>
+          </fieldset>
+        </div>
       </form>
     </div></main>
   </div>
-  <p class="ref-note">The two record cards stay visible above the locked form (omitted here). All six fieldsets are disabled; only two shown. "Reconnecting…" appears while EventSource reconnects, then returns to "Connected".</p>
+  <p class="ref-note">The two record cards stay visible above the sealed form (omitted here). All six fieldsets are disabled; only two shown. "Reconnecting…" appears while EventSource reconnects, then returns to "Connected".</p>
 </section>
 
 <!-- ============ STATE 6: REVEALED ============ -->
 <section class="ref-state">
-  <p class="ref-label">State 6 · Revealed (different answers; A correct, B not)</p>
+  <p class="ref-label">State 6 · Revealed (Case 3: complementary finds — each found one of two discrepancies)</p>
   <div class="ref-frame">
     <main><div class="wrap">
-      <div class="table-meta"><span>Table <strong>HK3V</strong></span><span>You are <strong>Checker A</strong></span><span>Case <strong>2</strong> of 6</span><span class="conn">Connected</span></div>
-      <h1>Case 2 · Results</h1>
+      <div class="table-meta"><span>Table <strong>HK3V</strong></span><span>You are <strong>Checker A</strong></span><span>Case <strong>3</strong> of 6</span><span class="conn">Connected</span></div>
+      <ol class="progress" aria-label="Progress, case 3 of 6"><li class="is-done"><span class="sr-only">Case </span>1<span class="sr-only">, done</span></li><li class="is-done"><span class="sr-only">Case </span>2<span class="sr-only">, done</span></li><li class="is-current" aria-current="step"><span class="sr-only">Case </span>3<span class="sr-only">, current</span></li><li><span class="sr-only">Case </span>4</li><li><span class="sr-only">Case </span>5</li><li><span class="sr-only">Case </span>6</li></ol>
+      <span class="eyebrow">Both checks opened</span>
+      <h1>Case 3 · Results</h1>
       <ul class="summary" aria-label="Summary">
         <li class="tag tag-neutral">You gave different answers</li>
-        <li class="tag tag-ok">Checker A: fully correct</li>
+        <li class="tag tag-bad">Checker A: not fully correct</li>
         <li class="tag tag-bad">Checker B: not fully correct</li>
       </ul>
+      <section class="pair" aria-labelledby="pair-h">
+        <span class="eyebrow" id="pair-h">Pair review</span>
+        <p>Together you found every discrepancy, but each check on its own was incomplete.</p>
+        <p class="detail">Missed — A: Scheduled time; B: Patient. Flagged but matching — A: none; B: none.</p>
+      </section>
       <table class="reveal">
-        <caption>Field by field</caption>
+        <caption>Line by line</caption>
         <thead><tr><th scope="col">Field</th><th scope="col">Records</th><th scope="col">Checker A (you)</th><th scope="col">Checker B</th></tr></thead>
         <tbody>
           <tr>
             <th scope="row">Patient</th>
-            <td data-label="Records"><strong>Do not match</strong><span class="vals">SIM-014 / SIM-041</span></td>
+            <td data-label="Records"><strong>Do not match</strong><span class="vals">SIM-037 / SIM-073</span></td>
             <td data-label="Checker A (you)">Does not match<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
             <td data-label="Checker B">Matches<span class="res res-bad"><span aria-hidden="true">✗</span> Incorrect</span></td>
           </tr>
@@ -499,21 +557,21 @@ main{padding:var(--s6) 0 var(--s7)}
           </tr>
           <tr>
             <th scope="row">Scheduled time</th>
-            <td data-label="Records">Match</td>
-            <td data-label="Checker A (you)">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
-            <td data-label="Checker B">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
+            <td data-label="Records"><strong>Do not match</strong><span class="vals">08:00 / 20:00</span></td>
+            <td data-label="Checker A (you)">Matches<span class="res res-bad"><span aria-hidden="true">✗</span> Incorrect</span></td>
+            <td data-label="Checker B">Does not match<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
           </tr>
           <tr class="overall-row">
             <th scope="row">Overall</th>
             <td data-label="Records"><strong>Discrepancy</strong></td>
             <td data-label="Checker A (you)">Discrepancy found<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
-            <td data-label="Checker B">Records match<span class="res res-bad"><span aria-hidden="true">✗</span> Incorrect</span></td>
+            <td data-label="Checker B">Discrepancy found<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
           </tr>
         </tbody>
       </table>
       <section class="explain" aria-labelledby="explain-h">
         <h3 id="explain-h">What the records show</h3>
-        <p>The order is for SIM-014; the prepared record says SIM-041. The same digits in a different order make a different identifier. Compare the complete identifier, not its general appearance.</p>
+        <p>The prepared record has two discrepancies: the patient is SIM-073 instead of SIM-037, and the time is 20:00 instead of 08:00. Finding one discrepancy does not end the check: this record had two.</p>
       </section>
       <div class="actions">
         <button class="btn" type="button">Next case</button>
@@ -521,24 +579,72 @@ main{padding:var(--s6) 0 var(--s7)}
       </div>
     </div></main>
   </div>
-  <p class="ref-note">Other summary tags: "You gave the same answer"; "Checker B: fully correct". On case 6 the button reads "See summary". Previous cases stay reviewable.</p>
+  <p class="ref-note">Pair review sentences (brief §6, first that applies): "Both checks were complete and correct." / "Checker A's check was complete; Checker B's was not." / "You both missed the same discrepancy: Dose." / "Together you found every discrepancy, but each check on its own was incomplete." / "Neither check was complete." The detail line appears unless the first applies. Other summary tags: "You gave the same answer"; "Checker A: fully correct". On case 6 the button reads "See summary".</p>
 </section>
 
 <!-- ============ STATE 7: AGREED BUT WRONG ============ -->
 <section class="ref-state">
-  <p class="ref-label">State 7 · Revealed, same answer, both wrong (callout above the table)</p>
+  <p class="ref-label">State 7 · Revealed (Case 2: same answer, both missed the same discrepancy)</p>
   <div class="ref-frame">
     <main><div class="wrap">
-      <h1>Case 4 · Results</h1>
+      <span class="eyebrow">Both checks opened</span>
+      <h1>Case 2 · Results</h1>
       <ul class="summary" aria-label="Summary">
         <li class="tag tag-neutral">You gave the same answer</li>
         <li class="tag tag-bad">Checker A: not fully correct</li>
         <li class="tag tag-bad">Checker B: not fully correct</li>
       </ul>
       <div class="notice notice-agreed-wrong"><strong>You agreed, but the records show a different result.</strong> Agreement is not the same as accuracy: two checks can miss the same thing.</div>
+      <section class="pair" aria-labelledby="pair7-h">
+        <span class="eyebrow" id="pair7-h">Pair review</span>
+        <p>You both missed the same discrepancy: Dose.</p>
+        <p class="detail">Missed — A: Dose; B: Dose. Flagged but matching — A: none; B: none.</p>
+      </section>
+      <table class="reveal">
+        <caption>Line by line</caption>
+        <thead><tr><th scope="col">Field</th><th scope="col">Records</th><th scope="col">Checker A (you)</th><th scope="col">Checker B</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row">Patient</th>
+            <td data-label="Records">Match</td>
+            <td data-label="Checker A (you)">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
+            <td data-label="Checker B">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Medicine</th>
+            <td data-label="Records">Match</td>
+            <td data-label="Checker A (you)">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
+            <td data-label="Checker B">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Dose</th>
+            <td data-label="Records"><strong>Do not match</strong><span class="vals">2 / 0.2 training units</span></td>
+            <td data-label="Checker A (you)">Matches<span class="res res-bad"><span aria-hidden="true">✗</span> Incorrect</span></td>
+            <td data-label="Checker B">Matches<span class="res res-bad"><span aria-hidden="true">✗</span> Incorrect</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Route</th>
+            <td data-label="Records">Match</td>
+            <td data-label="Checker A (you)">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
+            <td data-label="Checker B">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Scheduled time</th>
+            <td data-label="Records">Match</td>
+            <td data-label="Checker A (you)">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
+            <td data-label="Checker B">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
+          </tr>
+          <tr class="overall-row">
+            <th scope="row">Overall</th>
+            <td data-label="Records"><strong>Discrepancy</strong></td>
+            <td data-label="Checker A (you)">Records match<span class="res res-bad"><span aria-hidden="true">✗</span> Incorrect</span></td>
+            <td data-label="Checker B">Records match<span class="res res-bad"><span aria-hidden="true">✗</span> Incorrect</span></td>
+          </tr>
+        </tbody>
+      </table>
     </div></main>
   </div>
-  <p class="ref-note">Then the same reveal table, explanation and Next button as State 6. Show this callout only when both full answers are identical and wrong.</p>
+  <p class="ref-note">The red callout appears only when both sets of six judgements are identical and wrong. The explanation and Next button follow as in State 6.</p>
 </section>
 
 <!-- ============ STATE 8: FINAL REVIEW ============ -->
@@ -546,23 +652,64 @@ main{padding:var(--s6) 0 var(--s7)}
   <p class="ref-label">State 8 · Final review after case 6</p>
   <div class="ref-frame">
     <main><div class="wrap">
+      <ol class="progress" aria-label="Progress, all six cases done"><li class="is-done"><span class="sr-only">Case </span>1<span class="sr-only">, done</span></li><li class="is-done"><span class="sr-only">Case </span>2<span class="sr-only">, done</span></li><li class="is-done"><span class="sr-only">Case </span>3<span class="sr-only">, done</span></li><li class="is-done"><span class="sr-only">Case </span>4<span class="sr-only">, done</span></li><li class="is-done"><span class="sr-only">Case </span>5<span class="sr-only">, done</span></li><li class="is-done"><span class="sr-only">Case </span>6<span class="sr-only">, done</span></li></ol>
+      <span class="eyebrow">Check complete</span>
       <h1>All six cases checked</h1>
       <p class="lead">Here is how your two independent checks compared.</p>
       <ul class="stats">
         <li class="stat"><span class="num">6/6</span><span class="lbl">Cases completed</span></li>
-        <li class="stat"><span class="num">5/6</span><span class="lbl">Checker A (you): fully correct</span></li>
-        <li class="stat"><span class="num">4/6</span><span class="lbl">Checker B: fully correct</span></li>
+        <li class="stat"><span class="num">3/6</span><span class="lbl">Checker A (you): fully correct</span></li>
+        <li class="stat"><span class="num">3/6</span><span class="lbl">Checker B: fully correct</span></li>
         <li class="stat"><span class="num">1</span><span class="lbl">Case you both missed</span></li>
       </ul>
-      <h2>Cases</h2>
-      <ul class="item-list">
-        <li><span><strong>Case 1</strong> · same answer · both correct</span><a href="#">Review</a></li>
-        <li><span><strong>Case 2</strong> · different answers · A correct</span><a href="#">Review</a></li>
-        <li><span><strong>Case 3</strong> · same answer · both correct</span><a href="#">Review</a></li>
-        <li><span><strong>Case 4</strong> · same answer · both missed</span><a href="#">Review</a></li>
-        <li><span><strong>Case 5</strong> · same answer · both correct</span><a href="#">Review</a></li>
-        <li><span><strong>Case 6</strong> · same answer · both correct</span><a href="#">Review</a></li>
-      </ul>
+      <table class="reveal">
+        <caption>Case by case</caption>
+        <thead><tr><th scope="col">Case</th><th scope="col">You (A)</th><th scope="col">Partner (B)</th><th scope="col">Same answer</th><th scope="col">Teaching point</th></tr></thead>
+        <tbody>
+          <tr>
+            <th scope="row"><a href="#">Case 1</a></th>
+            <td data-label="You (A)"><span class="res res-ok" style="margin:0"><span aria-hidden="true">✓</span> Correct</span></td>
+            <td data-label="Partner (B)"><span class="res res-ok" style="margin:0"><span aria-hidden="true">✓</span> Correct</span></td>
+            <td data-label="Same answer">Yes</td>
+            <td data-label="Teaching point">Checking does not mean there must always be a discrepancy.</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#">Case 2</a></th>
+            <td data-label="You (A)"><span class="res res-bad" style="margin:0"><span aria-hidden="true">✗</span> Missed dose</span></td>
+            <td data-label="Partner (B)"><span class="res res-bad" style="margin:0"><span aria-hidden="true">✗</span> Missed dose</span></td>
+            <td data-label="Same answer">Yes</td>
+            <td data-label="Teaching point">A misplaced decimal point makes a tenfold difference.</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#">Case 3</a></th>
+            <td data-label="You (A)"><span class="res res-bad" style="margin:0"><span aria-hidden="true">✗</span> Missed time</span></td>
+            <td data-label="Partner (B)"><span class="res res-bad" style="margin:0"><span aria-hidden="true">✗</span> Missed patient</span></td>
+            <td data-label="Same answer">No</td>
+            <td data-label="Teaching point">Finding one discrepancy does not end the check.</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#">Case 4</a></th>
+            <td data-label="You (A)"><span class="res res-ok" style="margin:0"><span aria-hidden="true">✓</span> Correct</span></td>
+            <td data-label="Partner (B)"><span class="res res-bad" style="margin:0"><span aria-hidden="true">✗</span> Flagged route</span></td>
+            <td data-label="Same answer">No</td>
+            <td data-label="Teaching point">Expecting a problem is not evidence of one.</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#">Case 5</a></th>
+            <td data-label="You (A)"><span class="res res-ok" style="margin:0"><span aria-hidden="true">✓</span> Correct</span></td>
+            <td data-label="Partner (B)"><span class="res res-ok" style="margin:0"><span aria-hidden="true">✓</span> Correct</span></td>
+            <td data-label="Same answer">Yes</td>
+            <td data-label="Teaching point">Compare the stated routes.</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="#">Case 6</a></th>
+            <td data-label="You (A)"><span class="res res-bad" style="margin:0"><span aria-hidden="true">✗</span> Missed dose</span></td>
+            <td data-label="Partner (B)"><span class="res res-ok" style="margin:0"><span aria-hidden="true">✓</span> Correct</span></td>
+            <td data-label="Same answer">No</td>
+            <td data-label="Teaching point">Together is not the same as each check being complete.</td>
+          </tr>
+        </tbody>
+      </table>
       <p class="small muted">These counts describe this table only. They are not a measure of clinical competence.</p>
       <div class="actions">
         <a class="btn" href="/">Start a new table</a>
@@ -570,6 +717,7 @@ main{padding:var(--s6) 0 var(--s7)}
       </div>
     </div></main>
   </div>
+  <p class="ref-note">Each Case link opens that case's reveal. Result cells: "Correct", or "Missed &lt;field&gt;" / "Flagged &lt;field&gt;" (several joined with commas).</p>
 </section>
 
 <!-- ============ STATE 9: MY TABLES ============ -->
@@ -600,7 +748,7 @@ main{padding:var(--s6) 0 var(--s7)}
         <ol class="steps">
           <li>Open this site in two Chrome profiles or two browsers. An incognito window works but forgets who you are when it closes; use normal profiles if you want to come back tomorrow.</li>
           <li>In the first, choose Play, then Create a table, then Copy invite link.</li>
-          <li>Open the link in the second and choose Join. Check each case on your own; both answers appear once you have both submitted.</li>
+          <li>Open the link in the second and choose Join. Check each case on your own; both answers appear once you have both signed.</li>
         </ol>
         <a class="btn" href="/">Play</a>
       </section>

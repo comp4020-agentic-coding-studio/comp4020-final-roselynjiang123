@@ -1,8 +1,10 @@
 # Second Pair of Eyes — Build Brief
-## MVP v1.1: implementation contract
+## MVP v1.2: implementation contract
 
 Repo location: `docs/build-brief.md`. Visual reference: `docs/reference/ui-reference.html`.
 This brief is planning material, not the student's README or PROCESS. The product UI is English; the student may discuss decisions in Chinese.
+
+**v1.2 changes (applied in Round 3):** clinical-document UI reference v2 (Order as a medication chart, Prepared record as a pharmacy label); a real-time sign-off strip (Signed / Awaiting signature); six varied cases with 0, 1 or 2 discrepancies and different values in each (§5); a pair review stating what the second check added (§6); a six-step progress strip; a per-case final review table. A confidence rating was considered and deferred: it touches the whole submission chain for the least teaching gain.
 
 **v1.1 changes (scope unchanged):** work in four rounds and stop after each (§10); newcomer try-it box on `/readme/` and `/` (§4a); two separate record cards with a fixed label-style field order (§5, §8); exact UI reference, no generated images (§8); deployment gotchas (§7a); spec-first run, evidence log, ADRs and a deployed latency script (§9).
 
@@ -30,7 +32,7 @@ Display concise copy: “Educational simulation. All records are fictional. Comp
 
 ## 3. Locked feature scope
 
-Required: server-issued anonymous identity; a two-seat table and invitation link; six authored cases; five field judgements and one consistent overall judgement; independent immutable submission; automatic joint reveal; explanatory feedback; progression; persistent history; reconnection recovery; meaningful integration tests; server-rendered full README with a try-it box.
+Required: server-issued anonymous identity; a two-seat table and invitation link; six authored cases; five field judgements and one consistent overall judgement; a sign-off strip; a six-step progress strip; independent immutable submission; automatic joint reveal; explanatory feedback with a pair review; progression; persistent history; reconnection recovery; meaningful integration tests; server-rendered full README with a try-it box.
 
 Do not add: accounts, nickname input, chat, public leaderboard, time pressure, badges, images, generated art, icon sets, animation, drag-and-drop, hospital maps, real medicine data, uploads, AI-generated cases, model or image API calls, non-independent mode, A/B statistics, a medication-release action, post-reveal resubmission, spectator mode, presence tracking or automatic replacement of absent players. No research-note.md (COMP4020).
 
@@ -42,10 +44,10 @@ Do not add: accounts, nickname input, chat, public leaderboard, time pressure, b
 4. Both members can then check the first case. Either may submit first. Before two members exist, show waiting with the invite link, not a fake player or a solo mode.
 5. Show the Order card and the Prepared record card (§5), each with complete patient, medicine, dose, route and scheduled-time fields.
 6. Each field requires an initially unselected radio: Matches / Does not match. Also require Records match / Discrepancy found. Overall must be consistent with the learner's own five selections. Validate on the server; reject malformed, missing, extra or inconsistent answers. This validation must not disclose correctness.
-7. Allow editing before submission. After the server accepts a submission, it is immutable. Partner sees only Submitted / Not submitted, not choices or partial correctness. No per-field feedback until both submit.
-8. Once both submissions are durably stored, reveal automatically to both clients. Show both answers, field-by-field expected comparisons, explanatory text, agreement and each learner's full-answer accuracy as separate concepts.
+7. Allow editing before submission. After the server accepts a submission, it is immutable. Submitting is presented as signing. The partner sees only Signed / Awaiting signature in the sign-off strip, never choices or partial correctness. No per-field feedback until both submit.
+8. Once both submissions are durably stored, reveal automatically to both clients. Show the pair review (§6), both answers, field-by-field expected comparisons, explanatory text, agreement and each learner's full-answer accuracy as separate concepts.
 9. Retain the reveal until either member clicks Next case. The request names the revealed round. Concurrent clicks for the same round must advance only once. Do not clear the reveal by a timer.
-10. Repeat for six cases. Show a calm final review: completed cases, each learner's fully correct cases as a count (e.g. 4/6), and cases both missed. Preserve per-round review and link to My tables. Do not present results as clinical competence or research evidence.
+10. Repeat for six cases. Show a calm final review: completed cases, each learner's fully correct cases as a count (e.g. 4/6), and cases both missed, then a per-case table (case, your result, partner's result, same answer or not, the case's teaching point). Preserve per-round review and link to My tables. Do not present results as clinical competence or research evidence.
 
 Every accepted submission is persisted immediately; incomplete tables must also survive restarts. A returning member with the same cookie can resume or read completed rounds. New browser identities cannot take over occupied seats. If a partner leaves, retain the table and explain that they can return with the same browser; offer creating a new table. Clearing cookies loses access to the old identity in this MVP; disclose this limitation briefly.
 
@@ -55,7 +57,7 @@ Markers arrive with only the URL and start at `/readme/`. Above the README artic
 
 1. Open this site in two Chrome profiles or two browsers. An incognito window works but forgets who you are when it closes; use normal profiles if you want to come back tomorrow.
 2. In the first, choose Play, then Create a table, then Copy invite link.
-3. Open the link in the second and choose Join. Check each case on your own; both answers appear once you have both submitted.
+3. Open the link in the second and choose Join. Check each case on your own; both answers appear once you have both signed.
 
 `/` shows the same three steps in short form.
 
@@ -63,26 +65,18 @@ Markers arrive with only the URL and start at `/readme/`. Above the README artic
 
 Use a server-only case module. Case IDs and pre-reveal headings must be neutral (e.g. Case 1), not “wrong dose”. Fixed order is required for v1; do not add randomisation infrastructure.
 
-Every order uses:
+Field keys and labels: patient (Patient), medicine (Medicine), dose (Dose), route (Route), time (Scheduled time). Each case has its own order; the prepared record copies it except for the listed differences. Discrepancy counts run 0, 1, 2, 0, 1, 2, so players cannot learn “every case has exactly one error” or a field-by-field sequence.
 
-| Field key | Label | Display value |
-|---|---|---|
-| patient | Patient | SIM-014 |
-| medicine | Medicine | Training Medicine A |
-| dose | Dose | 0.5 training units |
-| route | Route | Oral (by mouth) |
-| time | Scheduled time | 09:00 |
-
-Prepared record starts as an exact copy, with the following overrides:
-
-| Case | Override | Expected mismatches | Post-reveal teaching point |
+| Case | Order: patient · medicine · dose · route · time | Prepared record differs in | Teaching point (shown after reveal) |
 |---|---|---|---|
-| 1 | none | none | Checking does not mean there must always be a discrepancy. |
-| 2 | patient = SIM-041 | patient only | Compare the complete identifier, not its general appearance. |
-| 3 | medicine = Training Medicine B | medicine only | Compare the full supplied label, not familiarity. |
-| 4 | dose = 5 training units | dose only | The decimal change makes a tenfold difference in these fictional training values. |
-| 5 | route = Intravenous (into a vein) | route only | Compare the stated routes; this does not establish appropriate routes for a real drug. |
-| 6 | time = 21:00 | time only | Compare scheduled record times; no clinical administration window is modelled. |
+| 1 | SIM-014 · Training Medicine A · 0.5 training units · Oral (by mouth) · 09:00 | nothing | Checking does not mean there must always be a discrepancy. |
+| 2 | SIM-022 · Training Medicine B · 2 training units · Oral (by mouth) · 13:00 | dose = 0.2 training units | A misplaced decimal point makes a tenfold difference in these fictional values. |
+| 3 | SIM-037 · Training Medicine C · 1 training unit · Intravenous (into a vein) · 08:00 | patient = SIM-073; time = 20:00 | Finding one discrepancy does not end the check: this record had two. |
+| 4 | SIM-048 · Training Medicine D · 2.5 training units · Intravenous (into a vein) · 18:00 | nothing | Expecting a problem after a run of errors is not evidence of one. |
+| 5 | SIM-051 · Training Medicine E · 10 training units · Oral (by mouth) · 06:00 | route = Intravenous (into a vein) | Compare the stated routes; this does not establish the right route for a real medicine. |
+| 6 | SIM-066 · Training Medicine F · 5 training units · Oral (by mouth) · 22:00 | medicine = Training Medicine E; dose = 15 training units | Two checkers can each catch a different problem; together is not the same as each check being complete. |
+
+Scoring must support any number of discrepancies per case (0–5): compute each field's expected comparison from the frozen values; never assume one discrepancy per case.
 
 Display order (fixed for all six cases): the Order card lists patient, medicine, dose, route, time. The Prepared record card lists the same five labelled fields in label order: medicine, dose, route, patient, time. The check form follows the Order card's order. This mirrors real documents with different layouts; it is not a per-case trick, and every field is always visible and labelled.
 
@@ -96,9 +90,19 @@ Table states: waiting_for_partner → playing → completed. Round state is deri
 
 Only a round with two immutable submissions is revealed. Divergent answers reveal for educational discussion; they are not overridden or reconciled by resubmission. Seeing the partner's answer ends the independent phase permanently for that round.
 
-Compute expected field comparisons from the frozen materials; fully correct means all five field choices and the consistent overall judgement are correct. Agreement means the two complete answer objects match, not merely that both chose “Discrepancy found”.
+Compute expected field comparisons from the frozen materials; fully correct means all five field choices and the consistent overall judgement are correct. Agreement means the two sets of six judgements (five fields plus overall) match, not merely that both chose “Discrepancy found”.
 
 Keep agreement and accuracy separate. If both agree but are wrong, say “You agreed, but the records show a different result” and explain the fields. If neither is fully correct but their errors differ, show that too. Never manufacture a participant answer, force a failure or label consensus as medication safety.
+
+**Pair review.** Above the reveal table, one box headed “Pair review” states what the second check added, computed only from the two frozen submissions. A *miss* is a real discrepancy marked Matches; a *false flag* is a matching field marked Does not match. Show the first sentence that applies:
+
+1. Both fully correct: “Both checks were complete and correct.”
+2. Exactly one fully correct: “Checker A's check was complete; Checker B's was not.” (names swapped as needed)
+3. At least one discrepancy missed by both: “You both missed the same discrepancy: <field labels>.”
+4. The case has discrepancies, each was found by at least one checker, and neither check is fully correct: “Together you found every discrepancy, but each check on its own was incomplete.”
+5. Otherwise: “Neither check was complete.”
+
+Unless category 1 applies, add one detail sentence: “Missed — A: <fields or none>; B: <fields or none>. Flagged but matching — A: <fields or none>; B: <fields or none>.” Never say or imply that a combined result makes a medication safe.
 
 Advance only from a revealed current round and only when another case exists. Next requests contain `fromRoundId`. An already-applied advance may return the current snapshot; it must never skip another case. Requests to submit to an old or revealed round cannot mutate history. Final review remains after case 6.
 
@@ -142,16 +146,16 @@ Suggested endpoints (adapt names if needed without changing semantics):
 
 ## 8. Visual and interaction design
 
-Follow `docs/reference/ui-reference.html` exactly. It is the numeric spec; do not reinterpret it.
+Follow `docs/reference/ui-reference.html` (v2, clinical-document style) exactly. It is the numeric spec; do not reinterpret it.
 
-- Copy the CSS inside `<style id="app-css">` verbatim into `public/style.css`. Do not copy `.ref-*` rules or the reference-only frames and labels.
-- Reuse its markup structure, class names and UI copy for each state: landing, join, waiting for partner, checking, submitted/waiting, revealed, agreed-but-wrong callout, final review, My tables, `/readme/`. Where the reference has text, use that text.
-- No new colours, fonts, shadows, images, icon sets, generated art or animation. The only icon is the inline SVG favicon in the reference. Do not call the image-generation API.
+- Copy the CSS inside `<style id="app-css">` verbatim into `public/style.css`, replacing the v1 file. Do not copy `.ref-*` rules or the reference-only frames and labels.
+- Reuse its markup structure, class names and UI copy for each state: landing, join, waiting for partner, checking, signed/waiting, revealed with pair review, agreed-but-wrong callout, progress strip, final review, My tables, `/readme/`. Where the reference has text, use that text.
+- No new colours, fonts, shadows, images, icon sets, generated art or animation. The only graphics are the favicon, the inline header SVG and the decorative CSS barcode stripe (aria-hidden) in the reference. Do not call the image-generation API.
 - Order and Prepared record are two separate cards: side by side at ≥ 760 px, stacked below. The check form sits below both cards.
 - At 390×844 there is no horizontal page scroll; the reveal table turns into stacked rows (the reference CSS does this via `data-label`).
-- Native labelled controls, semantic headings, visible keyboard focus, readable contrast and text labels (“Correct”, “Incorrect”, “Submitted”) in addition to colour.
+- Native labelled controls, semantic headings, visible keyboard focus, readable contrast and text labels (“Correct”, “Incorrect”, “Signed”) in addition to colour.
 - Preserve current local choices and keyboard focus during status refreshes. An unsubmitted draft may disappear on full reload; an accepted submission may never disappear.
-- One polite `aria-live` region announces partner joined, partner submitted and reveal; never keepalives. Never display “Submitted” before a successful server response. Errors preserve unsent choices and offer retry; duplicate retries must not create another record.
+- One polite `aria-live` region announces partner joined, partner signed and reveal; never keepalives. Never display “Signed” before a successful server response. Errors preserve unsent choices and offer retry; duplicate retries must not create another record.
 
 If a state the brief needs is missing from the reference, compose it only from existing classes and say so in your report.
 
@@ -169,7 +173,7 @@ Minimum meaningful coverage:
 4. Static assets and initial HTML do not include server-only case keys, revealing case titles or database content. Do not implement hiding with CSS.
 5. Missing/invalid/inconsistent selections are rejected without revealing the correct answer. Valid answers are accepted regardless of correctness.
 6. A duplicate identical submission is harmless; a changed repeat cannot overwrite the original. Concurrent submissions create exactly two rows and one reveal; both members see the same final result.
-7. Correct consensus, incorrect consensus, divergent answers and differing partial errors produce correct separate agreement/accuracy feedback. Use deliberate test answers; the live game never fabricates player behaviour.
+7. Correct consensus, incorrect consensus, divergent answers and differing partial errors produce correct separate agreement/accuracy feedback; each of the five pair-review categories produces its specified text, including case 3 with complementary finds and a no-discrepancy case with a false flag; a case with two discrepancies scores both fields. Use deliberate test answers; the live game never fabricates player behaviour.
 8. Concurrent Next requests for one `fromRoundId` advance once. Unrevealed or stale rounds cannot be edited, and all six cases can complete without skipping.
 9. Close and restart the actual app process with the same SQLite file and cookies. An incomplete game resumes and completed records remain. Case snapshots preserve old explanations after a changed fixture.
 10. SSE reconnect returns the latest authorised state after a missed update or restart; status updates do not expose hidden fields.
@@ -190,7 +194,7 @@ Stop after each round and report. Commit when coherent verified changes exist, w
 
 1. **Round 1:** inspect the starter; confirm the placeholder the student already deployed is live; write CLAUDE.md v1 and the evidence-log/ADR scaffolding; build a walking skeleton (Express + SQLite on the volume + `/healthz`, starter `/` and `/readme/` still passing); deploy; confirm the database survives a machine restart.
 2. **Round 2:** spec-first tests; the full MVP (§3–§8) with all §9 tests; deploy; run the latency script.
-3. **Round 3:** fixes from the student's two-browser test, each with a regression test where testable; restart and redeploy persistence evidence in `docs/evidence/persistence.txt`; ADRs; CLAUDE.md update.
+3. **Round 3:** apply the v1.2 changes (UI reference v2, sign-off strip, six varied cases, pair review, progress strip, final review table, with tests); fixes from the student's two-browser test, each with a regression test where testable; restart and redeploy persistence evidence in `docs/evidence/persistence.txt`; ADRs; CLAUDE.md update.
 4. **Round 4:** after the student writes README.md and PROCESS.md: render, word counts, link checks, a claim → enforcement map in `docs/claims.md`, both checks green, deploy, `/ship`.
 
 The student owns the README/PROCESS argument. Do not write submission-ready first-person reflections, invented motivations, claimed literature reading, user-test results or crit reflections. You may record objective implementation/test facts, maintain technical instructions and suggest an outline. If an author draft exists, preserve its voice; change wording only when asked.

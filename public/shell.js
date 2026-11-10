@@ -10,8 +10,9 @@ export function renderShell(activeNav) {
     <header class="site-header">
       <div class="wrap">
         <a class="brand" href="/">
-          <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="5" width="17" height="22" rx="3" fill="#e7eff6" stroke="#1e5a85" stroke-width="2"/><rect x="12" y="5" width="17" height="22" rx="3" fill="#ffffff" stroke="#1e5a85" stroke-width="2"/><path d="M16 16l3 3 6-7" fill="none" stroke="#1e5a85" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="5" width="17" height="22" rx="3" fill="#0d5c7a" stroke="#ffffff" stroke-width="2"/><rect x="12" y="5" width="17" height="22" rx="3" fill="#10283a" stroke="#ffffff" stroke-width="2"/><path d="M16 16l3 3 6-7" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Second Pair of Eyes
+          <span class="sub">Medication double-check simulation</span>
         </a>
         <nav class="nav" aria-label="Main">
           ${navItem("/", "Play")}

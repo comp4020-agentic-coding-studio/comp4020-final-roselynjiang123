@@ -21,7 +21,7 @@ if (!ok && status === 404) {
   const code = body.table?.code ?? body.table?.id?.slice(0, 4).toUpperCase() ?? "";
   root.innerHTML = `
     <h1>You're invited to check records</h1>
-    <p>Checker A has started table <strong>${code}</strong>. Join as Checker B to check six short cases together. Neither of you sees the other's answers until you have both submitted.</p>
+    <p>Checker A has started table <strong>${code}</strong>. Join as Checker B to check six short cases together. Neither of you sees the other's answers until you have both signed.</p>
     <div class="actions">
       <button class="btn" type="button" id="join">Join as Checker B</button>
       <a class="btn btn-secondary" href="/">Start my own table instead</a>
