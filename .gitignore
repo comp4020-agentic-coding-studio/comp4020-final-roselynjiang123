@@ -2,6 +2,14 @@ node_modules/
 dist/
 *.log
 
+# local dev SQLite database (brief §7: DATABASE_PATH points at the Fly volume
+# in production; this is the untracked local/test equivalent)
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
 # editor and OS junk
 .DS_Store
 ._*
