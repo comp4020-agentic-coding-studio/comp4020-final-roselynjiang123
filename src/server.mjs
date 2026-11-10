@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { openDatabase, resolveDatabasePath } from "./db.mjs";
 import { createRepo } from "./repo.mjs";
+import { createSseHub } from "./sse.mjs";
 import { sessionMiddleware, requireSameOrigin } from "./session.mjs";
 import { serializeSnapshot } from "./serializer.mjs";
 import { validateAnswer } from "./scoring.mjs";
@@ -21,6 +22,7 @@ const OUTCOME_STATUS = {
 
 export function createApp(db) {
   const repo = createRepo(db);
+  const sse = createSseHub();
   const app = express();
   // Behind Fly's proxy (brief §7a).
   app.set("trust proxy", 1);
@@ -99,6 +101,7 @@ export function createApp(db) {
       res.status(OUTCOME_STATUS[result.outcome] ?? 400).json({ error: result.outcome });
       return;
     }
+    sse.notify(req.params.id);
     res.json(serializeSnapshot(result.snapshot));
   });
 
@@ -119,10 +122,45 @@ export function createApp(db) {
       res.status(OUTCOME_STATUS[result.outcome] ?? 400).json({ error: result.outcome });
       return;
     }
+    sse.notify(id);
     res.json(serializeSnapshot(result.snapshot));
   });
 
-  return { app, repo };
+  // SSE: authorise membership, then send a fresh database-derived snapshot
+  // on connect and on every subsequent notify() for this table (brief §7).
+  app.get("/api/tables/:id/events", (req, res) => {
+    const { id } = req.params;
+    if (!repo.isMember(id, req.identity)) {
+      res.status(403).json({ error: "forbidden" });
+      return;
+    }
+
+    res.set({
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache, no-transform",
+      Connection: "keep-alive",
+      "X-Accel-Buffering": "no",
+    });
+    res.flushHeaders();
+    res.write("retry: 2000\n\n");
+
+    const send = () => {
+      const snapshot = repo.getSnapshot(id, req.identity);
+      if (!snapshot) return;
+      res.write(`data: ${JSON.stringify(serializeSnapshot(snapshot))}\n\n`);
+    };
+    send();
+
+    const unsubscribe = sse.subscribe(id, send);
+    const keepalive = setInterval(() => res.write(": keepalive\n\n"), 20000);
+
+    req.on("close", () => {
+      clearInterval(keepalive);
+      unsubscribe();
+    });
+  });
+
+  return { app, repo, sse };
 }
 
 export function start() {
