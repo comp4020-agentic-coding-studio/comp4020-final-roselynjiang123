@@ -9,6 +9,7 @@ import { sessionMiddleware, requireSameOrigin } from "./session.mjs";
 import { serializeSnapshot } from "./serializer.mjs";
 import { validateAnswer } from "./scoring.mjs";
 import { randomToken } from "./ids.mjs";
+import { renderMarkdown } from "./markdown.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(__dirname, "..");
@@ -37,14 +38,26 @@ export function createApp(db) {
   }
 
   app.get("/", (_req, res) => {
-    res.sendFile(join(repoRoot, "placeholder", "index.html"));
+    res.sendFile(join(repoRoot, "public", "index.html"));
+  });
+
+  app.get("/tables", (_req, res) => {
+    res.sendFile(join(repoRoot, "public", "tables.html"));
+  });
+
+  app.get("/join/:tableId", (_req, res) => {
+    res.sendFile(join(repoRoot, "public", "join.html"));
+  });
+
+  app.get("/play/:tableId", (_req, res) => {
+    res.sendFile(join(repoRoot, "public", "play.html"));
   });
 
   app.get("/readme/", (_req, res) => {
     const readme = readFileSync(join(repoRoot, "README.md"), "utf8");
-    const escaped = readme.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-    const template = readFileSync(join(repoRoot, "placeholder", "readme.html"), "utf8");
-    res.type("html").send(template.replace("@README@", escaped));
+    const rendered = renderMarkdown(readme);
+    const template = readFileSync(join(repoRoot, "public", "readme.html"), "utf8");
+    res.type("html").send(template.replace("@README@", rendered));
   });
 
   // Reveals no paths or data; just proves the DB opens and a trivial query

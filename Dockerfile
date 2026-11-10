@@ -20,7 +20,7 @@ WORKDIR /app
 COPY --from=build /app/node_modules ./node_modules
 COPY package.json ./
 COPY src/ ./src/
-COPY placeholder/ ./placeholder/
+COPY public/ ./public/
 COPY README.md ./
 ENV NODE_ENV=production
 ENV DATABASE_PATH=/data/app.db
