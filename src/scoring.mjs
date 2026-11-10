@@ -70,3 +70,43 @@ export function fieldResults(answerA, answerB, expected) {
   }
   return results;
 }
+
+// A miss is a real discrepancy (brief §6 "Pair review") marked Matches.
+function missedFields(answer, mismatchFields) {
+  return FIELD_KEYS.filter((key) => mismatchFields.includes(key) && answer[key] === "match");
+}
+
+// A false flag is a matching field marked Does not match.
+function falseFlagFields(answer, mismatchFields) {
+  return FIELD_KEYS.filter((key) => !mismatchFields.includes(key) && answer[key] === "mismatch");
+}
+
+// Brief §6 "Pair review": what the second check added, computed only from
+// the two frozen submissions and the case's real discrepancies
+// (mismatchFields, never the learners' answers against each other). Field
+// keys only here, not labels or copy -- src/serializer.mjs turns these into
+// the brief's labelled sentences so this file stays free of UI text.
+//
+// Category order matters: each condition below is checked only once the
+// ones above it have failed, mirroring brief §6's "first sentence that
+// applies" (1 both correct, 2 exactly one correct, 3 a shared miss even
+// though neither is correct, 4 every discrepancy caught by someone despite
+// neither check being complete, 5 otherwise).
+export function pairReview(answerA, answerB, expected, mismatchFields) {
+  const aFullyCorrect = isFullyCorrect(answerA, expected);
+  const bFullyCorrect = isFullyCorrect(answerB, expected);
+  const missedA = missedFields(answerA, mismatchFields);
+  const missedB = missedFields(answerB, mismatchFields);
+  const flagA = falseFlagFields(answerA, mismatchFields);
+  const flagB = falseFlagFields(answerB, mismatchFields);
+  const missedByBoth = missedA.filter((key) => missedB.includes(key));
+
+  let category;
+  if (aFullyCorrect && bFullyCorrect) category = 1;
+  else if (aFullyCorrect !== bFullyCorrect) category = 2;
+  else if (missedByBoth.length > 0) category = 3;
+  else if (mismatchFields.length > 0) category = 4;
+  else category = 5;
+
+  return { category, aFullyCorrect, bFullyCorrect, missedA, missedB, flagA, flagB, missedByBoth };
+}

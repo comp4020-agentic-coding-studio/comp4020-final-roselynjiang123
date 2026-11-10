@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
+  advanceToRound,
+  answerWith,
   CASE1_ANSWER_CORRECT,
   createAndJoinTable,
   createClient,
@@ -204,6 +206,75 @@ describe("independent submission and joint reveal", () => {
       expect(round.reveal.sameAnswer).toBe(false);
       expect(round.reveal.aFullyCorrect).toBe(false);
       expect(round.reveal.bFullyCorrect).toBe(false);
+    });
+  });
+
+  describe("multi-discrepancy scoring and the pair review (brief §9 item 7, §6)", () => {
+    async function playRound(
+      a: Client,
+      b: Client,
+      tableId: string,
+      roundId: string,
+      answerA: Record<string, string>,
+      answerB: Record<string, string>,
+    ) {
+      await a.post(`/api/tables/${tableId}/rounds/${roundId}/submissions`, { answer: answerA });
+      const res = await b.post(`/api/tables/${tableId}/rounds/${roundId}/submissions`, { answer: answerB });
+      return currentRound(await res.json());
+    }
+
+    it("a case with two discrepancies scores both fields (case 3: patient, time)", async () => {
+      const { a, b, tableId } = await createAndJoinTable();
+      const roundId = await advanceToRound(a, b, tableId, 3);
+      const round = await playRound(a, b, tableId, roundId, answerWith(["patient", "time"]), answerWith([]));
+      expect(round.reveal.fields.patient.expected).toBe("mismatch");
+      expect(round.reveal.fields.time.expected).toBe("mismatch");
+      expect(round.reveal.fields.patient.aCorrect).toBe(true);
+      expect(round.reveal.fields.time.aCorrect).toBe(true);
+      expect(round.reveal.fields.patient.bCorrect).toBe(false);
+      expect(round.reveal.fields.time.bCorrect).toBe(false);
+    });
+
+    it("category 1: both fully correct on a no-discrepancy case", async () => {
+      const { a, b, tableId } = await createAndJoinTable();
+      const roundId = await advanceToRound(a, b, tableId, 1);
+      const round = await playRound(a, b, tableId, roundId, answerWith([]), answerWith([]));
+      expect(round.reveal.pair.text).toBe("Both checks were complete and correct.");
+      expect(round.reveal.pair.detail).toBeUndefined();
+    });
+
+    it("category 2: exactly one fully correct -- a false flag on a no-discrepancy case", async () => {
+      const { a, b, tableId } = await createAndJoinTable();
+      const roundId = await advanceToRound(a, b, tableId, 1);
+      const round = await playRound(a, b, tableId, roundId, answerWith([]), answerWith(["dose"]));
+      expect(round.reveal.pair.text).toBe("Checker A's check was complete; Checker B's was not.");
+      expect(round.reveal.pair.detail).toMatch(/Flagged but matching — A: none; B: Dose\./);
+    });
+
+    it("category 3: both missed the same discrepancy", async () => {
+      const { a, b, tableId } = await createAndJoinTable();
+      const roundId = await advanceToRound(a, b, tableId, 2);
+      const round = await playRound(a, b, tableId, roundId, answerWith([]), answerWith([]));
+      expect(round.reveal.pair.text).toBe("You both missed the same discrepancy: Dose.");
+      expect(round.reveal.pair.detail).toMatch(/Missed — A: Dose; B: Dose\./);
+    });
+
+    it("category 4: complementary finds on case 3 -- together every discrepancy is caught, neither check alone is complete", async () => {
+      const { a, b, tableId } = await createAndJoinTable();
+      const roundId = await advanceToRound(a, b, tableId, 3);
+      const round = await playRound(a, b, tableId, roundId, answerWith(["patient"]), answerWith(["time"]));
+      expect(round.reveal.pair.text).toBe(
+        "Together you found every discrepancy, but each check on its own was incomplete.",
+      );
+      expect(round.reveal.pair.detail).toMatch(/Missed — A: Scheduled time; B: Patient\./);
+    });
+
+    it("category 5: neither check was complete, no real discrepancy to share a miss on", async () => {
+      const { a, b, tableId } = await createAndJoinTable();
+      const roundId = await advanceToRound(a, b, tableId, 1);
+      const round = await playRound(a, b, tableId, roundId, answerWith(["dose"]), answerWith(["route"]));
+      expect(round.reveal.pair.text).toBe("Neither check was complete.");
+      expect(round.reveal.pair.detail).toMatch(/Flagged but matching — A: Dose; B: Route\./);
     });
   });
 });

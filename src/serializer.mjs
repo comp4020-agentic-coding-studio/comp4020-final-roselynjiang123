@@ -1,6 +1,6 @@
 import { CASE_COUNT, FIELD_LABELS, ORDER_DISPLAY, PREPARED_DISPLAY } from "./cases.mjs";
 import { tableCode } from "./ids.mjs";
-import { answersEqual, expectedAnswer, fieldResults, isFullyCorrect } from "./scoring.mjs";
+import { answersEqual, expectedAnswer, fieldResults, pairReview } from "./scoring.mjs";
 
 // The one explicit allowlist-based serializer (brief §7): every GET, POST
 // response and SSE event is built by this function, from a repo snapshot, so
@@ -69,15 +69,48 @@ function serializeRound(round, viewerIdentity, seatOf) {
   }
   const answerA = bySeat.A;
   const answerB = bySeat.B;
+  const review = pairReview(answerA, answerB, expected, round.case.mismatchFields);
 
   return {
     ...base,
     reveal: {
       fields: fieldResults(answerA, answerB, expected),
       sameAnswer: answersEqual(answerA, answerB),
-      aFullyCorrect: isFullyCorrect(answerA, expected),
-      bFullyCorrect: isFullyCorrect(answerB, expected),
+      aFullyCorrect: review.aFullyCorrect,
+      bFullyCorrect: review.bFullyCorrect,
       teachingPoint: round.case.teachingPoint,
+      pair: buildPairReviewText(review),
     },
   };
+}
+
+// Brief §6 "Pair review": the first sentence that applies, plus (unless
+// category 1) one detail sentence. Field keys -> labels only happens here;
+// src/scoring.mjs stays free of UI copy.
+const fieldLabelList = (keys) => (keys.length === 0 ? "none" : keys.map((k) => FIELD_LABELS[k]).join(", "));
+
+function buildPairReviewText(review) {
+  const { category, missedA, missedB, flagA, flagB, missedByBoth } = review;
+  let text;
+  switch (category) {
+    case 1:
+      text = "Both checks were complete and correct.";
+      break;
+    case 2:
+      text = review.aFullyCorrect
+        ? "Checker A's check was complete; Checker B's was not."
+        : "Checker B's check was complete; Checker A's was not.";
+      break;
+    case 3:
+      text = `You both missed the same discrepancy: ${fieldLabelList(missedByBoth)}.`;
+      break;
+    case 4:
+      text = "Together you found every discrepancy, but each check on its own was incomplete.";
+      break;
+    default:
+      text = "Neither check was complete.";
+  }
+  if (category === 1) return { text };
+  const detail = `Missed — A: ${fieldLabelList(missedA)}; B: ${fieldLabelList(missedB)}. Flagged but matching — A: ${fieldLabelList(flagA)}; B: ${fieldLabelList(flagB)}.`;
+  return { text, detail };
 }

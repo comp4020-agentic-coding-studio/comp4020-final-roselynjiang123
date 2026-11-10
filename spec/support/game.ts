@@ -32,5 +32,34 @@ export const CASE1_ANSWER_CORRECT = {
   overall: "match",
 };
 
+const FIELD_KEYS = ["patient", "medicine", "dose", "route", "time"];
+
+// Builds a well-formed, self-consistent answer with exactly `mismatchKeys`
+// marked "Does not match". validateAnswer only checks internal consistency,
+// not the answer against any particular case, so this is valid for any case
+// regardless of that case's real discrepancies -- useful for driving an
+// answer that's deliberately right or wrong about a specific frozen case.
+export function answerWith(mismatchKeys: string[]): Record<string, string> {
+  const answer: Record<string, string> = {};
+  for (const key of FIELD_KEYS) answer[key] = mismatchKeys.includes(key) ? "mismatch" : "match";
+  answer.overall = mismatchKeys.length > 0 ? "discrepancy" : "match";
+  return answer;
+}
+
+// Submits CASE1_ANSWER_CORRECT for both members and advances, repeatedly,
+// until the table's current round is `targetIndex` -- a case-content-
+// agnostic way to reach case 2, 3, etc. for a test. Correctness doesn't
+// matter while passing through; validateAnswer only checks self-consistency.
+export async function advanceToRound(a: Client, b: Client, tableId: string, targetIndex: number): Promise<string> {
+  for (;;) {
+    const snapshot = await (await a.get(`/api/tables/${tableId}`)).json();
+    const round = currentRound(snapshot);
+    if (round.index === targetIndex) return round.id;
+    await a.post(`/api/tables/${tableId}/rounds/${round.id}/submissions`, { answer: CASE1_ANSWER_CORRECT });
+    await b.post(`/api/tables/${tableId}/rounds/${round.id}/submissions`, { answer: CASE1_ANSWER_CORRECT });
+    await a.post(`/api/tables/${tableId}/next`, { fromRoundId: round.id });
+  }
+}
+
 export { createClient, type Client };
 export { baseUrl };

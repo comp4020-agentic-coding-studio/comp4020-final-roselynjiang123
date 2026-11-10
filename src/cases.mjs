@@ -16,40 +16,78 @@ export const FIELD_LABELS = {
   time: "Scheduled time",
 };
 
-const BASE_ORDER = {
-  patient: "SIM-014",
-  medicine: "Training Medicine A",
-  dose: "0.5 training units",
-  route: "Oral (by mouth)",
-  time: "09:00",
-};
-
-const OVERRIDES = [
-  { override: {}, mismatchFields: [], teachingPoint: "Checking does not mean there must always be a discrepancy." },
+// Each case has its own order; the prepared record copies it except for
+// `override` (brief §5). Discrepancy counts run 0, 1, 2, 0, 1, 2, so players
+// cannot learn "every case has exactly one error" or a field-by-field
+// sequence. Scoring (src/scoring.mjs) derives mismatchFields from
+// Object.keys(override), so any count from 0 to 5 is supported without
+// special-casing.
+const CASES = [
   {
-    override: { patient: "SIM-041" },
-    mismatchFields: ["patient"],
-    teachingPoint: "Compare the complete identifier, not its general appearance.",
+    order: {
+      patient: "SIM-014",
+      medicine: "Training Medicine A",
+      dose: "0.5 training units",
+      route: "Oral (by mouth)",
+      time: "09:00",
+    },
+    override: {},
+    teachingPoint: "Checking does not mean there must always be a discrepancy.",
   },
   {
-    override: { medicine: "Training Medicine B" },
-    mismatchFields: ["medicine"],
-    teachingPoint: "Compare the full supplied label, not familiarity.",
+    order: {
+      patient: "SIM-022",
+      medicine: "Training Medicine B",
+      dose: "2 training units",
+      route: "Oral (by mouth)",
+      time: "13:00",
+    },
+    override: { dose: "0.2 training units" },
+    teachingPoint: "A misplaced decimal point makes a tenfold difference in these fictional values.",
   },
   {
-    override: { dose: "5 training units" },
-    mismatchFields: ["dose"],
-    teachingPoint: "The decimal change makes a tenfold difference in these fictional training values.",
+    order: {
+      patient: "SIM-037",
+      medicine: "Training Medicine C",
+      dose: "1 training unit",
+      route: "Intravenous (into a vein)",
+      time: "08:00",
+    },
+    override: { patient: "SIM-073", time: "20:00" },
+    teachingPoint: "Finding one discrepancy does not end the check: this record had two.",
   },
   {
+    order: {
+      patient: "SIM-048",
+      medicine: "Training Medicine D",
+      dose: "2.5 training units",
+      route: "Intravenous (into a vein)",
+      time: "18:00",
+    },
+    override: {},
+    teachingPoint: "Expecting a problem after a run of errors is not evidence of one.",
+  },
+  {
+    order: {
+      patient: "SIM-051",
+      medicine: "Training Medicine E",
+      dose: "10 training units",
+      route: "Oral (by mouth)",
+      time: "06:00",
+    },
     override: { route: "Intravenous (into a vein)" },
-    mismatchFields: ["route"],
-    teachingPoint: "Compare the stated routes; this does not establish appropriate routes for a real drug.",
+    teachingPoint: "Compare the stated routes; this does not establish the right route for a real medicine.",
   },
   {
-    override: { time: "21:00" },
-    mismatchFields: ["time"],
-    teachingPoint: "Compare scheduled record times; no clinical administration window is modelled.",
+    order: {
+      patient: "SIM-066",
+      medicine: "Training Medicine F",
+      dose: "5 training units",
+      route: "Oral (by mouth)",
+      time: "22:00",
+    },
+    override: { medicine: "Training Medicine E", dose: "15 training units" },
+    teachingPoint: "Two checkers can each catch a different problem; together is not the same as each check being complete.",
   },
 ];
 
@@ -58,17 +96,17 @@ const OVERRIDES = [
 // module is edited later (brief §5).
 export function caseSnapshot(index) {
   const i = index - 1;
-  if (i < 0 || i >= OVERRIDES.length) {
+  if (i < 0 || i >= CASES.length) {
     throw new RangeError(`no case at index ${index}`);
   }
-  const { override, mismatchFields, teachingPoint } = OVERRIDES[i];
+  const { order, override, teachingPoint } = CASES[i];
   return {
     id: `Case ${index}`,
-    order: { ...BASE_ORDER },
-    prepared: { ...BASE_ORDER, ...override },
-    mismatchFields,
+    order: { ...order },
+    prepared: { ...order, ...override },
+    mismatchFields: Object.keys(override),
     teachingPoint,
   };
 }
 
-export const CASE_COUNT = OVERRIDES.length;
+export const CASE_COUNT = CASES.length;
