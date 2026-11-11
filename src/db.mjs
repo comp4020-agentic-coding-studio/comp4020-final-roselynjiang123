@@ -82,6 +82,58 @@ const MIGRATIONS = [
     id: "0002_table_version",
     sql: `ALTER TABLE tables ADD COLUMN version INTEGER NOT NULL DEFAULT 0;`,
   },
+  // v2 (brief §5, §6.1): stage replaces the single-round status/next-case
+  // model with four stages (waiting_for_partner -> training ->
+  // training_summary -> transfer -> completed); bank_major_version/
+  // bank_version record which content/case-bank.v2.json version a table was
+  // created against (brief §6.1: "Each table records bankMajorVersion and
+  // bankVersion at creation"). Existing rows backfill to the v1-equivalent
+  // stage/status so they keep reading correctly with no data loss: a v1
+  // table's `status` already distinguishes waiting/playing/completed, and
+  // every v1 game was a single six-case "training"-shaped sequence, so
+  // status='playing' backfills to stage='training'. bank_major_version/
+  // bank_version are left NULL for pre-v2 rows -- there is no bank version
+  // to backfill them to, and NULL is how the rest of this migration set
+  // marks "not collected in this version" content.
+  {
+    id: "0003_tables_stage_and_bank_version",
+    sql: `
+      ALTER TABLE tables ADD COLUMN stage TEXT;
+      ALTER TABLE tables ADD COLUMN bank_major_version INTEGER;
+      ALTER TABLE tables ADD COLUMN bank_version TEXT;
+      UPDATE tables SET stage = CASE status
+        WHEN 'waiting_for_partner' THEN 'waiting_for_partner'
+        WHEN 'playing' THEN 'training'
+        WHEN 'completed' THEN 'completed'
+        ELSE 'waiting_for_partner'
+      END WHERE stage IS NULL;
+    `,
+  },
+  // phase (training|transfer) and case_version let a round be read without
+  // re-parsing case_data's JSON blob just to know which; both are NULL for
+  // pre-v2 rows (no case_version existed, and every v1 round was
+  // training-equivalent, so phase backfills to 'training' -- a factual,
+  // non-destructive default, not a guess, since v1 had no transfer phase at
+  // all).
+  {
+    id: "0004_rounds_phase_and_case_version",
+    sql: `
+      ALTER TABLE rounds ADD COLUMN phase TEXT;
+      ALTER TABLE rounds ADD COLUMN case_version TEXT;
+      UPDATE rounds SET phase = 'training' WHERE phase IS NULL;
+    `,
+  },
+  // action/evidence_id (brief §7.1's decision step) are new in v2 and have
+  // no v1 equivalent, so existing submission rows leave them NULL -- the
+  // serializer displays a NULL action/evidence_id round's decision as "Not
+  // collected in this version" (brief §6.1) rather than scoring it as wrong.
+  {
+    id: "0005_submissions_action_and_evidence",
+    sql: `
+      ALTER TABLE submissions ADD COLUMN action TEXT;
+      ALTER TABLE submissions ADD COLUMN evidence_id TEXT;
+    `,
+  },
 ];
 
 export function openDatabase(path) {
