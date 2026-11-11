@@ -171,3 +171,14 @@ and the new line needed it pre-reveal too | src/caseSnapshot.mjs
 cards), spec/submissions.test.ts (T01 extended: no case's claim text in
 the case projection before reveal, walked across every training round) |
 (Round D of E F2 commit)
+2026-11-12 | `docs/process/change-record.md`'s §10 consistency map found
+brief §4 item 3 (same-origin writes, monotonic table version) and §4 item
+11 (the action log, T18) had no CLAUDE.md rule naming them, and brief §1
+items 2 ("who found what") and 3 ("matching records are not permission")
+were likewise unnamed; §4 items 9 ("never log cookie tokens or full
+submitted answers") and 10 ("nothing secret served as static asset") had
+rules present but cited the wrong judged-by label ("judged" where a spec
+test actually enforces them) | CLAUDE.md (new rules for brief §1 items 2-3
+and §4 items 3, 11; corrected "judged" to "enforced" throughout; named
+T10, T15, T17 where previously untested-by-name) | (this round's CLAUDE.md
+commit)
