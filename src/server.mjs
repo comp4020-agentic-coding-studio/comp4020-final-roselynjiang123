@@ -81,6 +81,38 @@ export function createApp(db, bank) {
     });
   });
 
+  // §8.4 "earlier practice in this browser": owner-only (scoped entirely by
+  // req.identity, the server-validated session -- never a client-supplied
+  // id, brief §4 item 1), up to 3 previous COMPLETED tables, newest first,
+  // excluding ?exclude=<tableId> (the end-review/My-tables screen's own
+  // table, so it never lists itself). Built from the one allowlist
+  // serializer (serializeSnapshot), not a second read path, so this can
+  // never expose anything that path withholds.
+  app.get("/api/me/history", (req, res) => {
+    res.set("Cache-Control", "no-store");
+    const excludeTableId = typeof req.query.exclude === "string" ? req.query.exclude : "";
+    const rows = repo.listCompletedTablesForIdentity(req.identity, excludeTableId).slice(0, 3);
+    const history = rows.map((row) => {
+      const snapshot = repo.getSnapshot(row.table_id, req.identity);
+      const full = serializeSnapshot(snapshot, bank);
+      const viewerSeat = full.viewer?.seat;
+      const training = full.trainingSummary?.[viewerSeat];
+      const transfer = full.transferSummary?.[viewerSeat];
+      return {
+        tableId: full.table.id,
+        code: full.table.code,
+        completedAt: row.completed_at,
+        bankMajorVersion: full.table.bankMajorVersion,
+        bankVersion: full.table.bankVersion,
+        trainingMismatchesFound: training?.mismatchesFound ?? null,
+        trainingFalseMarks: training?.matchingMarkedMismatch ?? null,
+        trainingDecisionsAccepted: training?.decisions.accepted ?? null,
+        transferDecisionsAccepted: transfer?.decisions.accepted ?? null,
+      };
+    });
+    res.json({ history });
+  });
+
   app.post("/api/tables", requireSameOrigin, (req, res) => {
     res.set("Cache-Control", "no-store");
     const tableId = randomToken();

@@ -50,6 +50,21 @@ export function createRepo(db, bank) {
       "INSERT OR IGNORE INTO submissions (id, round_id, identity, answer, action, evidence_id) VALUES (?, ?, ?, ?, ?, ?)",
     ),
     submissionsForRound: db.prepare("SELECT * FROM submissions WHERE round_id = ?"),
+
+    // §8.4 "earlier practice" source list: every OTHER completed table this
+    // identity belongs to, newest-first by when its last round was revealed
+    // (tables carry no separate "completed at" column, and a completed
+    // table's last round is always its most recently revealed one). The `?`
+    // exclude parameter is always bound -- the route passes "" when there is
+    // no current table to exclude, which can never match a real table id
+    // (src/ids.mjs tokens are never empty).
+    listCompletedTablesForIdentity: db.prepare(
+      `SELECT t.id as table_id, t.bank_major_version, t.bank_version,
+              (SELECT MAX(revealed_at) FROM rounds WHERE table_id = t.id) as completed_at
+       FROM table_members m JOIN tables t ON t.id = m.table_id
+       WHERE m.identity = ? AND t.stage = 'completed' AND t.id != ?
+       ORDER BY completed_at DESC`,
+    ),
   };
 
   // v1 tables' status mirrors directly onto a v2 stage (brief §6.1: "v1
@@ -290,6 +305,16 @@ export function createRepo(db, bank) {
     return { table, members, rounds, viewerIdentity: identity };
   }
 
+  // §8.4 "earlier practice" source rows: table id, its recorded bank
+  // version/major version, and when it finished, for every OTHER completed
+  // table this identity belongs to. The route layer (src/server.mjs) turns
+  // each row into the actual summary numbers via getSnapshot() +
+  // serializeSnapshot(), the one allowlist path, rather than this function
+  // re-deriving scores a second way.
+  function listCompletedTablesForIdentity(identity, excludeTableId) {
+    return stmt.listCompletedTablesForIdentity.all(identity, excludeTableId ?? "");
+  }
+
   function listTablesForIdentity(identity) {
     return db
       .prepare(
@@ -313,6 +338,7 @@ export function createRepo(db, bank) {
     advance,
     getSnapshot,
     listTablesForIdentity,
+    listCompletedTablesForIdentity,
     isMember,
   };
 }
