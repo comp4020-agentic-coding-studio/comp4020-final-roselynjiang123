@@ -50,6 +50,7 @@ Live or runtime AI of any kind; accounts or login; teacher dashboard; chat or fr
 8. SQLite is the source of truth; persist before broadcast. Restarts and redeploys lose nothing accepted.
 9. Do not log cookie tokens or full submitted answers.
 10. Nothing secret (answer keys, accepted pairs, feedback, the bank file, fixtures, test files, the database) is served as a static asset or bundled into front-end code.
+11. **Keep the server-side action log** (it is what crit 10 is narrated from, and it outlives the crit): one stdout line per accepted action, `ISO time | table code | seat | action | round`, e.g. `2026-11-11T01:07:00.486Z | BIIJ | A | sign | 4`. Actions: `create`, `join`, `sign`, `reveal`, `next`, plus v2's stage changes `summary` (round 6 → training summary), `transfer` (summary → round 7) and `complete` (round 9 → end review). Rejected requests are not logged as actions. Never log cookie tokens, session ids, answer values, evidence choices or usage events on this line. This is separate from the usage-event table in §9.
 
 ## 5. Teaching flow and table stages
 
@@ -71,7 +72,8 @@ If a partner leaves, keep the table; show that they can return in the same brows
 ## 6. Case bank
 
 ### 6.1 Loading and versioning
-- Load `content/case-bank.v2.json` at start-up from a server-only path. Validate it (fail start-up with a clear message if invalid): five field keys; every case has an answer for each key; every accepted pair uses a known action and evidence id; no accepted pair uses `continue_checks` when any field is `mismatch`; every claim's `sourceIds` exist; every `medicineCardIds` entry exists; `reviewStatus` rules in §6.3 hold.
+- Load `content/case-bank.v2.json` at start-up from a server-only path. Validate it (fail start-up with a clear message if invalid): five field keys; every case has an answer for each key; every accepted pair uses a known action and evidence id; no accepted pair uses `continue_checks` when any field is `mismatch`; every `sourceIds` list (case claims, medicine cards, the knowledge card and `setting.pairNoteSourceIds`) points to existing sources; every `medicineCardIds` entry exists; `reviewStatus` rules in §6.3 hold.
+- `setting.pairNote` (real wards use independent double checks only for selected high-risk medicines) appears on the waiting screen and in the Guide with links to its `setting.pairNoteSourceIds`; every source link points to `/sources/#<sourceId>`.
 - Each table records `bankMajorVersion` and `bankVersion` at creation. Each round freezes a **complete snapshot** of its case (public part, answer key, accepted pairs, feedback, claims, card content, review status at the time). History never changes when the bank changes.
 - v1 tables and rounds (if the repository has them) remain readable. Old submissions without `action`/`evidenceId` display "Not collected in this version" and are excluded from v2 summaries, not scored as wrong.
 
@@ -203,12 +205,13 @@ Use node:test (or the starter's runner), real HTTP against an isolated temporary
 - **T09 Stages**: full flow waiting → training (6) → training_summary → transfer (3) → completed over real HTTP with two cookies; transfer results never alter training results.
 - **T10 Snapshots and versions**: changing a case in a copy of the bank after a round was played does not change that round's content, answer or debrief; a withdrawn version shows its notice on old rounds; v1 rows (if any) remain readable and are excluded from v2 summaries.
 - **T11 Review status**: draft never shows a reviewed badge; `educator_reviewed` without role/date fails validation; `source_checked` with a "TO VERIFY" source fails validation.
-- **T12 Bank validation**: an accepted pair with `continue_checks` on a case with a mismatch, an unknown source id or an unknown card id fails start-up validation.
+- **T12 Bank validation**: an accepted pair with `continue_checks` on a case with a mismatch, an unknown source id in any `sourceIds` list (including `setting.pairNoteSourceIds`) or an unknown card id fails start-up validation.
 - **T13 Persistence**: restart the real app process on the same database file with the same cookies: an in-progress table resumes at the right stage and completed summaries are unchanged.
 - **T14 SSE**: reconnect after a missed update returns the latest authorised snapshot; no hidden fields in any SSE message.
 - **T15 Pages**: `/`, `/readme/`, `/guide/`, `/sources/` return server-rendered HTML with their headings before JavaScript runs.
 - **T16 Logging and export**: unknown log types/refs rejected; stored rows contain no token; export CSV contains no token or cookie value.
 - **T17 No AI calls**: no outbound network calls are made while scoring or summarising (stub the network in tests and assert it is untouched).
+- **T18 Action log**: one accepted sign request writes exactly one action line with the fields above and no answer or evidence values; a rejected submission writes none; each v2 stage change writes one line; no line contains a cookie or session value.
 
 Keep the existing v1 tests unless they test behaviour this brief removes; replace those with the v2 equivalent and record the change in `docs/evidence-log.md`.
 

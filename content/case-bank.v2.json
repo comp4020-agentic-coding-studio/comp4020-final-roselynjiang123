@@ -7,6 +7,9 @@
     "ward": "Banksia Ward",
     "hospital": "Simulated General Hospital",
     "description": "Adult general ward, morning medicine round (fictional)",
+    "pairNoteSourceIds": [
+      "S02"
+    ],
     "pairNote": "On real wards, independent double checks are kept for selected high-risk medicines and tasks. In this practice you check every medicine twice so you can practise independent judgement."
   },
   "learningObjectives": [
@@ -62,20 +65,20 @@
     {
       "id": "continue_checks",
       "label": "Continue with the remaining checks",
-      "help": "Nothing here stops this dose. Carry on with this scenario's remaining bedside checks. This is not permission to give a real medicine.",
-      "short": "Continue with the remaining checks"
+      "short": "Continue with the remaining checks",
+      "help": "Nothing here stops this dose. Carry on with this scenario's remaining bedside checks. This is not permission to give a real medicine."
     },
     {
       "id": "reprepare",
       "label": "Stop and re-prepare",
-      "help": "The order is fine, but what was prepared isn't. Prepare it again and re-check.",
-      "short": "Stop and re-prepare"
+      "short": "Stop and re-prepare",
+      "help": "The order is fine, but what was prepared isn't. Prepare it again and re-check."
     },
     {
       "id": "pause_clarify",
       "label": "Pause and clarify",
-      "help": "Don't give this dose now. Sort it out with your facilitator, the nurse in charge or the prescriber.",
-      "short": "Pause and clarify"
+      "short": "Pause and clarify",
+      "help": "Don't give this dose now. Sort it out with your facilitator, the nurse in charge or the prescriber."
     }
   ],
   "evidenceOptions": [
@@ -1731,14 +1734,14 @@
     {
       "id": "S19",
       "group": "teaching design",
-      "org": "Lee S et al.; and an interprofessional pilot",
-      "title": "Room of Horrors simulation studies (BMC Nursing 2025; J Multidiscip Healthc 2022)",
+      "org": "Lee S, et al.",
+      "title": "Patient safety in the ‘Room of Horrors’ simulation: a multi-method study of student, novice, and experienced nurses. BMC Nursing 2025;24:1044",
       "url": "https://doi.org/10.1186/s12912-025-03700-x",
       "published": "2025",
       "accessed": "2026-11-11",
-      "supports": "Find-the-hazard simulation; teams found more hazards than individuals",
-      "limits": "Different format from this game",
-      "verification": "opened 2026-11-11"
+      "supports": "Room of Horrors (find-the-hazard) simulation is used in nursing patient-safety education; experienced nurses identified more hazards than students and novices",
+      "limits": "Single centre in Korea; competency outcomes self-reported; a different format from this game",
+      "verification": "abstract checked 2026-11-11"
     },
     {
       "id": "S20",
@@ -1751,6 +1754,18 @@
       "supports": "No timers, minimal notifications",
       "limits": "Not a claim that the game is calm technology",
       "verification": "listed in v1.0 baseline"
+    },
+    {
+      "id": "S21",
+      "group": "teaching design",
+      "org": "Reime MH, Molloy MA, Blodgett TJ, Telnes KI",
+      "title": "Why an IPE Team Matters… Improvement in Identification of Hospital Hazards: A Room of Horrors Pilot Study. J Multidiscip Healthc 2022;15:1349–1360",
+      "url": "https://doi.org/10.2147/JMDH.S368363",
+      "published": "2022",
+      "accessed": "2026-11-11",
+      "supports": "In one pilot, interprofessional student teams identified far more of the pre-staged hazards (90.1%) than students working alone (10.7% in an open essay, 42.6% on a questionnaire)",
+      "limits": "Small pilot; mixed-profession teams worked together, not two independent checkers; does not show that pairs in this game find more",
+      "verification": "abstract checked 2026-11-11"
     }
   ]
 }

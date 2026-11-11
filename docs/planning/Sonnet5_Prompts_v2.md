@@ -1,6 +1,6 @@
 # Second Pair of Eyes v2 · 给 Sonnet 5 的分轮 prompt
 
-2026-11-11。按顺序用：第 0 步你手动做，然后 Round A–D 交给 Sonnet，中间是你的验证窗口，最后 Round E。每轮都**新开会话**，先粘启动语，再粘本轮 prompt。每轮结束只看“你检查”清单：全 ✓ 直接进下一轮；有 ✗ 把 Sonnet 的汇报和 ✗ 的编号发给我。
+2026-11-11。按顺序用：第 0 步你手动做，然后 Round A–D 交给 Sonnet，中间是你的验证窗口，最后 Round E。Round C 已经合并了“同步最新文件”这一步，不需要单独多跑一轮。每轮都**新开会话**，先粘启动语，再粘本轮 prompt。每轮结束只看“你检查”清单：全 ✓ 直接进下一轮；有 ✗ 把 Sonnet 的汇报和 ✗ 的编号发给我。
 
 **启动语（每轮开头都粘）**
 
@@ -57,12 +57,12 @@ Stop and report briefly: 5-line summary of the map; conflicts and how you resolv
 Round B of E — data and teaching flow. Re-read docs/build-brief.md §5–§7, §9 and §10, and docs/reference/ui-reference.html.
 
 1. Incremental migration — never drop or recreate tables: tables.stage, bank_major_version, bank_version; rounds.phase, full frozen case snapshot (§6.1) and case_version; submissions.action and evidence_id (nullable for old rows). Old rows stay readable and show "Not collected in this version".
-2. Stages and rounds as in §5; POST /next accepts fromRoundId or fromStage and advances exactly once under concurrency.
+2. Stages and rounds as in §5; POST /next accepts fromRoundId or fromStage and advances exactly once under concurrency. Keep the existing action log and add the v2 stage actions (brief §4 item 11); write T18.
 3. Submission API v2 (§7) through the single allowlist serializer; public vs secret projection (§6.2). Write T01, T02, T03, T05, T09 and T10 over real HTTP with two cookies and a temporary database.
 4. Screens using the reference's class names and copy now (the stylesheet itself comes in Round D): start, waiting (invite link, Lee's prebrief, Before you start), checking (patient strip, order and prepared records side by side, part 1 compare, part 2 decide, toolbox), signed, debrief (composer output, evidence highlights via data-evidence). SSE updates must not steal focus or clear unsent choices.
 5. Existing engine tests still pass. Every mistake a test or review catches that shows a missing rule: fix it, add a regression test or a CLAUDE.md line, and log one line in docs/evidence-log.md.
 
-Stop and report: hashes; test count; which acceptance IDs (T01–T17) pass; screens still missing.
+Stop and report: hashes; test count; which acceptance IDs (T01–T18) pass; one example action-log line; screens still missing.
 ```
 
 **你检查（15 分钟，两个 Chrome 普通 profile）**
@@ -75,28 +75,42 @@ Stop and report: hashes; test count; which acceptance IDs (T01–T17) pass; scre
 
 ---
 
-## Round C：总结、迁移题、结束回顾、页面和评估工具
+## Round C：同步最新文件 ＋ 总结、迁移题、结束回顾、页面和评估工具（合并版）
+
+开始前：把最新包里的 `content/`、`docs/`、`tools/` 复制进仓库并覆盖同名文件（不要复制 `reflections/`），然后在 WSL 终端运行 `find . -name "*:Zone.Identifier" -delete`。
 
 ```
-Round C of E — summaries, transfer, end review, pages, evidence tooling. Re-read docs/build-brief.md §5, §8, §9 and §11.
+Round C of E — sync to the latest files, then summaries, transfer, end review, pages and evidence tooling. I have copied the latest package over the repo (not reflections/). Commit each step separately with `pnpm check` green. If this session gets long, stop after a finished step and report where you stopped.
 
-1. training_summary and transfer stages: summary screen, transfer-intro banner, transfer rounds 7–9, end review with the earlier-practice table (§8.4) and print CSS. T07, T08 and T09 must also pass end-to-end over HTTP.
-2. GET /api/me/history (owner only; extend T03).
-3. /guide/: write docs/guide.md from brief §1 and §5 and the bank — goals, who it is for, a 20–25 minute plan, two-browser set-up, keeping independence until both have signed (sit apart or back to back), how to read the summary, the three new situations, not using results for competence decisions, content version and the real review status, and "Contact: TODO (student)". Facts only; I will edit it. Render it server-side. /sources/: the §11 copy plus the bank's sources grouped by `group`, showing "Not yet verified" for any source whose verification starts with "TO VERIFY". T15.
-4. POST /api/tables/:id/log and `pnpm export:evaluation` (§9, T16). `pnpm content:review-pack` regenerates docs/content/review-pack.md; regenerate it and report whether it differs from the committed file.
-5. T17: no outbound network calls while scoring or summarising.
+Sync first
+1. Make the newest files the contract: replace docs/build-brief.md with docs/build-brief-v2.md, and docs/reference/ui-reference.html with docs/reference/ui-reference-v2.html (git mv over the old ones; the -v2 files are newer). Summarise what changed in each in at most 5 lines. Commit "Sync brief and UI reference to latest v2.1".
+2. content/case-bank.v2.json now has setting.pairNoteSourceIds and a new source S21. Make the bank validator and T12 check every sourceIds list, including setting.pairNoteSourceIds (brief §6.1), and show the pair note with its source link on the waiting screen.
+3. Action log (brief §4 item 11): confirm the crit-10 stdout action log still writes exactly one line per accepted action after Round B's rewrite; add the v2 stage actions (summary, transfer, complete); write T18.
+4. Tests went from 84 to 77: list every test removed or replaced in Rounds A–B and the v2 test that now covers each behaviour. Restore or replace any test whose behaviour is no longer covered (especially the action log and restart/reconnect).
 
-Stop and report: hashes; tests; acceptance IDs passing; every place where a §11 sentence and the actual behaviour differ.
+Then Round C (re-read brief §5, §8, §9, §11)
+5. training_summary and transfer stages: the summary screen (fractions, simple bars and tables per U10), the transfer-intro banner, rounds 7–9, and the end review with the earlier-practice table (§8.4) and print CSS. T07, T08 and T09 must also pass end-to-end over HTTP.
+6. GET /api/me/history (owner only; extend T03).
+7. /guide/: write docs/guide.md from brief §1 and §5 and the bank — goals, who it is for, a 20–25 minute plan, two-browser set-up, keeping independence until both have signed (sit apart or back to back), how to read the summary, the three new situations, not using results for competence decisions, the content version and real review status, and "Contact: TODO (student)". Facts only; I will edit it. Render it server-side. /sources/: the §11 copy plus the bank's sources grouped by `group`, "Not yet verified" for any source whose verification starts with "TO VERIFY", and an anchor per source id. T15.
+8. POST /api/tables/:id/log and `pnpm export:evaluation` (§9, T16). `pnpm content:review-pack` regenerates docs/content/review-pack.md; report whether it matches the committed file.
+9. T17: no outbound network calls while scoring or summarising.
+10. Tell me the exact command to run the app locally and the URL, so I can check every screen in two Chrome profiles.
+
+Stop and report: hashes; the brief/reference change summary; one example log line per action; the removed-test table; final test count; acceptance IDs passing (T01–T18); every place where a §11 sentence and the actual behaviour differ; anything you could not verify yourself.
 ```
 
-**你检查（15 分钟）**
-- [ ] 两人走完 6 题 → 训练总结：分数是 “3 of 4” 这种分数，不是百分比；没出现的类别写 “No opportunity this time”
-- [ ] 故意两人在 C6 都漏掉剂量：总结里 “Both missed” 有这一项，并写着 “Agreeing isn't the same as being right”
-- [ ] 点 “Start the new situations” → 3 道新题 → 结束回顾；训练和迁移分开显示；能打印
-- [ ] `/guide/` 和 `/sources/` 能打开，来源旁边有 “Not yet verified”
-- [ ] 本机运行 `pnpm export:evaluation` 生成 CSV，里面没有 cookie 或 token
-
----
+**你检查（约 25 分钟，用它给的本地命令，两个 Chrome 普通 profile）**
+- [ ] 汇报里 T01–T18 全部通过；被删测试那张表里每一行都有对应的新测试
+- [ ] 汇报里有 create、join、sign、reveal、next、summary、transfer、complete 各一行日志示例，里面没有答案或 cookie
+- [ ] A 建桌 → 等待页能看到带教说明，那句“真实病房只对部分高风险药物…”后面有来源链接
+- [ ] B 用邀请链接，只出现 Join，点了才加入；A 不刷新就看到 B
+- [ ] 某个字段选 Doesn't match 再选 “Continue…” 会被拒绝，提示不透露答案；A 提交后 B 只看到 “Signed”
+- [ ] 两人提交后同时出现复盘：对比表、四块文字、讨论题、来源和 Draft 标记；刷新后已提交的答案还在
+- [ ] 6 题后进入训练总结：显示 “3 of 4” 这样的分数，没出现的类别写 “No opportunity this time”
+- [ ] 点 “Start the new situations” → 3 道新题 → 结束回顾；训练和迁移分开；能打印
+- [ ] `/guide/` 和 `/sources/` 能打开，未核实的来源旁有 “Not yet verified”
+- [ ] `pnpm export:evaluation` 生成的 CSV 里没有 cookie 或 token
+- [ ] （样式还是旧的属正常，Round D 才换）
 
 ## Round D：视觉、无障碍、部署和证据
 
@@ -138,13 +152,13 @@ Stop and report: hashes; both check outputs; latency median and max; persistence
 先写好 README.md 和 PROCESS.md（可以先发给我审）。
 
 ```
-Round E of E — after validation. I have edited content/case-bank.v2.json after review (statuses set by me), written docs/validation/plan.md, sessions.md, findings.md and content-review.md, and written README.md and PROCESS.md. Do not change their wording or any clinical text.
+Round E of E — after validation. I have edited content/case-bank.v2.json after review (statuses set by me), written docs/validation/plan.md, sessions.md, findings.md and content-review.md, and written README.md, PROCESS.md and reflections/crit-8.md, crit-9.md and crit-10.md. Do not change their wording or any clinical text.
 
 1. Run bank validation and the full test suite. If my edits broke validation, tell me exactly which field and why; don't fix clinical content yourself.
 2. Regenerate docs/content/review-pack.md. Apply each item under "Fix list" in docs/validation/findings.md: one commit each, with a regression test where testable and a docs/evidence-log.md line.
 3. /readme/ renders README.md in full with its headings in the server HTML. Report word counts (README target 400–600, PROCESS 900–1100); do not edit to fit.
 4. Write docs/claims.md: map every claim README makes to "enforced: <acceptance ID>" or "judged/validated: <evidence file>", plus the CLAUDE.md rule. List claims with neither; do not edit README.
-5. Check every commit hash, file path and URL in README.md and PROCESS.md resolves; fix URLs only.
+5. Check every commit hash, file path and URL in README.md, PROCESS.md and reflections/ resolves. In reflections/, replace each bracketed commit hash such as [a222b5e] with a link to that commit, [ADR 000N] with a link to the ADR file, and [test names] with the real test names; change nothing else. Fix URLs only, and list any hash that doesn't exist.
 6. `pnpm check` and `pnpm check:evidence` pass. Commit, deploy, then run the course /ship skill.
 
 Report: hashes; both check outputs; word counts; unmapped claims; live status of /, /readme/, /guide/, /sources/; CI result after ship.
