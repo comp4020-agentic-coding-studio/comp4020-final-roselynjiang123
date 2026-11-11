@@ -151,3 +151,23 @@ on the waiting screen, and above "What you'll practise" on the start page
 anything is hidden from them) | public/shell.js (`WHY_CHECK_ALONE`),
 public/landing.js, public/play.js (`renderWaiting()`) | (Round D of E F1
 commit)
+2026-11-12 | S1 also found the checking screen gave no way to see a case's
+sources or review status, and F2 asked for a "Sources and review status"
+line -- but the straightforward way to build it (expose each medicine
+card's full bank `sources` entries) would leak the case's answer: source
+S14's `supports` field is "Amoxicillin is a penicillin-class antibiotic",
+word-for-word Case 5's claim text, which is exactly the finding's own
+example of what must stay hidden before reveal ("amoxicillin is a
+penicillin"). Confirmed the fix against the real bank by driving a table
+through cases C1-C5 via the live API and checking case 5's rendered
+checking screen for both strings; neither appeared. Fixed by resolving
+each medicine card's sources down to `{id, org, title, url}` only, never
+`supports`/`limits`/`verification`; also moved the case's review badge
+into the always-public part of the round serializer, since brief §6.2
+already lists "case version and review status" as public before reveal,
+and the new line needed it pre-reveal too | src/caseSnapshot.mjs
+(`resolveCardSources()`), src/serializer.mjs (`reviewBadge` moved into
+`base`), public/play.js (`sourcesAndReviewStatusHtml()`, toolbox medicine
+cards), spec/submissions.test.ts (T01 extended: no case's claim text in
+the case projection before reveal, walked across every training round) |
+(Round D of E F2 commit)

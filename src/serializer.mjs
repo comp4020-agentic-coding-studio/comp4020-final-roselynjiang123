@@ -135,6 +135,11 @@ function serializeRound(round, viewerIdentity, seatOf, liveCasesById) {
     // complete · {date}").
     revealedAt: round.revealed_at,
     withdrawnNotice,
+    // F2 (docs/validation/findings.md): the case's review badge is public
+    // even before reveal (brief §6.2 lists "case version and review status"
+    // as public) -- moved out of the post-reveal-only block below so the
+    // checking screen's "Sources and review status" line has it too.
+    reviewBadge: reviewBadgeText(caseSnapshot),
   };
 
   if (!revealed) {
@@ -168,7 +173,6 @@ function serializeRound(round, viewerIdentity, seatOf, liveCasesById) {
     ...base,
     result: { ...result, decisionTag: caseSnapshot.decisionTag },
     debrief,
-    reviewBadge: reviewBadgeText(caseSnapshot),
   };
 }
 

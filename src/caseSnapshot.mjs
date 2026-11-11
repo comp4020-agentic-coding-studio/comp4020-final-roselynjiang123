@@ -1,3 +1,20 @@
+import { reviewBadgeText } from "./debrief.mjs";
+
+// F2 (docs/validation/findings.md, Round D): resolves a medicine card's
+// sourceIds to {id, org, title, url} only -- deliberately never `supports`,
+// `limits` or `verification`, since a source's `supports` text can be the
+// same sentence as a case's claim (e.g. source S14's `supports` is
+// "Amoxicillin is a penicillin-class antibiotic", word-for-word Case 5's
+// claim that gives its answer away). The id/org/title/url are enough to
+// link to the source's full entry on `/sources/#<id>` without repeating
+// what it's cited for.
+function resolveCardSources(bank, sourceIds) {
+  return (sourceIds ?? [])
+    .map((sid) => bank.sources.find((s) => s.id === sid))
+    .filter(Boolean)
+    .map((s) => ({ id: s.id, org: s.org, title: s.title, url: s.url }));
+}
+
 // Builds a round's frozen case snapshot (brief §6.1: "Each round freezes a
 // complete snapshot of its case -- public part, answer key, accepted pairs,
 // feedback, claims, card content, review status at the time. History never
@@ -8,9 +25,14 @@
 //
 // Includes the referenced medicine cards' full content (not just their ids)
 // precisely so an edit to a medicine card after the round is played doesn't
-// change what that round shows (same freezing rule, brief §6.1).
+// change what that round shows (same freezing rule, brief §6.1). Each
+// card's `sources` (F2) are resolved and frozen here too, for the same
+// reason.
 export function buildCaseSnapshot(bank, caseDef) {
-  const medicineCards = (caseDef.medicineCardIds ?? []).map((id) => bank.medicineCards.find((m) => m.id === id));
+  const medicineCards = (caseDef.medicineCardIds ?? []).map((id) => {
+    const card = bank.medicineCards.find((m) => m.id === id);
+    return { ...card, sources: resolveCardSources(bank, card.sourceIds), reviewBadge: reviewBadgeText(card) };
+  });
   return {
     caseId: caseDef.caseId,
     caseVersion: caseDef.caseVersion,

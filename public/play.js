@@ -293,7 +293,7 @@ function recordsHtml(caseDef, { singleColumn = false } = {}) {
   return `
     <div class="records" id="recgrid"${style}>
       <section class="card" aria-label="Order: medication chart">
-        <div class="rec-h"><div class="ttl">Order · medication chart</div><div class="idbox"><span class="ev" data-evidence="identifiers">MRN ${escapeHtml(caseDef.patient.mrn)}<br>${escapeHtml(caseDef.patient.familyName)}, ${escapeHtml(caseDef.patient.givenName)}<br>DOB ${escapeHtml(caseDef.patient.dob)}</span></div></div>
+        <div class="rec-h"><div class="ttl">Order · medication chart<small>Fictional order for this scenario</small></div><div class="idbox"><span class="ev" data-evidence="identifiers">MRN ${escapeHtml(caseDef.patient.mrn)}<br>${escapeHtml(caseDef.patient.familyName)}, ${escapeHtml(caseDef.patient.givenName)}<br>DOB ${escapeHtml(caseDef.patient.dob)}</span></div></div>
         <div class="adr"><span class="k">Allergies &amp; adverse reactions</span><span class="ev" data-evidence="allergy_record"><b>${escapeHtml(chart.allergies.text)}</b> · checked ${escapeHtml(chart.allergies.checkedBy)}</span></div>
         <div class="grid4">
           <div class="wide"><span class="k">Medicine (generic name)</span><span class="v">${escapeHtml(order.medicine)}</span></div>
@@ -338,18 +338,19 @@ function toolboxHtml(caseDef) {
   // without an extra click; any further cards stay collapsed like "Before
   // you start".
   const cards = caseDef.medicineCards
-    .map(
-      (m, i) => `
+    .map((m, i) => {
+      const sourceLinks = (m.sources ?? []).map((s) => `<a href="/sources/#${escapeHtml(s.id)}">${escapeHtml(s.org)} · ${escapeHtml(s.title)}</a>`).join(" · ");
+      return `
       <details${i === 0 ? " open" : ""} data-log-ref="${escapeHtml(m.id)}">
-        <summary>Medicine card: ${escapeHtml(m.name)}</summary>
+        <summary>Medicine card: ${escapeHtml(m.name)} <span class="fine">General information</span></summary>
         <dl>
           <dt>What it is</dt><dd>${escapeHtml(m.whatItIs)}</dd>
           <dt>What to watch</dt><dd>${escapeHtml(m.whatToWatch)}</dd>
-          <dt>Sources</dt><dd><span class="review">Draft · not yet source checked</span></dd>
+          <dt>Sources</dt><dd>${sourceLinks || "—"} · ${reviewBadgeHtml(m)}</dd>
         </dl>
       </details>
-    `,
-    )
+    `;
+    })
     .join("");
   const knowledgeSections = (caseDef.knowledgeCard?.sections ?? [])
     .map(
@@ -411,7 +412,8 @@ function renderChecking(snapshot, current) {
   root.innerHTML = `
     ${statusStripHtml(snapshot, current, `${pos.label} ${progressDotsHtml(pos.index, pos.total)}`)}
     ${transferIntroHtml(snapshot, current)}
-    <div class="casehead"><p class="kicker" style="margin:0">${pos.label}</p><h1>${escapeHtml(caseDef.title)}</h1><span class="review">Draft · not yet source checked</span></div>
+    <div class="casehead"><p class="kicker" style="margin:0">${pos.label}</p><h1>${escapeHtml(caseDef.title)}</h1>${reviewBadgeHtml(current)}</div>
+    ${sourcesAndReviewStatusHtml(current)}
     ${patientStripHtml(caseDef)}
     ${recordsHtml(caseDef)}
     <form class="answer" id="check-form" aria-label="Your independent check">
@@ -506,7 +508,8 @@ function renderSigned(snapshot, current) {
   root.innerHTML = `
     ${statusStripHtml(snapshot, current, `${pos.label} ${progressDotsHtml(pos.index, pos.total)}`)}
     ${transferIntroHtml(snapshot, current)}
-    <div class="casehead"><p class="kicker" style="margin:0">${pos.label}</p><h1>${escapeHtml(caseDef.title)}</h1><span class="review">Draft · not yet source checked</span></div>
+    <div class="casehead"><p class="kicker" style="margin:0">${pos.label}</p><h1>${escapeHtml(caseDef.title)}</h1>${reviewBadgeHtml(current)}</div>
+    ${sourcesAndReviewStatusHtml(current)}
     ${patientStripHtml(caseDef)}
     ${recordsHtml(caseDef)}
     <div class="answer">
@@ -532,6 +535,19 @@ function renderSigned(snapshot, current) {
 
 function reviewBadgeHtml(round) {
   return round.reviewBadge ? `<span class="review">${escapeHtml(round.reviewBadge)}</span>` : "";
+}
+
+// F2 (docs/validation/findings.md): "Sources and review status" line under
+// the case heading, visible before reveal -- the review badge, links to
+// this case's medicine card(s) sources, and a link to /sources/. Never the
+// case's claims (those give the answer away before reveal); only the
+// card-level sources resolved in src/caseSnapshot.mjs's resolveCardSources()
+// (id/org/title/url, never a source's `supports` text).
+function sourcesAndReviewStatusHtml(round) {
+  const cardSources = round.case.medicineCards.flatMap((m) => m.sources ?? []);
+  const uniqueSources = [...new Map(cardSources.map((s) => [s.id, s])).values()];
+  const sourceLinks = uniqueSources.map((s) => `<a href="/sources/#${escapeHtml(s.id)}">${escapeHtml(s.org)}</a>`).join(" · ");
+  return `<p class="src">${reviewBadgeHtml(round)}${sourceLinks ? ` · Sources: ${sourceLinks}` : ""} · <a href="/sources/">See all sources and review status</a></p>`;
 }
 
 // Seat cell: reference markup's ✓/✗ "mk" mark (U09: "meaning never by
