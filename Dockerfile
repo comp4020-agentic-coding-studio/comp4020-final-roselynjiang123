@@ -21,6 +21,8 @@ COPY --from=build /app/node_modules ./node_modules
 COPY package.json ./
 COPY src/ ./src/
 COPY public/ ./public/
+COPY content/ ./content/
+COPY docs/guide.md ./docs/guide.md
 COPY README.md ./
 ENV NODE_ENV=production
 ENV DATABASE_PATH=/data/app.db

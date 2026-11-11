@@ -118,3 +118,15 @@ first time and comparing against
 `docs/reference/shots/sources-1920x1080.png` side by side | src/pages.mjs
 (the legend's third `<span class="review ok">`) | (Round D of E commit,
 visual-contract commit)
+2026-11-12 | First real deploy attempt crashed the Fly machine on every
+boot (`ENOENT: no such file or directory, open '/app/content/case-bank.v2.json'`,
+then the same for `docs/guide.md` once the first was fixed): the Dockerfile's
+runtime stage never `COPY`d `content/` or `docs/guide.md` into the image,
+only `src/`, `public/` and `README.md`, even though `src/bank.mjs` and
+`src/server.mjs`'s `/guide/` route both `readFileSync` them at start-up/
+request time from `repoRoot` (`/app` in the container). `pnpm check` can't
+catch this: it runs the spec against a locally-spawned `node src/main.mjs`
+from the repo root, where both paths already exist on disk, so the gap only
+shows up against the actual built image. Caught by watching `mise exec --
+flyctl deploy`'s first attempt crash-loop and reading `flyctl logs` |
+Dockerfile (two added `COPY` lines) | (Round D of E deploy commit)
