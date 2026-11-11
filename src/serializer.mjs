@@ -124,7 +124,7 @@ function serializeRound(round, viewerIdentity, seatOf, liveCasesById) {
     index: round.round_index,
     case: publicCaseView(caseSnapshot),
     mine: mine
-      ? { submitted: true, fields: mine.fields, action: mine.action, evidenceId: mine.evidence_id }
+      ? { submitted: true, fields: mine.fields, action: mine.action, evidenceId: mine.evidence_id, submittedAt: mine.submitted_at }
       : { submitted: false },
     partner: { submitted: Boolean(partner) },
     revealed,
@@ -172,16 +172,18 @@ function serializeRound(round, viewerIdentity, seatOf, liveCasesById) {
   };
 }
 
-// composeDebrief() needs a bank-shaped object (fields/templates/sources) to
-// render labels and template text; the round's frozen snapshot already
-// carries fields/actions/evidenceOptions/sources (src/caseSnapshot.mjs), so
-// this assembles the minimal bank-shaped view from the snapshot itself
-// rather than reading the live (possibly since-edited) bank -- keeping the
-// debrief, like the result, computed only from what was frozen at round
-// creation (brief §6.1).
+// composeDebrief() needs a bank-shaped object (fields/actions/
+// evidenceOptions/templates/sources) to render labels and template text;
+// the round's frozen snapshot already carries all of these
+// (src/caseSnapshot.mjs), so this assembles the minimal bank-shaped view
+// from the snapshot itself rather than reading the live (possibly
+// since-edited) bank -- keeping the debrief, like the result, computed only
+// from what was frozen at round creation (brief §6.1).
 function caseSnapshotBank(caseSnapshot) {
   return {
     fields: caseSnapshot.fields,
+    actions: caseSnapshot.actions,
+    evidenceOptions: caseSnapshot.evidenceOptions,
     templates: caseSnapshot.templates,
     sources: caseSnapshot.sources,
   };

@@ -59,30 +59,72 @@ function resultChips(caseDef, result, viewerSeat) {
   };
 }
 
+// "Both"/"Neither"/"Only you"/"Only Checker {X}", viewer-relative -- the
+// same wording public/play.js's own coverageDescription() uses for the
+// summary tables, duplicated here (not imported) since this module has no
+// access to client-side code and the mapping is three lines.
+function coverageLabel(value, viewerSeat) {
+  if (value == null) return null;
+  if (value === "both") return "Both";
+  if (value === "neither") return "Neither";
+  const onlySeat = value === "onlyA" ? "A" : "B";
+  return onlySeat === viewerSeat ? "Only you" : `Only Checker ${onlySeat}`;
+}
+
+function matchLabel(value) {
+  return value === "mismatch" ? "Doesn't match" : "Matches";
+}
+
+// Every action/evidenceId that appears in some accepted pair for this case,
+// in the bank's own option order, short-labelled and joined with "or" --
+// the reference value for a case with more than one accepted combination
+// (brief §7.1: a case may accept more than one next step/evidence pair;
+// §8.2 doesn't name what "Reference" shows then, so this lists every valid
+// option rather than picking one arbitrarily).
+function acceptedLabels(options, ids) {
+  const uniqueIds = [...new Set(ids)];
+  return options
+    .filter((o) => uniqueIds.includes(o.id))
+    .map((o) => o.short ?? o.label)
+    .join(" or ");
+}
+
 // Comparison table (brief §8.2 step 2): rows = five fields + Next step +
-// Evidence; columns Checker A, You, Reference, Between you.
+// Evidence; columns Checker A, You, Reference, Between you. Seat columns
+// carry {label, ok} so the caller can mark them (reference's ✓/✗); ok for a
+// field row is "given matches actual"; ok for the Next step/Evidence rows
+// is that seat's actionOk/evidenceOk (brief §8.3's same "right next step
+// alone"/"right evidence alone" split, not whole-decision acceptance, so a
+// seat can show ✓ on one of these two rows and ✗ on the other).
 function comparisonTable(caseDef, bank, result, viewerSeat) {
   const fieldKeys = Object.keys(caseDef.answerKey.fields);
+  const seatCell = (seatResult, key) => ({ label: matchLabel(seatResult.fields[key].given), ok: seatResult.fields[key].outcome === "TP" || seatResult.fields[key].outcome === "TN" });
   const rows = fieldKeys.map((key) => ({
     row: bank.fields[key].label,
-    checkerA: result.A.fields[key].given,
-    you: result[viewerSeat].fields[key].given,
-    reference: result.A.fields[key].actual,
-    betweenYou: result.pair.coverage[key] ?? null,
+    checkerA: seatCell(result.A, key),
+    you: seatCell(result[viewerSeat], key),
+    reference: matchLabel(result.A.fields[key].actual),
+    betweenYou: coverageLabel(result.pair.coverage[key] ?? null, viewerSeat),
   }));
+
+  const actionLabel = (seatResult) => bank.actions.find((a) => a.id === seatResult.decision.action)?.short ?? seatResult.decision.action;
+  const evidenceLabel = (seatResult) => bank.evidenceOptions.find((e) => e.id === seatResult.decision.evidenceId)?.short ?? seatResult.decision.evidenceId;
+  const acceptedActions = caseDef.answerKey.acceptedPairs.map((p) => p.action);
+  const acceptedEvidence = caseDef.answerKey.acceptedPairs.map((p) => p.evidenceId);
+
   rows.push({
     row: "Next step",
-    checkerA: result.A.decision.action,
-    you: result[viewerSeat].decision.action,
-    reference: null,
-    betweenYou: null,
+    checkerA: { label: actionLabel(result.A), ok: result.A.decision.actionOk },
+    you: { label: actionLabel(result[viewerSeat]), ok: result[viewerSeat].decision.actionOk },
+    reference: acceptedLabels(bank.actions, acceptedActions),
+    betweenYou: coverageLabel(result.pair.decisionCoverage, viewerSeat),
   });
   rows.push({
     row: "Evidence",
-    checkerA: result.A.decision.evidenceId,
-    you: result[viewerSeat].decision.evidenceId,
-    reference: null,
-    betweenYou: null,
+    checkerA: { label: evidenceLabel(result.A), ok: result.A.decision.evidenceOk },
+    you: { label: evidenceLabel(result[viewerSeat]), ok: result[viewerSeat].decision.evidenceOk },
+    reference: acceptedLabels(bank.evidenceOptions, acceptedEvidence),
+    betweenYou: coverageLabel(result.pair.decisionCoverage, viewerSeat),
   });
   return rows;
 }

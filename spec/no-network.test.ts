@@ -53,8 +53,9 @@ describe("T17: scoring and summarising never touch the network", () => {
       const subA = { fields: fields(example.A), action: example.A.decision.action, evidenceId: example.A.decision.evidenceId };
       const subB = { fields: fields(example.B), action: example.B.decision.action, evidenceId: example.B.decision.evidenceId };
       const result = roundResult(caseDef, subA, subB);
-      composeDebrief({ caseDef, bank: { fields: bank.fields, templates: bank.templates, sources: bank.sources } }, result, "A");
-      composeDebrief({ caseDef, bank: { fields: bank.fields, templates: bank.templates, sources: bank.sources } }, result, "B");
+      const debriefBank = { fields: bank.fields, actions: bank.actions, evidenceOptions: bank.evidenceOptions, templates: bank.templates, sources: bank.sources };
+      composeDebrief({ caseDef, bank: debriefBank }, result, "A");
+      composeDebrief({ caseDef, bank: debriefBank }, result, "B");
     }
 
     expect(fetchSpy).not.toHaveBeenCalled();

@@ -1,10 +1,11 @@
 import { renderShell, appRoot, announce, apiFetch, escapeHtml } from "./shell.js";
+import { renderSprites } from "./sprites.js";
 
 renderShell(null);
 
 const tableId = window.location.pathname.split("/").pop();
 const root = appRoot();
-root.innerHTML = `<p class="muted">Loading…</p>`;
+root.innerHTML = `<p class="fine">Loading…</p>`;
 
 // view state not derivable from the server snapshot alone
 let mode = null;
@@ -106,6 +107,9 @@ function render(snapshot) {
   const current = snapshot.rounds[snapshot.rounds.length - 1];
   const seatsBothJoined = snapshot.seats.A.joined && snapshot.seats.B.joined;
 
+  // Before B joins (brief §5's waiting_for_partner stage), round 1 doesn't
+  // exist yet (src/repo.mjs only creates it once both seats are claimed), so
+  // `current` is undefined here -- this branch must never read `current.*`.
   let nextMode;
   if (!seatsBothJoined) {
     nextMode = "waiting";
@@ -121,7 +125,7 @@ function render(snapshot) {
     nextMode = "checking";
   }
 
-  const sameRound = nextMode === mode && current.id === roundId;
+  const sameRound = nextMode === mode && current?.id === roundId;
   const revealedCount = snapshot.rounds.filter((r) => r.revealed).length;
 
   if (sameRound && (nextMode === "checking" || nextMode === "signed")) {
@@ -131,10 +135,10 @@ function render(snapshot) {
   }
 
   mode = nextMode;
-  roundId = current.id;
+  roundId = current?.id ?? null;
   draft = { fields: {}, action: null, evidenceId: null };
   lastSeatsJoined = { A: snapshot.seats.A.joined, B: snapshot.seats.B.joined };
-  lastPartnerSubmitted = current.partner.submitted;
+  lastPartnerSubmitted = current?.partner.submitted ?? false;
   lastRevealedCount = revealedCount;
 
   if (mode === "waiting") renderWaiting(snapshot);
@@ -200,7 +204,7 @@ function renderWaiting(snapshot) {
         <p>Send this link to your partner. They open it in their own browser and click <b>Join</b>.</p>
         <div class="invite"><label class="sr" for="inv">Invite link</label><input id="inv" readonly value="${escapeHtml(inviteUrl)}"><button class="btn" type="button" id="copy">Copy link</button></div>
         <p class="fine">The link admits one second browser. It doesn't check who is using it.</p>
-        <div class="coach mt" style="border-top:1px dashed var(--line, #ccc);padding-top:14px">
+        <div class="coach mt" style="border-top:1px dashed var(--line);padding-top:14px">
           <span class="ava" data-sprite="lee" data-scale="2.4"></span>
           <div><b>Lee · clinical facilitator</b><br>Morning. Six patients, six medicines. Check each one on your own — don't tell your partner what you find until you've both signed. Mistakes here are how we learn; nothing you choose reaches a real patient.</div>
         </div>
@@ -213,6 +217,7 @@ function renderWaiting(snapshot) {
       </div>
     </div>
   `;
+  renderSprites(root);
   const list = document.getElementById("before-you-start-list");
   if (snapshot.knowledgeCard) {
     list.innerHTML = snapshot.knowledgeCard.sections
@@ -269,7 +274,7 @@ function patientStripHtml(caseDef) {
 // administration record and frequency, allergy_record on the allergy box,
 // route_form on route/form; always present in markup, lit up post-reveal by
 // .reveal .ev (applied as a class on #recgrid, see renderDebrief).
-function recordsHtml(caseDef) {
+function recordsHtml(caseDef, { singleColumn = false } = {}) {
   const chart = caseDef.chart;
   const prepared = caseDef.prepared;
   const order = chart.order;
@@ -278,8 +283,14 @@ function recordsHtml(caseDef) {
       (r) => `<tr><td>${escapeHtml(r.date)}</td><td><span class="ev" data-evidence="admin_record">${escapeHtml(r.time)}</span></td><td>${escapeHtml(r.dose)}</td><td>${escapeHtml(r.route)}</td><td>${escapeHtml(r.givenBy)}</td><td>${escapeHtml(r.witness ?? "—")}</td></tr>`,
     )
     .join("");
+  // Reference markup/script: the mock state switcher sets #recgrid's
+  // grid-template-columns to a single column once the page is in the
+  // debrief state (two records would otherwise compete for width with the
+  // .dgrid debrief column next to them); this app has no state switcher, so
+  // the same inline style is applied directly by the caller instead.
+  const style = singleColumn ? ' style="grid-template-columns:minmax(0,1fr)"' : "";
   return `
-    <div class="records" id="recgrid">
+    <div class="records" id="recgrid"${style}>
       <section class="card" aria-label="Order: medication chart">
         <div class="rec-h"><div class="ttl">Order · medication chart</div><div class="idbox"><span class="ev" data-evidence="identifiers">MRN ${escapeHtml(caseDef.patient.mrn)}<br>${escapeHtml(caseDef.patient.familyName)}, ${escapeHtml(caseDef.patient.givenName)}<br>DOB ${escapeHtml(caseDef.patient.dob)}</span></div></div>
         <div class="adr"><span class="k">Allergies &amp; adverse reactions</span><span class="ev" data-evidence="allergy_record"><b>${escapeHtml(chart.allergies.text)}</b> · checked ${escapeHtml(chart.allergies.checkedBy)}</span></div>
@@ -321,10 +332,14 @@ function recordsHtml(caseDef) {
 // §9), matching src/repo.mjs's allowlist: a medicine card's own id, or
 // "knowledge:<sectionHeading>" for a knowledge-card section.
 function toolboxHtml(caseDef) {
+  // Reference markup (docs/reference/ui-reference.html): the case's first
+  // (here, only) medicine card opens by default, so a checker sees it
+  // without an extra click; any further cards stay collapsed like "Before
+  // you start".
   const cards = caseDef.medicineCards
     .map(
-      (m) => `
-      <details data-log-ref="${escapeHtml(m.id)}">
+      (m, i) => `
+      <details${i === 0 ? " open" : ""} data-log-ref="${escapeHtml(m.id)}">
         <summary>Medicine card: ${escapeHtml(m.name)}</summary>
         <dl>
           <dt>What it is</dt><dd>${escapeHtml(m.whatItIs)}</dd>
@@ -431,6 +446,7 @@ function renderChecking(snapshot, current) {
     </form>
     ${toolboxHtml(caseDef)}
   `;
+  renderSprites(root);
   wireToolboxLogging(root, tableId);
 
   const form = document.getElementById("check-form");
@@ -480,6 +496,11 @@ function renderSigned(snapshot, current) {
     .join("");
   const actionLabel = caseDef.actions.find((a) => a.id === mine.action)?.label ?? mine.action;
   const evidenceLabel = caseDef.evidenceOptions.find((e) => e.id === mine.evidenceId)?.label ?? mine.evidenceId;
+  // Reference copy: "Signed at {time}" (the device clock, not the case's
+  // simulated ward time -- that's shown separately in the patient strip).
+  const signedAtLabel = mine.submittedAt
+    ? ` at ${new Date(mine.submittedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}`
+    : "";
 
   root.innerHTML = `
     ${statusStripHtml(snapshot, current, `${pos.label} ${progressDotsHtml(pos.index, pos.total)}`)}
@@ -489,7 +510,7 @@ function renderSigned(snapshot, current) {
     ${recordsHtml(caseDef)}
     <div class="answer">
       <section class="card pad">
-        <h2>✓ Signed · your check is sealed</h2>
+        <h2>✓ Signed${signedAtLabel} · your check is sealed</h2>
         <ul class="sealed">
           ${sealedFieldRows}
           <li><span>Next step</span><span>${escapeHtml(actionLabel)}</span></li>
@@ -498,12 +519,13 @@ function renderSigned(snapshot, current) {
         <p class="fine">Signed means saved, not checked for correctness.</p>
       </section>
       <section class="card pad">
-        <div class="coach"><span class="ava" data-sprite="lee" data-scale="2.4"></span><div><b>Lee</b><br>Checker ${partnerSeat} is still checking. The debrief opens on both screens as soon as they sign.</div></div>
-        <p class="note">You don't need to refresh.</p>
+        <div class="coach"><span class="ava" data-sprite="lee" data-scale="2.4"></span><div><b>Lee</b><br>Checker ${partnerSeat} is still checking. While you wait: which record did you look at last?</div></div>
+        <p class="note">The debrief opens on both screens as soon as Checker ${partnerSeat} signs. You don't need to refresh.</p>
       </section>
     </div>
     ${toolboxHtml(caseDef)}
   `;
+  renderSprites(root);
   wireToolboxLogging(root, tableId);
 }
 
@@ -511,18 +533,28 @@ function reviewBadgeHtml(round) {
   return round.reviewBadge ? `<span class="review">${escapeHtml(round.reviewBadge)}</span>` : "";
 }
 
+// Seat cell: reference markup's ✓/✗ "mk" mark (U09: "meaning never by
+// colour alone" -- the ✓/✗ glyph and the text both carry it, not just the
+// colour class).
+function seatCellHtml(cell) {
+  const mark = cell.ok ? "✓" : "✗";
+  const cls = cell.ok ? "ok" : "miss";
+  return `<span class="mk ${cls}">${mark} ${escapeHtml(cell.label)}</span>`;
+}
+
 function comparisonTableHtml(debrief) {
   const rows = debrief.comparisonTable
-    .map((row) => {
+    .map((row, i) => {
       const isDecisionRow = row.row === "Next step" || row.row === "Evidence";
-      const cell = (value) => (value == null ? "—" : escapeHtml(String(value)));
+      const rowClass = row.row === "Next step" ? "sep hl" : isDecisionRow ? "hl" : "";
+      const refCell = (value) => (value == null ? "—" : escapeHtml(String(value)));
       return `
-        <tr${isDecisionRow ? ' class="hl"' : ""}>
+        <tr${rowClass ? ` class="${rowClass}"` : ""}>
           <td data-l="Check">${escapeHtml(row.row)}</td>
-          <td data-l="Checker A">${cell(row.checkerA)}</td>
-          <td data-l="You">${cell(row.you)}</td>
-          <td data-l="Reference">${cell(row.reference)}</td>
-          <td data-l="Between you">${cell(row.betweenYou)}</td>
+          <td data-l="Checker A">${seatCellHtml(row.checkerA)}</td>
+          <td data-l="You">${seatCellHtml(row.you)}</td>
+          <td data-l="Reference">${refCell(row.reference)}</td>
+          <td data-l="Between you">${refCell(row.betweenYou)}</td>
         </tr>
       `;
     })
@@ -540,7 +572,7 @@ function comparisonTableHtml(debrief) {
 // screen (renderDebrief, with a Next button) and a suggestion/case link's
 // read-only history view (openCaseDebrief, with a Back link instead) -- one
 // markup source so the two can never drift apart.
-function debriefBodyHtml(current) {
+function debriefBodyHtml(current, nextButtonHtml) {
   const caseDef = current.case;
   const debrief = current.debrief;
   return `
@@ -554,27 +586,30 @@ function debriefBodyHtml(current) {
       </div>
       ${comparisonTableHtml(debrief)}
     </section>
-    ${recordsHtml(caseDef)}
-    <section class="card pad" aria-labelledby="deb-h">
-      <div class="lee"><span class="ava" data-sprite="lee" data-scale="2.4"></span><div><b id="deb-h">Lee · debrief</b><small>Built from what you each chose</small></div></div>
-      <div class="blocks">
-        <div class="blk"><h3>Finding</h3><p>${escapeHtml(debrief.feedback.finding)}</p></div>
-        <div class="blk"><h3>Evidence</h3><p>${escapeHtml(debrief.feedback.evidence)}</p></div>
-        <div class="blk"><h3>Why it matters</h3><p>${escapeHtml(debrief.feedback.why)}</p></div>
-        <div class="blk"><h3>Next step</h3><p>${escapeHtml(debrief.feedback.nextStep)}</p></div>
-      </div>
-      <div class="lines">
-        ${debrief.lines.personal.map((l) => `<p><span class="whotag">You</span>${escapeHtml(l)}</p>`).join("")}
-        ${debrief.lines.pair.map((l) => `<p><span class="whotag">Between you</span>${escapeHtml(l)}</p>`).join("")}
-      </div>
-      ${debrief.realWorld ? `<div class="realw">${escapeHtml(debrief.realWorld)}</div>` : ""}
-      <div class="talk"><h3>Talk it through · out loud</h3><p style="margin:4px 0 0">${escapeHtml(debrief.discussion)}</p></div>
-      <p class="src">${escapeHtml(caseDef.title)} · v${escapeHtml(debrief.sources.caseVersion)} · ${reviewBadgeHtml(current)}<br>Sources: ${debrief.sources.claims
-        .flatMap((c) => c.sources)
-        .map((s) => `<a href="/sources/#${escapeHtml(s.id)}">${escapeHtml(s.org)} · ${escapeHtml(s.title)}</a>`)
-        .join(" · ")}</p>
-      ${current.withdrawnNotice ? `<div class="note" role="alert">This case version has been withdrawn. ${escapeHtml(current.withdrawnNotice)}</div>` : ""}
-    </section>
+    <div class="dgrid">
+      <section class="card pad" aria-labelledby="deb-h">
+        <div class="lee"><span class="ava" data-sprite="lee" data-scale="2.4"></span><div><b id="deb-h">Lee · debrief</b><small>Built from what you each chose</small></div></div>
+        <div class="blocks">
+          <div class="blk"><h3>Finding</h3><p>${escapeHtml(debrief.feedback.finding)}</p></div>
+          <div class="blk"><h3>Evidence</h3><p>${escapeHtml(debrief.feedback.evidence)}</p></div>
+          <div class="blk"><h3>Why it matters</h3><p>${escapeHtml(debrief.feedback.why)}</p></div>
+          <div class="blk"><h3>Next step</h3><p>${escapeHtml(debrief.feedback.nextStep)}</p></div>
+        </div>
+        <div class="lines">
+          ${debrief.lines.personal.map((l) => `<p><span class="whotag">You</span>${escapeHtml(l)}</p>`).join("")}
+          ${debrief.lines.pair.map((l) => `<p><span class="whotag">Between you</span>${escapeHtml(l)}</p>`).join("")}
+        </div>
+        ${debrief.realWorld ? `<div class="realw">${escapeHtml(debrief.realWorld)}</div>` : ""}
+        <div class="talk"><h3>Talk it through · out loud</h3><p style="margin:4px 0 0">${escapeHtml(debrief.discussion)}</p></div>
+        <p class="src">${escapeHtml(caseDef.title)} · v${escapeHtml(debrief.sources.caseVersion)} · ${reviewBadgeHtml(current)}<br>Sources: ${debrief.sources.claims
+          .flatMap((c) => c.sources)
+          .map((s) => `<a href="/sources/#${escapeHtml(s.id)}">${escapeHtml(s.org)} · ${escapeHtml(s.title)}</a>`)
+          .join(" · ")}</p>
+        ${current.withdrawnNotice ? `<div class="note" role="alert">This case version has been withdrawn. ${escapeHtml(current.withdrawnNotice)}</div>` : ""}
+        ${nextButtonHtml ?? ""}
+      </section>
+      ${recordsHtml(caseDef, { singleColumn: true })}
+    </div>
   `;
 }
 
@@ -594,14 +629,13 @@ function renderDebrief(snapshot, current) {
   const caseDef = current.case;
   const pos = phasePosition(snapshot, current);
   const isLastInPhase = caseDef.phase === "training" ? current.index === snapshot.trainingCaseCount : current.index === snapshot.trainingCaseCount + snapshot.transferCaseCount;
+  const nextButtonHtml = `<div class="sign" style="border-style:solid"><button class="btn" type="button" id="next">${isLastInPhase ? "See summary →" : "Next case →"}</button><p>Either of you can move on. The other screen follows.</p></div>`;
 
   root.innerHTML = `
     ${statusStripHtml(snapshot, current, `${pos.label} ${progressDotsHtml(pos.index, pos.total)}`)}
-    ${debriefBodyHtml(current)}
-    <section class="card pad">
-      <div class="sign" style="border-style:solid"><button class="btn" type="button" id="next">${isLastInPhase ? "See summary →" : "Next case →"}</button><p>Either of you can move on. The other screen follows.</p></div>
-    </section>
+    ${debriefBodyHtml(current, nextButtonHtml)}
   `;
+  renderSprites(root);
   applyEvidenceHighlights(current);
 
   document.getElementById("next").addEventListener("click", async () => {
@@ -629,6 +663,7 @@ function openCaseDebrief(roundId) {
     <p class="fine"><a href="#" id="back-to-summary">← Back to summary</a></p>
     ${debriefBodyHtml(round)}
   `;
+  renderSprites(root);
   applyEvidenceHighlights(round);
   document.getElementById("back-to-summary").addEventListener("click", (e) => {
     e.preventDefault();
@@ -842,6 +877,7 @@ function renderSummary(snapshot) {
       <div class="btns"><button class="btn" type="button" id="start-transfer">Start the new situations →</button><span class="fine">Three new patients. Same rules: check on your own first. Your training results stay as they are.</span></div>
     </div>
   `;
+  renderSprites(root);
 
   document.getElementById("start-transfer").addEventListener("click", async () => {
     const button = document.getElementById("start-transfer");
@@ -963,6 +999,7 @@ function renderEnd(snapshot) {
     </div>
     <div class="btns mt" style="margin-bottom:40px"><button class="btn" type="button" id="print-btn">Print or save as PDF</button><a class="btn ghost" href="/tables">My tables</a></div>
   `;
+  renderSprites(root);
 
   document.getElementById("print-btn").addEventListener("click", () => window.print());
   loadEarlierPractice(snapshot.table.id, snapshot.table.bankMajorVersion, snapshot.table.bankVersion);
