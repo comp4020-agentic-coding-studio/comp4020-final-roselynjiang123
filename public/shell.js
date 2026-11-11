@@ -64,3 +64,14 @@ export function escapeHtml(s) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 }
+
+// F1 (docs/validation/findings.md, Round D): shown verbatim on the start
+// page and the waiting screen, above Lee's prebrief, so a participant knows
+// *why* answers are hidden, not just *that* they are -- S1 found the
+// purpose unclear even though the waiting screen already said *what*
+// happens. Plain text, escaped by each caller like every other static
+// string in this codebase (no second escaping convention for one string).
+// Exact wording from the findings doc; not reworded, since F1 says "add
+// this text exactly".
+export const WHY_CHECK_ALONE =
+  "A second checker only helps if they look for themselves. Once you've heard your partner's answer, it's easy to see what you expect and stop looking. So neither of you sees the other's answer until you've both signed. Then you see what each of you caught, and what you both missed. Two people can agree and still both be wrong.";

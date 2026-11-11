@@ -141,3 +141,13 @@ validator (`validateSubmissionV2`) against the script's hardcoded body.
 Fixed to read case C1's own `answerKey` from the live bank and post its
 first accepted pair instead of a hand-written v1 constant | scripts/
 smoke-deployed.mjs | (Round D of E deploy commit)
+2026-11-12 | S1 (docs/validation/findings.md) found that non-nursing
+playtesters didn't understand why two people check independently: the
+waiting screen said *what* happens (don't tell your partner until you've
+both signed) but never *why* hiding the answer matters, so F1 adds the
+finding's exact "Why check on your own first?" text above Lee's prebrief
+on the waiting screen, and above "What you'll practise" on the start page
+(the only two places a participant is told to check alone before
+anything is hidden from them) | public/shell.js (`WHY_CHECK_ALONE`),
+public/landing.js, public/play.js (`renderWaiting()`) | (Round D of E F1
+commit)

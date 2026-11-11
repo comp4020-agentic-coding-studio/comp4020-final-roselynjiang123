@@ -1,4 +1,4 @@
-import { renderShell, appRoot, apiFetch } from "./shell.js";
+import { renderShell, appRoot, apiFetch, escapeHtml, WHY_CHECK_ALONE } from "./shell.js";
 import { myTablesCardHtml } from "./my-tables.js";
 
 renderShell("/");
@@ -10,6 +10,7 @@ appRoot().innerHTML = `
       <p class="kicker">Paired medication-check practice</p>
       <h1>Check on your own. Compare together.</h1>
       <p>You and a partner are nursing students on a simulated adult ward at the 08:00 medicine round. For six patients, compare the order with what was prepared, decide what happens next, then see what each of you found.</p>
+      <p class="note"><b>Why check on your own first?</b> ${escapeHtml(WHY_CHECK_ALONE)}</p>
       <h2 class="mt">What you'll practise</h2>
       <ol class="goals">
         <li>Checking the <b>total amount</b>: units, strength and quantity.</li>

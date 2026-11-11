@@ -1,4 +1,4 @@
-import { renderShell, appRoot, announce, apiFetch, escapeHtml } from "./shell.js";
+import { renderShell, appRoot, announce, apiFetch, escapeHtml, WHY_CHECK_ALONE } from "./shell.js";
 import { renderSprites } from "./sprites.js";
 
 renderShell(null);
@@ -204,6 +204,7 @@ function renderWaiting(snapshot) {
         <p>Send this link to your partner. They open it in their own browser and click <b>Join</b>.</p>
         <div class="invite"><label class="sr" for="inv">Invite link</label><input id="inv" readonly value="${escapeHtml(inviteUrl)}"><button class="btn" type="button" id="copy">Copy link</button></div>
         <p class="fine">The link admits one second browser. It doesn't check who is using it.</p>
+        <p class="note"><b>Why check on your own first?</b> ${escapeHtml(WHY_CHECK_ALONE)}</p>
         <div class="coach mt" style="border-top:1px dashed var(--line);padding-top:14px">
           <span class="ava" data-sprite="lee" data-scale="2.4"></span>
           <div><b>Lee · clinical facilitator</b><br>Morning. Six patients, six medicines. Check each one on your own — don't tell your partner what you find until you've both signed. Mistakes here are how we learn; nothing you choose reaches a real patient.</div>
