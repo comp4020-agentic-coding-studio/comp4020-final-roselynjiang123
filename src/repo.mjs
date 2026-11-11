@@ -140,10 +140,12 @@ export function createRepo(db, bank) {
     const revealed = submissions.length === 2;
     const trainingCount = trainingCases(bank).length;
     const transferCount = transferCases(bank).length;
+    let completed = false;
     if (revealed) {
       stmt.revealRound.run(roundId);
       if (current.round_index === trainingCount + transferCount) {
         stmt.setTableStage.run("completed", statusForStage("completed"), tableId);
+        completed = true;
       }
     }
     stmt.bumpTableVersion.run(tableId);
@@ -152,6 +154,10 @@ export function createRepo(db, bank) {
       seat: member.seat,
       roundIndex: current.round_index,
       revealed,
+      // Tells the route layer to log a "complete" action line (brief §4
+      // item 11) exactly once, on the call that reveals round 9 and moves
+      // the table to "completed" -- never on a later idempotent read.
+      completed,
       snapshot: getSnapshot(tableId, identity),
     };
   });
@@ -183,7 +189,19 @@ export function createRepo(db, bank) {
       stmt.setTableStage.run(transition.stage, statusForStage(transition.stage), tableId);
       insertRoundForIndex(tableId, transition.nextRoundIndex);
       stmt.bumpTableVersion.run(tableId);
-      return { outcome: "ok", seat: member.seat, roundIndex: null, snapshot: getSnapshot(tableId, identity) };
+      // "transfer" action (brief §4 item 11): training_summary -> round 7,
+      // logged by the route layer from this stageAction, same reasoning as
+      // "summary"/"complete" below -- only the call that actually performs
+      // the transition sets it, never an idempotent replay (the earlier
+      // table.stage !== "training_summary" branch returns before here).
+      return {
+        outcome: "ok",
+        seat: member.seat,
+        roundIndex: transition.nextRoundIndex,
+        applied: true,
+        stageAction: "transfer",
+        snapshot: getSnapshot(tableId, identity),
+      };
     }
 
     const current = stmt.currentRound.get(tableId);
@@ -191,13 +209,17 @@ export function createRepo(db, bank) {
 
     if (current.id !== fromRoundId) {
       // Either already advanced past fromRoundId (idempotent replay) or
-      // fromRoundId never was current for this table.
+      // fromRoundId never was current for this table. `applied: false`
+      // (brief §4 item 11: one log line per accepted action, not per
+      // request) -- this call mutated nothing, so the route layer must not
+      // log a second "next" for it.
       const target = stmt.roundById.get(fromRoundId);
       if (target && target.table_id === tableId && target.round_index < current.round_index) {
         return {
           outcome: "ok",
           seat: member.seat,
           roundIndex: target.round_index,
+          applied: false,
           snapshot: getSnapshot(tableId, identity),
         };
       }
@@ -207,12 +229,33 @@ export function createRepo(db, bank) {
 
     const transition = afterRound(bank, current.round_index);
     if (transition.kind === "stage_only") {
+      // afterRound() returns "stage_only" for two different transitions:
+      // round 6 -> training_summary ("summary"), and round 9 -> completed.
+      // Round 9's completed transition is normally already applied by
+      // submitAnswer() when the second signature reveals it, before
+      // anyone calls /next -- but the client still sends fromRoundId for
+      // the last round in a phase (its "Next" button reads "See summary"
+      // but posts the same body either way), so this branch is reachable
+      // for round 9 too and must not log a second line for it: `applied:
+      // false` when the table is already at the target stage (a no-op
+      // idempotent read, not a transition this call performed).
+      if (table.stage === transition.stage) {
+        return {
+          outcome: "ok",
+          seat: member.seat,
+          roundIndex: current.round_index,
+          applied: false,
+          snapshot: getSnapshot(tableId, identity),
+        };
+      }
       stmt.setTableStage.run(transition.stage, statusForStage(transition.stage), tableId);
       stmt.bumpTableVersion.run(tableId);
       return {
         outcome: "ok",
         seat: member.seat,
         roundIndex: current.round_index,
+        applied: true,
+        stageAction: transition.stage === "training_summary" ? "summary" : null,
         snapshot: getSnapshot(tableId, identity),
       };
     }
@@ -224,6 +267,7 @@ export function createRepo(db, bank) {
       outcome: "ok",
       seat: member.seat,
       roundIndex: current.round_index,
+      applied: true,
       snapshot: getSnapshot(tableId, identity),
     };
   });

@@ -154,6 +154,12 @@ export function createApp(db, bank) {
     if (result.revealed) {
       logAction({ tableId: id, seat: result.seat, action: "reveal", round: result.roundIndex });
     }
+    // "complete" action (brief §4 item 11): round 9's reveal moves the
+    // table to "completed" (repo.submitAnswer()'s `completed` flag), unlike
+    // round 6's equivalent transition which happens via /next instead.
+    if (result.completed) {
+      logAction({ tableId: id, seat: result.seat, action: "complete", round: result.roundIndex });
+    }
     sse.notify(id);
     res.json(serializeSnapshot(result.snapshot, bank));
   });
@@ -176,7 +182,18 @@ export function createApp(db, bank) {
       res.status(OUTCOME_STATUS[result.outcome] ?? 400).json({ error: result.outcome });
       return;
     }
-    if (result.roundIndex != null) {
+    // Only a call that actually mutated something logs a line (brief §4
+    // item 11: one line per accepted action, not per request -- an
+    // idempotent replay, including round 9's "already completed" case,
+    // sets neither `applied` nor `stageAction`, see src/repo.mjs). Among
+    // applied calls: `stageAction` names a stage transition ("summary"
+    // round 6 -> training_summary, "transfer" training_summary -> round 7,
+    // or null for round 9's stage_only -> completed, already logged as
+    // "complete" by the submissions route); anything else applied is a
+    // plain round-to-round advance, logged as "next".
+    if (result.applied && result.stageAction) {
+      logAction({ tableId: id, seat: result.seat, action: result.stageAction, round: result.roundIndex ?? 0 });
+    } else if (result.applied) {
       logAction({ tableId: id, seat: result.seat, action: "next", round: result.roundIndex });
     }
     sse.notify(id);
