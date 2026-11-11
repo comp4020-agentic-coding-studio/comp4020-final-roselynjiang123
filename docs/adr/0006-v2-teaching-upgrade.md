@@ -42,3 +42,4 @@ staying entirely on the student, per CLAUDE.md's content-governance rule.
 
 ## Student's judgement
 
+I chose rule-based feedback because the app's fourth claim is honesty about its content. Every sentence a learner reads after a reveal already exists in `content/case-bank.v2.json`, carries a review status, and can be checked before anyone sees it. Runtime AI would make the debrief more responsive and could answer questions the bank never anticipated, which S1's participants asked for. But its clinical text could not be reviewed before it was shown, and T17 could no longer show that scoring makes no outbound calls. The cost is that feedback is only as good as what I wrote, and a question the bank didn't anticipate waits for the facilitator after the session.
