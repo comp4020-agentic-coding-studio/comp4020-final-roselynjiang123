@@ -73,3 +73,48 @@ the round's global index (1..9 across training+transfer) against a fixed
 shown as "case 7 of 6", every dot "done") | src/serializer.mjs (top-level
 `knowledgeCard` field), public/play.js (`phasePosition()`) | (Round B of E
 commit, five-screens)
+2026-11-12 | `public/play.js`'s `render()` crashed on the `waiting` state
+with `TypeError: Cannot read properties of undefined (reading 'id')`: round
+1 doesn't exist until B joins (`src/repo.mjs` only creates it once both
+seats are claimed), so `snapshot.rounds[snapshot.rounds.length - 1]` is
+`undefined` while waiting, but `render()` unconditionally read
+`current.revealed`/`current.mine.submitted` before checking
+`seatsBothJoined`'s `nextMode = "waiting"` branch separately from the branches
+that actually need `current`. Pre-existing (present at HEAD before this
+round, not introduced by Round D's CSS/markup work) -- never caught earlier
+because no headless browser was available (jsdom doesn't execute `<script
+type="module">`) until this round installed Playwright + Chromium and
+`scripts/screenshot-v2.mjs` loaded `/play/:id` for the first screenshot.
+Fixed with optional chaining on every `current.*` read reachable before
+`seatsBothJoined` is true | public/play.js (`render()`) | (Round D of E
+commit, screenshot script + play.js fix)
+2026-11-12 | `composeDebrief`'s comparison table (brief §8.2 step 2) showed
+raw `action`/`evidenceId` strings ("continue_checks", "total_amount")
+instead of the bank's short labels, had no ✓/✗ match marks on any cell
+(U09: "meaning never by colour alone" needs a mark, not just a background
+tint), and the Next step/Evidence rows' Reference and Between you columns
+were always `null` -- so a screen reader or a printed page showed nothing
+there at all. Caught by screenshotting `debrief` for the first time
+(Playwright now available) and comparing against
+`docs/reference/shots/debrief-1920x1080.png`, which shows labelled,
+marked, fully-populated rows. Fixed `comparisonTable()` to resolve labels
+from `bank.actions`/`bank.evidenceOptions`, mark each seat cell with its
+own actionOk/evidenceOk, and fill Reference (every accepted option, joined
+with "or", for cases with more than one accepted pair -- the brief doesn't
+name a single "the" reference answer for those) and Between you (the pair's
+existing `decisionCoverage`) for both decision rows. Also had to add
+`actions`/`evidenceOptions` to `src/serializer.mjs`'s `caseSnapshotBank()`,
+which was already freezing them per round but not forwarding them to
+`composeDebrief` | src/debrief.mjs (`comparisonTable()`), src/serializer.mjs
+(`caseSnapshotBank()`), spec/no-network.test.ts (test bank shape updated to
+match), public/play.js (`comparisonTableHtml()`/`seatCellHtml()`) | (Round D
+of E commit, debrief comparison table fix)
+2026-11-12 | `/sources/`'s review-status legend showed the literal
+placeholder string `Reviewed by {role}, {date}` instead of a filled example,
+unlike the reference's "Reviewed by a registered nurse, 2026-11-20" --
+`src/pages.mjs` had the template syntax left in a string with no
+interpolation to fill it. Caught by screenshotting `/sources/` for the
+first time and comparing against
+`docs/reference/shots/sources-1920x1080.png` side by side | src/pages.mjs
+(the legend's third `<span class="review ok">`) | (Round D of E commit,
+visual-contract commit)

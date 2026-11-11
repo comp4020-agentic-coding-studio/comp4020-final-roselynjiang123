@@ -100,7 +100,11 @@ function main(): void {
   }
 
   const date = new Date().toISOString().slice(0, 10);
-  const outDir = "docs/validation/data";
+  // EXPORT_OUT_DIR lets spec/export.test.ts (T16's automated export check)
+  // point this at a scratch directory instead of the committed
+  // docs/validation/data/ default; unset in every normal run, including the
+  // real `pnpm export:evaluation` command.
+  const outDir = process.env.EXPORT_OUT_DIR ?? "docs/validation/data";
   mkdirSync(outDir, { recursive: true });
   const outPath = `${outDir}/export-${date}.csv`;
   writeFileSync(outPath, lines.join("\n") + "\n", "utf8");

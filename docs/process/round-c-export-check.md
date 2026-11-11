@@ -1,9 +1,16 @@
 # `pnpm export:evaluation` manual check (Round C step 8)
 
+**Superseded (Round D):** `spec/export.test.ts` now runs the real CLI
+against a spawned app and a scratch database (the same spawn-and-point-
+`DATABASE_PATH`-at-a-temp-file pattern `spec/restart.test.ts` already used),
+asserting the exported CSV never contains either session's real cookie
+token or the full table id. The manual check below is kept as the record
+of what was verified before that automation existed.
+
 `scripts/export-evaluation.ts` reads straight from `DATABASE_PATH`, not the
-spec's isolated per-run test database, so there is no automated end-to-end
-test that runs the actual CLI command; T16's export half is checked here,
-by hand, each time the script changes.
+spec's isolated per-run test database, so there was no automated end-to-end
+test that ran the actual CLI command; T16's export half was checked here,
+by hand, each time the script changed.
 
 ## What was checked
 
