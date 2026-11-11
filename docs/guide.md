@@ -105,4 +105,4 @@ the full source list.
 
 ## Contact
 
-Contact: TODO (student)
+Roselyn Jiang (student developer), [u8083533@anu.edu.au](mailto:u8083533@anu.edu.au). Please report content errors by email.
