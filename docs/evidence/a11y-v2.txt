@@ -1,0 +1,34 @@
+Second Pair of Eyes -- accessibility pass (Round D)
+Run date: 2026-11-11
+Method: Playwright + Chromium, keyboard events only (page.keyboard.press), one full case (create -> join -> checking -> sign -> debrief), both marking viewports checked for visible focus.
+
+[start] Loaded "/". Tabbed through the page from body: 
+  1st Tab focuses element with class="skip" -- expected the skip-link ("Skip to content"), class "skip".
+  Skip-link visible on focus (not clipped off-screen): true.
+  Computed outline on the focused skip-link: solid 3px rgb(217, 154, 43) (expect a visible solid outline, not "none").
+  2nd Tab focuses: <a class="brand" href="/">
+        <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect x="12" y="2"
+  Found "Create a practice table" button via Tab order after 9 tabs total; activating with Enter (keyboard, not click).
+  Keyboard activation navigated to http://localhost:28621/play/27QekitHDJCqNwSZ8XD-aAEpmLT7xeAS.
+
+[checking] Loaded the checking screen for table 27QekitH... via keyboard-only session.
+  First Tab on [checking] lands on <A class="skip">, computed outline: solid 3px.
+  Measured control heights at 390x844 (target >= 44px): .opt: 139px, .seg label: 44px, .btn: 44px, .toolbox summary: 44px, .nav a: 44px
+  Reached and selected all 5 comparison-check radios by keyboard (Tab + Arrow, auto-selecting as the native radiogroup role requires): true.
+  Measured on [checking] at 1920x1080: .opt: min 44px across 10 elements, .seg label: min 44px across 10 elements
+  Reached and selected the accepted "Next step" option by keyboard: true.
+  Reached and selected the accepted evidence option by keyboard: true.
+  Checked radios just before submit: field-patient=match, field-medicine=match, field-dose=match, field-route=match, field-time=match, action=continue_checks, ev=total_amount
+  Reached "Sign and submit" and activated it with Enter (keyboard, not click); request accepted: true. (tab order: INPUT[radio]"" > BUTTON[submit]"Sign and submit")
+  [signed] screen reached, "your check is sealed" shown.
+  First Tab on [signed] lands on <SUMMARY class="">, outline-style: solid.
+  [debrief] screen reached after partner signed.
+  Reached "Next case" from the debrief screen and activated it with Enter: true.
+
+[live region] public/shell.js renders one <p class="sr" aria-live="polite" id="announcer">, updated via announce() for: "Your partner joined.", "Your partner signed their check.", "Results revealed." (public/play.js calls at the corresponding state transitions). Not re-verified by a screen reader in this pass (no screen reader available in this environment) -- the markup/attribute and call sites were read directly, not inferred.
+
+[target size] CSS variable --tap: 44px (public/style.css) applied as min-height on: .btn, .nav a, .seg label (segmented decide/evidence radios), .opt (comparison-check radio rows), .toolbox summary, .invite input. Real getBoundingClientRect() heights measured above at both marking viewports, not just traced from the stylesheet.
+
+[colour-only meaning] Every mark that carries pass/fail meaning pairs colour with a symbol or word, not colour alone: .mk uses "✓"/"✗" text glyphs (public/play.js seatCellHtml()); .chip for "decisionFits" uses "✓"/"✗" plus "fits"/"doesn't fit" wording; .pill "Signed" uses "✓ Signed" (symbol + word); review-status badges (.review) are full text labels ("Draft · not yet source checked" etc.), not colour swatches.
+
+[not checked / human to verify] A real screen reader (VoiceOver/NVDA/JAWS) was not run against this app in this environment -- only the aria-live/aria-label/role attributes and keyboard reachability were verified programmatically. Human should verify announcer text is actually spoken, and that the .skip link's visual repositioning on focus (top:-60px -> top:8px) reads correctly to a screen reader as well as sighted keyboard users.
