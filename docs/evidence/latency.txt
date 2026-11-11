@@ -24,3 +24,23 @@ run 10: 0ms
 
 median: 0ms
 max: 1ms
+
+Rerun 2026-11-11 (Round 3) after deploying the varied six-case fixtures and
+v2 UI; case 1, which this script always plays, is unchanged between the
+Round 2 and Round 3 fixtures (src/cases.mjs), so this measures the same
+thing against the same deployed instance the persistence evidence above
+used.
+
+run 1: 1ms
+run 2: 1ms
+run 3: -2ms
+run 4: 0ms
+run 5: -1ms
+run 6: -1ms
+run 7: -2ms
+run 8: 0ms
+run 9: 0ms
+run 10: -1ms
+
+median: 0ms
+max: 1ms

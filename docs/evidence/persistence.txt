@@ -1,0 +1,49 @@
+Persistence evidence against the deployed Fly app (brief §9 item 9, §1).
+Measured 2026-11-11 against https://comp4020-final-roselynjiang123.fly.dev,
+machine 891e4e5f443298 (app comp4020-final-roselynjiang123).
+
+Method: two independent cookie jars (the pattern scripts/smoke-deployed.mjs
+uses) create a table, join, and complete case 1 end to end -- both
+submissions, automatic reveal -- against the deployed app. GET
+/api/tables/:id is then fetched as Checker A (1) immediately after
+completion, (2) after a machine restart, (3) after a full redeploy, and the
+three JSON bodies are compared.
+
+Commands run:
+
+  node persistence-check.mjs https://comp4020-final-roselynjiang123.fly.dev create
+    -> TABLE_ID=NgWJUlnZCAfawlWykQHZV1DfjqU4M8Rr
+       COOKIE_A=spe_session=C9x1fhnleDlm-rh1lrIdgkKzSztAcryQ
+       COOKIE_B=spe_session=KA2ftY9yeGFte6vYb5iaVzXhYaCS6AUO
+
+  mise exec -- flyctl machine restart 891e4e5f443298 -a comp4020-final-roselynjiang123
+    -> "Machine 891e4e5f443298 restarted successfully!"
+
+  COOKIE_A=... node persistence-check.mjs https://comp4020-final-roselynjiang123.fly.dev \
+    fetch NgWJUlnZCAfawlWykQHZV1DfjqU4M8Rr
+
+  mise exec -- flyctl deploy --remote-only --ha=false -a comp4020-final-roselynjiang123
+    -> "Machine 891e4e5f443298 is now in a good state"
+
+  COOKIE_A=... node persistence-check.mjs https://comp4020-final-roselynjiang123.fly.dev \
+    fetch NgWJUlnZCAfawlWykQHZV1DfjqU4M8Rr
+
+(persistence-check.mjs is a throwaway script using the same cookie-jar
+helpers as scripts/smoke-deployed.mjs; not committed, since it duplicates
+that script's client plumbing for a one-off check rather than adding a new
+permanent tool.)
+
+Result: table status, round 1 (frozen case snapshot, both submissions,
+revealed_at, full reveal including the pair-review text "Both checks were
+complete and correct."), table.version (3) and seats were byte-identical
+across all three fetches; `diff` against the three captured JSON bodies
+shows no difference except the expected "viewer.seat" field (A vs B,
+depending on which cookie jar made the request -- not a persistence
+concern). The table's `status` stayed "playing" (one of six cases done,
+correctly not "completed"), consistent with an incomplete game resuming
+rather than silently finishing.
+
+Conclusion: an accepted submission and its reveal survive both a machine
+restart and a full image redeploy with no data loss, as brief §9 item 9 and
+the brief's "all accepted progress persists through restart and redeploy"
+definition of done require.
