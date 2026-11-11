@@ -250,6 +250,42 @@ export function createApp(db, bank) {
     res.json(serializeSnapshot(result.snapshot, bank));
   });
 
+  // Usage event (brief §9): "reference_opened" with a medicine-card id or
+  // "knowledge:<sectionHeading>" ref, allowlisted against the bank by
+  // repo.logUsageEvent. Not used for scoring (brief's own words); never
+  // broadcast over SSE or returned in any snapshot -- it has no reader
+  // besides pnpm export:evaluation. T16: unknown type/ref is REJECTED
+  // (400), not silently dropped; only the per-member rate limit (>60/min)
+  // is silently ignored (brief §9's own distinction -- "allowlisted types
+  // and refs" vs. "silently ignore more than 60 events").
+  app.post("/api/tables/:id/log", requireSameOrigin, (req, res) => {
+    res.set("Cache-Control", "no-store");
+    const { id } = req.params;
+    const type = req.body?.type;
+    const ref = req.body?.ref;
+    if (typeof type !== "string" || typeof ref !== "string") {
+      res.status(400).json({ error: "type and ref are required strings" });
+      return;
+    }
+    const result = repo.logUsageEvent(id, req.identity, type, ref);
+    if (result.outcome === "forbidden") {
+      res.status(403).json({ error: "forbidden" });
+      return;
+    }
+    if (result.outcome === "not_found") {
+      res.status(404).json({ error: "not_found" });
+      return;
+    }
+    if (result.outcome === "invalid") {
+      res.status(400).json({ error: "unknown type or ref" });
+      return;
+    }
+    // "ok" and "rate_limited" both succeed from the client's point of view
+    // (brief: "silently ignore" the rate-limited case) -- the caller never
+    // needs to distinguish a logged event from a capped one.
+    res.status(204).end();
+  });
+
   // SSE: authorise membership, then send a fresh database-derived snapshot
   // on connect and on every subsequent notify() for this table (brief §4
   // item 3).

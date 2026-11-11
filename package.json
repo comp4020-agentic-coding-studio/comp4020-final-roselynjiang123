@@ -8,7 +8,9 @@
     "check": "pnpm typecheck && pnpm test",
     "check:evidence": "node scripts/check-evidence.ts",
     "test": "vitest run",
-    "start": "node src/main.mjs"
+    "start": "node src/main.mjs",
+    "export:evaluation": "node scripts/export-evaluation.ts",
+    "content:review-pack": "python3 tools/content/render_review_pack.py"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",

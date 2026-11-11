@@ -35,7 +35,7 @@ export function createRepo(db, bank) {
     ),
 
     insertRound: db.prepare(
-      "INSERT INTO rounds (id, table_id, round_index, case_data, phase, case_version) VALUES (?, ?, ?, ?, ?, ?)",
+      "INSERT INTO rounds (id, table_id, round_index, case_data, phase, case_version, created_at) VALUES (?, ?, ?, ?, ?, ?, strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))",
     ),
     currentRound: db.prepare(
       "SELECT * FROM rounds WHERE table_id = ? ORDER BY round_index DESC LIMIT 1",
@@ -64,6 +64,18 @@ export function createRepo(db, bank) {
        FROM table_members m JOIN tables t ON t.id = m.table_id
        WHERE m.identity = ? AND t.stage = 'completed' AND t.id != ?
        ORDER BY completed_at DESC`,
+    ),
+
+    insertUsageEvent: db.prepare(
+      "INSERT INTO usage_events (id, table_id, seat, round_id, type, ref) VALUES (?, ?, ?, ?, ?, ?)",
+    ),
+    // Rate limit (brief §9's /log route: "silently ignore more than 60
+    // events per member per minute") -- counted per table+seat, not per
+    // identity globally, since seat is what the export groups by and a
+    // member only ever has one seat at one table at a time.
+    usageEventsInLastMinute: db.prepare(
+      `SELECT COUNT(*) as n FROM usage_events
+       WHERE table_id = ? AND seat = ? AND created_at > strftime('%Y-%m-%dT%H:%M:%fZ', 'now', '-1 minute')`,
     ),
   };
 
@@ -329,6 +341,38 @@ export function createRepo(db, bank) {
     return Boolean(stmt.memberByIdentity.get(tableId, identity));
   }
 
+  // Allowlisted ref values (brief §9's /log route): a real medicine card id
+  // from the bank, or "knowledge:<sectionHeading>" matching a real
+  // knowledge-card section -- never free text, so this can't become a
+  // side-channel for logging arbitrary strings.
+  const knownMedicineCardIds = new Set(bank.medicineCards.map((m) => m.id));
+  const knownKnowledgeRefs = new Set((bank.knowledgeCard?.sections ?? []).map((s) => `knowledge:${s.heading}`));
+  function isKnownRef(ref) {
+    return knownMedicineCardIds.has(ref) || knownKnowledgeRefs.has(ref);
+  }
+
+  const KNOWN_USAGE_TYPES = new Set(["reference_opened"]);
+
+  // Usage event (brief §9's POST /api/tables/:id/log): `type` and `ref` are
+  // checked against allowlists here (the bank's own medicine-card ids and
+  // knowledge-card section headings for `ref`, a fixed set for `type`), not
+  // trusted from the request body, so this can never become a side channel
+  // for logging arbitrary strings. Never I/O's anything else from the
+  // request -- no cookie token, session id or answer value has a column to
+  // land in (src/db.mjs's usage_events schema), so there is nothing here
+  // that could leak one (brief §4 item 9, T16).
+  const logUsageEvent = db.transaction((tableId, identity, type, ref) => {
+    if (!KNOWN_USAGE_TYPES.has(type) || !isKnownRef(ref)) return { outcome: "invalid" };
+    const member = stmt.memberByIdentity.get(tableId, identity);
+    if (!member) return { outcome: "forbidden" };
+    const current = stmt.currentRound.get(tableId);
+    if (!current) return { outcome: "not_found" };
+    const recent = stmt.usageEventsInLastMinute.get(tableId, member.seat).n;
+    if (recent >= 60) return { outcome: "rate_limited" };
+    stmt.insertUsageEvent.run(uuid(), tableId, member.seat, current.id, type, ref);
+    return { outcome: "ok" };
+  });
+
   return {
     ensureSession,
     sessionExists: (token) => Boolean(stmt.sessionExists.get(token)),
@@ -339,6 +383,7 @@ export function createRepo(db, bank) {
     getSnapshot,
     listTablesForIdentity,
     listCompletedTablesForIdentity,
+    logUsageEvent,
     isMember,
   };
 }

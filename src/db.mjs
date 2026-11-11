@@ -134,6 +134,39 @@ const MIGRATIONS = [
       ALTER TABLE submissions ADD COLUMN evidence_id TEXT;
     `,
   },
+  // Usage events (brief §9's POST /api/tables/:id/log: "reference_opened"
+  // with a medicine-card or knowledge-card ref), consumed by
+  // pnpm export:evaluation's reference_opened counts. A new table, not an
+  // ALTER on an existing one, so its own default timestamp can be set at
+  // CREATE time (ALTER TABLE ADD COLUMN rejects a non-constant default --
+  // the same reason 0001's per-table defaults aren't replicated into later
+  // ALTER-based migrations here).
+  {
+    id: "0006_usage_events",
+    sql: `
+      CREATE TABLE usage_events (
+        id TEXT PRIMARY KEY,
+        table_id TEXT NOT NULL REFERENCES tables(id),
+        seat TEXT NOT NULL CHECK (seat IN ('A', 'B')),
+        round_id TEXT NOT NULL REFERENCES rounds(id),
+        type TEXT NOT NULL,
+        ref TEXT NOT NULL,
+        created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+      );
+      CREATE INDEX idx_usage_events_table_seat_created ON usage_events (table_id, seat, created_at);
+    `,
+  },
+  // rounds.created_at (brief §9's export: "submitted-at minus round-
+  // created-at in seconds"), nullable since ALTER TABLE ADD COLUMN can't
+  // carry a non-constant default onto an existing table; a pre-existing
+  // round has no way to recover when it was actually created, so the
+  // export (scripts/export-evaluation.ts) leaves that row's duration blank
+  // rather than guessing, the same "not collected in this version"
+  // treatment 0004/0005 already give other pre-v2/pre-this-migration data.
+  {
+    id: "0007_rounds_created_at",
+    sql: `ALTER TABLE rounds ADD COLUMN created_at TEXT;`,
+  },
 ];
 
 export function openDatabase(path) {

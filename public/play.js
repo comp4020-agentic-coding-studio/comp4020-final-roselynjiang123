@@ -318,13 +318,13 @@ function recordsHtml(caseDef) {
 // Toolbox (U08): Before you start + the medicine card(s) for this case,
 // collapsible via native <details>, keyboard operable with no extra JS.
 // Opening an item posts a usage event via POST /api/tables/:id/log (brief
-// §9's `/log` route); until that route exists, the toggle listener is a
-// no-op placeholder rather than a dead TODO.
+// §9), matching src/repo.mjs's allowlist: a medicine card's own id, or
+// "knowledge:<sectionHeading>" for a knowledge-card section.
 function toolboxHtml(caseDef) {
   const cards = caseDef.medicineCards
     .map(
       (m) => `
-      <details>
+      <details data-log-ref="${escapeHtml(m.id)}">
         <summary>Medicine card: ${escapeHtml(m.name)}</summary>
         <dl>
           <dt>What it is</dt><dd>${escapeHtml(m.whatItIs)}</dd>
@@ -336,7 +336,9 @@ function toolboxHtml(caseDef) {
     )
     .join("");
   const knowledgeSections = (caseDef.knowledgeCard?.sections ?? [])
-    .map((s) => `<li><b>${escapeHtml(s.heading)}.</b> ${escapeHtml(s.body)}</li>`)
+    .map(
+      (s) => `<li data-log-ref="knowledge:${escapeHtml(s.heading)}"><b>${escapeHtml(s.heading)}.</b> ${escapeHtml(s.body)}</li>`,
+    )
     .join("");
   return `
     <section class="card toolbox" aria-label="Toolbox">
@@ -348,6 +350,31 @@ function toolboxHtml(caseDef) {
       </details>
     </section>
   `;
+}
+
+// Opening a toolbox item posts a usage event (U08, brief §9's /log route).
+// A medicine card's own <details> carries data-log-ref directly; the
+// "Before you start" <details> wraps several knowledge-card sections at
+// once (reference markup: one collapsible for all of them), so opening IT
+// logs one event per section heading it reveals, rather than inventing a
+// single ref that doesn't match any real section.
+function wireToolboxLogging(container, tableId) {
+  container.querySelectorAll(".toolbox > details").forEach((details) => {
+    details.addEventListener("toggle", () => {
+      if (!details.open) return;
+      const ownRef = details.dataset.logRef;
+      const refs = ownRef ? [ownRef] : [...details.querySelectorAll("[data-log-ref]")].map((el) => el.dataset.logRef);
+      for (const ref of refs) {
+        apiFetch(`/api/tables/${tableId}/log`, {
+          method: "POST",
+          body: JSON.stringify({ type: "reference_opened", ref }),
+        }).catch(() => {
+          // Best-effort (brief §9: not used for scoring); a lost usage ping
+          // never blocks or errors the check itself.
+        });
+      }
+    });
+  });
 }
 
 function fieldset(key, label, lookAt, checked) {
@@ -404,6 +431,7 @@ function renderChecking(snapshot, current) {
     </form>
     ${toolboxHtml(caseDef)}
   `;
+  wireToolboxLogging(root, tableId);
 
   const form = document.getElementById("check-form");
   form.addEventListener("change", (e) => {
@@ -476,6 +504,7 @@ function renderSigned(snapshot, current) {
     </div>
     ${toolboxHtml(caseDef)}
   `;
+  wireToolboxLogging(root, tableId);
 }
 
 function reviewBadgeHtml(round) {
