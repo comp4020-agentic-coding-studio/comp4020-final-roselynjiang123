@@ -5,9 +5,11 @@ renderShell("/tables");
 const root = appRoot();
 root.innerHTML = `<p class="muted">Loading…</p>`;
 
-const STATUS_LABEL = {
+const STAGE_LABEL = {
   waiting_for_partner: "Waiting for partner",
-  playing: "In progress",
+  training: "In progress",
+  training_summary: "Training summary",
+  transfer: "New situations",
   completed: "Completed",
 };
 
@@ -24,8 +26,8 @@ if (!ok) {
 } else {
   const items = body.tables
     .map((t) => {
-      const action = t.status === "completed" ? "Review" : "Open";
-      return `<li><span><strong>Table ${t.tableId.slice(0, 4).toUpperCase()}</strong> · Checker ${t.seat} · ${STATUS_LABEL[t.status] ?? t.status}</span><a href="/play/${t.tableId}">${action}</a></li>`;
+      const action = t.stage === "completed" ? "Review" : "Open";
+      return `<li><span><strong>Table ${t.tableId.slice(0, 4).toUpperCase()}</strong> · Checker ${t.seat} · ${STAGE_LABEL[t.stage] ?? t.stage}</span><a href="/play/${t.tableId}">${action}</a></li>`;
     })
     .join("");
   root.innerHTML = `

@@ -2,23 +2,33 @@ import { renderShell, appRoot, apiFetch } from "./shell.js";
 
 renderShell("/");
 
+// v2.1 reference markup/copy, `start` state (docs/reference/ui-reference.html).
 appRoot().innerHTML = `
-  <span class="eyebrow">Independent double check</span>
-  <h1>Second Pair of Eyes</h1>
-  <p class="lead">You and another learner are a checking pair for six fictional medication records. Each of you checks on your own; neither sees the other's answer until both have signed. Then you review together: did you agree, and were you right?</p>
-  <div class="panel">
-    <h2>How to play</h2>
-    <ol class="steps">
-      <li>Open this site in two Chrome profiles or two browsers. An incognito window works but forgets who you are when it closes.</li>
-      <li>In the first, choose Create a table, then Copy invite link.</li>
-      <li>Open the link in the second and choose Join. Check each case on your own; both answers appear once you have both signed.</li>
-    </ol>
-    <p class="small muted">Six short cases. No timer, no leaderboard.</p>
-    <div class="actions">
-      <button class="btn" type="button" id="create">Create a table</button>
-      <a class="btn btn-secondary" href="/tables">My tables</a>
+  <div class="card hero">
+    <div>
+      <p class="kicker">Paired medication-check practice</p>
+      <h1>Check on your own. Compare together.</h1>
+      <p>You and a partner are nursing students on a simulated adult ward at the 08:00 medicine round. For six patients, compare the order with what was prepared, decide what happens next, then see what each of you found.</p>
+      <h2 class="mt">What you'll practise</h2>
+      <ol class="goals">
+        <li>Checking the <b>total amount</b>: units, strength and quantity.</li>
+        <li>Using the <b>records and the patient's words</b> — the administration record and the allergy box — even when the order and the medicine match.</li>
+        <li>Choosing a <b>next step with evidence</b>, and telling agreement apart from being right.</li>
+      </ol>
+      <div class="btns mt"><button class="btn" type="button" id="create">Create a practice table</button><a class="btn ghost" href="/tables">My tables</a></div>
+      <p class="fine mt">About 20–25 minutes · two people, two browsers · fictional patients · content status: draft (<a href="/sources/">see Sources</a>)</p>
+      <div class="form-error" role="alert" id="error" hidden></div>
     </div>
-    <div class="form-error" role="alert" id="error" hidden></div>
+    <div>
+      <h2>How it works</h2>
+      <ol class="steps">
+        <li><span>Create a table and send the invite link to your partner. Use two normal browser windows or devices.</span></li>
+        <li><span>For each case, check on your own and sign. Your partner can't see your answers until you've both signed.</span></li>
+        <li><span>See both answers, the reference answer and the debrief together. Talk it through.</span></li>
+        <li><span>A summary, three new situations, then an end review you can print.</span></li>
+      </ol>
+      <p class="note">A private window loses your place when it closes. Your records stay in this browser only.</p>
+    </div>
   </div>
 `;
 
