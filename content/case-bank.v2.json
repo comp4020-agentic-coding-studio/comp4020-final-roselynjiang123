@@ -1,0 +1,1756 @@
+{
+  "bankId": "second-pair-adult-ward",
+  "bankMajorVersion": 2,
+  "bankVersion": "2.0.0-draft",
+  "notice": "DRAFT teaching content. Fictional patients. Every clinical statement must be checked against its listed source by the content author before reviewStatus may change. The implementing agent must not edit clinical wording or reviewStatus.",
+  "setting": {
+    "ward": "Banksia Ward",
+    "hospital": "Simulated General Hospital",
+    "description": "Adult general ward, morning medicine round (fictional)",
+    "pairNote": "On real wards, independent double checks are kept for selected high-risk medicines and tasks. In this practice you check every medicine twice so you can practise independent judgement."
+  },
+  "learningObjectives": [
+    {
+      "id": "LO1",
+      "text": "Check the total amount prepared using units, strength and quantity, and tell a different way of writing the same dose from a different dose."
+    },
+    {
+      "id": "LO2",
+      "text": "Use the order, the administration record and relevant history such as allergies to explain why matching records can still mean pausing to clarify."
+    },
+    {
+      "id": "LO3",
+      "text": "Choose a next step with evidence, and in the joint debrief tell apart agreeing, matching the reference answer, and real-world safety."
+    }
+  ],
+  "fieldKeys": [
+    "patient",
+    "medicine",
+    "dose",
+    "route",
+    "time"
+  ],
+  "fields": {
+    "patient": {
+      "label": "Patient",
+      "question": "Do the patient identifiers on the prepared medicine match the chart and the ID band?",
+      "lookAt": "Name, date of birth and MRN on the label, band and chart"
+    },
+    "medicine": {
+      "label": "Medicine",
+      "question": "Is the prepared medicine the one that was ordered?",
+      "lookAt": "Medicine name on the order and on the label"
+    },
+    "dose": {
+      "label": "Dose",
+      "question": "Does the total amount prepared equal the ordered dose?",
+      "lookAt": "Ordered dose vs strength × quantity prepared"
+    },
+    "route": {
+      "label": "Route & form",
+      "question": "Does the form prepared fit the ordered route?",
+      "lookAt": "Ordered route vs the form and device prepared"
+    },
+    "time": {
+      "label": "Time on record",
+      "question": "Does the time or schedule on the prepared record match the order?",
+      "lookAt": "Order times or PRN vs 'prepared for' time"
+    }
+  },
+  "fieldNote": "These five checks compare the order with what was prepared. Whether a dose should be given now (for example, how long since the last dose, or an allergy) is part of your next step and evidence, not these five checks.",
+  "actions": [
+    {
+      "id": "continue_checks",
+      "label": "Continue with the remaining checks",
+      "help": "Nothing here stops this dose. Carry on with this scenario's remaining bedside checks. This is not permission to give a real medicine.",
+      "short": "Continue with the remaining checks"
+    },
+    {
+      "id": "reprepare",
+      "label": "Stop and re-prepare",
+      "help": "The order is fine, but what was prepared isn't. Prepare it again and re-check.",
+      "short": "Stop and re-prepare"
+    },
+    {
+      "id": "pause_clarify",
+      "label": "Pause and clarify",
+      "help": "Don't give this dose now. Sort it out with your facilitator, the nurse in charge or the prescriber.",
+      "short": "Pause and clarify"
+    }
+  ],
+  "evidenceOptions": [
+    {
+      "id": "all_fields_match",
+      "label": "The order and the prepared medicine match on all five checks",
+      "short": "All five checks match"
+    },
+    {
+      "id": "total_amount",
+      "label": "The total amount prepared (strength × quantity)",
+      "short": "Total amount"
+    },
+    {
+      "id": "identifiers",
+      "label": "The patient identifiers (name, date of birth, MRN)",
+      "short": "Patient identifiers"
+    },
+    {
+      "id": "admin_record",
+      "label": "The administration record (when the last dose was given)",
+      "short": "Administration record"
+    },
+    {
+      "id": "allergy_record",
+      "label": "The allergy record",
+      "short": "Allergy record"
+    },
+    {
+      "id": "route_form",
+      "label": "The route or form prepared",
+      "short": "Route or form"
+    },
+    {
+      "id": "patient_words",
+      "label": "What the patient said",
+      "short": "What the patient said"
+    }
+  ],
+  "capabilityTags": [
+    {
+      "id": "identity",
+      "label": "Patient identity",
+      "fieldKeys": [
+        "patient"
+      ]
+    },
+    {
+      "id": "medicine_name",
+      "label": "Medicine name",
+      "fieldKeys": [
+        "medicine"
+      ]
+    },
+    {
+      "id": "total_dose",
+      "label": "Total amount",
+      "fieldKeys": [
+        "dose"
+      ]
+    },
+    {
+      "id": "route_form",
+      "label": "Route and form",
+      "fieldKeys": [
+        "route"
+      ]
+    },
+    {
+      "id": "administration_history",
+      "label": "Administration record and timing",
+      "fieldKeys": [
+        "time"
+      ]
+    },
+    {
+      "id": "allergy_context",
+      "label": "Allergies",
+      "fieldKeys": []
+    }
+  ],
+  "capabilityTagOrder": [
+    "identity",
+    "medicine_name",
+    "total_dose",
+    "route_form",
+    "administration_history",
+    "allergy_context"
+  ],
+  "knowledgeCard": {
+    "id": "before-you-start",
+    "version": "2.0.0",
+    "title": "Before you start",
+    "sections": [
+      {
+        "heading": "Units",
+        "body": "1 g = 1000 mg. 1 mg = 1000 micrograms. Write “micrograms” and “units” in full: “µg” and “U” are easily misread. Convert to the same unit before you compare."
+      },
+      {
+        "heading": "Total amount",
+        "body": "Tablets and capsules: strength × number. Liquids: strength (mg per mL) × volume (mL). Example with other numbers: 2 mg/mL × 3 mL = 6 mg."
+      },
+      {
+        "heading": "Routes and forms",
+        "body": "Oral: swallowed. Inhaled: breathed in from an inhaler, often through a spacer. Nebulised: a liquid turned into mist through a mask. IV: into a vein. Subcutaneous: under the skin. A different form can mean a different route and different units."
+      },
+      {
+        "heading": "PRN orders",
+        "body": "PRN means “when required”. A PRN order says the shortest gap between doses and may give a maximum for 24 hours. In this practice, use the interval written on each order; don't assume one rule for every medicine."
+      },
+      {
+        "heading": "Reading the chart",
+        "body": "The allergy box is at the top of the chart. The order says what, how, how much and when. The administration record shows what was actually given, with the date and time. Count across midnight using the date as well as the time."
+      },
+      {
+        "heading": "Patient identifiers",
+        "body": "Use three: full name, date of birth and MRN. Ask the patient to tell you their name and date of birth, rather than asking “Are you…?”."
+      },
+      {
+        "heading": "This practice",
+        "body": "First compare the order with what was prepared, on five checks. Then choose a next step and the evidence that decided it. Your partner can't see your answers until you've both signed."
+      }
+    ],
+    "sourceIds": [
+      "S09",
+      "S10",
+      "S07",
+      "S08"
+    ],
+    "reviewStatus": "draft",
+    "reviewerRole": null,
+    "reviewedAt": null,
+    "sourceCheckedAt": null
+  },
+  "medicineCards": [
+    {
+      "id": "paracetamol",
+      "name": "Paracetamol",
+      "version": "2.0.0",
+      "whatItIs": "A common medicine for pain and fever.",
+      "whatToWatch": "Check the total amount per dose (strength × number of tablets), how long since the last dose, and any 24-hour maximum written on the chart. Other medicines can also contain paracetamol.",
+      "category": null,
+      "sourceIds": [
+        "S13",
+        "S12"
+      ],
+      "openQuestions": [
+        "Confirm wording against the TGA paracetamol oral monograph and the specific product PI/CMI used (500 mg immediate-release tablet)."
+      ],
+      "reviewStatus": "draft",
+      "reviewerRole": null,
+      "reviewedAt": null,
+      "sourceCheckedAt": null
+    },
+    {
+      "id": "amoxicillin",
+      "name": "Amoxicillin",
+      "version": "2.0.0",
+      "whatItIs": "An antibiotic of the penicillin family.",
+      "whatToWatch": "Check the allergy record. A penicillin allergy applies to amoxicillin, even though its name doesn't say “penicillin”.",
+      "category": "APINCHS: A (antimicrobials)",
+      "sourceIds": [
+        "S14",
+        "S06",
+        "S12"
+      ],
+      "openQuestions": [
+        "Confirm penicillin-class statement in ACSQHC Medicine Finder / product PI; confirm 500 mg capsule presentation."
+      ],
+      "reviewStatus": "draft",
+      "reviewerRole": null,
+      "reviewedAt": null,
+      "sourceCheckedAt": null
+    },
+    {
+      "id": "morphine-oral-liquid",
+      "name": "Morphine (oral liquid)",
+      "version": "2.0.0",
+      "whatItIs": "A strong opioid pain medicine. In Australia it is a Schedule 8 controlled drug.",
+      "whatToWatch": "Read the strength on the bottle before working out the volume: oral morphine liquid comes in more than one strength. Check the time since the last dose and any 24-hour maximum on the chart. Too much can make breathing slow and shallow.",
+      "category": "APINCHS: N (narcotics/opioids) · Schedule 8",
+      "sourceIds": [
+        "S06",
+        "S11",
+        "S12"
+      ],
+      "openQuestions": [
+        "Confirm Australian oral morphine liquid strengths (1 mg/mL and 10 mg/mL used in cases C4 and T1).",
+        "Confirm S8 witnessing/disposal wording against an Australian hospital policy."
+      ],
+      "reviewStatus": "draft",
+      "reviewerRole": null,
+      "reviewedAt": null,
+      "sourceCheckedAt": null
+    },
+    {
+      "id": "salbutamol",
+      "name": "Salbutamol",
+      "version": "2.0.0",
+      "whatItIs": "A reliever that relaxes the airways (the “blue puffer”).",
+      "whatToWatch": "Inhalers are dosed in micrograms per puff; nebules are dosed in milligrams. The form decides the route and the units. Check the device as well as the name.",
+      "category": null,
+      "sourceIds": [
+        "S12",
+        "S09"
+      ],
+      "openQuestions": [
+        "Confirm 100 micrograms per actuation pMDI and 5 mg/2.5 mL nebule presentations in Australian PI/CMI."
+      ],
+      "reviewStatus": "draft",
+      "reviewerRole": null,
+      "reviewedAt": null,
+      "sourceCheckedAt": null
+    },
+    {
+      "id": "flucloxacillin",
+      "name": "Flucloxacillin",
+      "version": "2.0.0",
+      "whatItIs": "An antibiotic of the penicillin family, used for some skin and bone infections.",
+      "whatToWatch": "Check the allergy record. A penicillin allergy applies to flucloxacillin.",
+      "category": "APINCHS: A (antimicrobials)",
+      "sourceIds": [
+        "S12",
+        "S06"
+      ],
+      "openQuestions": [
+        "Confirm penicillin-class statement and 1 g vial presentation in product PI."
+      ],
+      "reviewStatus": "draft",
+      "reviewerRole": null,
+      "reviewedAt": null,
+      "sourceCheckedAt": null
+    }
+  ],
+  "templates": {
+    "personal": {
+      "fieldsAllCorrect": "You judged all five checks correctly.",
+      "foundMismatch": "You found the {field} mismatch.",
+      "missedMismatch": "You marked {field} as matching, but it didn't match.",
+      "falseMismatch": "You marked {field} as a mismatch, but the records agree.",
+      "decisionAccepted": "Your next step and evidence fit this scenario.",
+      "decisionActionOnly": "Your next step fits, but the evidence you chose isn't what decides it here.",
+      "decisionEvidenceOnly": "You pointed to the right evidence, but chose a different next step.",
+      "decisionNeither": "This scenario called for a different next step and evidence.",
+      "stoppedAfterOne": "There were {total} mismatches on this tray and you found {found}. After you find a problem, finish the list."
+    },
+    "pair": {
+      "noMismatches": "There were no mismatches between the order and the prepared medicine on this tray.",
+      "bothFound": "You both found the {field} mismatch.",
+      "onlyOne": "Only {seat} found the {field} mismatch. That is what a second checker is for — and it only works if each of you checks without seeing the other's answer.",
+      "sharedMiss": "You both missed the {field} mismatch. Agreement isn't accuracy.",
+      "identical": "You gave identical answers.",
+      "identicalButNotReference": "You gave identical answers, and they don't match the reference answer. Agreement isn't accuracy.",
+      "decisionSplit": "You chose different next steps or evidence.",
+      "decisionOnlyOne": "Only {seat} chose a next step and evidence that fit this scenario.",
+      "decisionNeither": "Neither of you chose a next step and evidence that fit this scenario.",
+      "bothFullyCorrect": "You both judged this case in line with the reference answer."
+    }
+  },
+  "suggestions": {
+    "identity": {
+      "one": "Worth reviewing: patient identifiers. Check name, date of birth and MRN on the label, band and chart.",
+      "multi": "In {k} different situations, patient identifiers needed another look. Check all three identifiers on the label, band and chart."
+    },
+    "medicine_name": {
+      "one": "Worth reviewing: the medicine name. Compare the full name on the order and the label.",
+      "multi": "In {k} different situations, the medicine name needed another look. Compare the full name, not how familiar it looks."
+    },
+    "total_dose": {
+      "one": "Worth reviewing: the total amount. Convert units, then multiply strength by quantity.",
+      "multi": "In {k} different situations, the total amount needed another look. Convert units, then multiply strength by quantity before you compare."
+    },
+    "route_form": {
+      "one": "Worth reviewing: route and form. Check the device and form as well as the medicine name.",
+      "multi": "In {k} different situations, route and form needed another look. A different form can mean a different route and different units."
+    },
+    "administration_history": {
+      "one": "Worth reviewing: the administration record. Compare the current date and time, the last dose given and the interval on this order.",
+      "multi": "In {k} different situations, the administration record needed another look. Compare the current date and time, the last dose and the order's interval before you choose a step."
+    },
+    "allergy_context": {
+      "one": "Worth reviewing: allergies. Check the allergy box and what family the medicine belongs to.",
+      "multi": "In {k} different situations, the allergy record needed another look. Check the allergy box and the medicine's family before you choose a step."
+    },
+    "none": "No errors in these cases. The new situations will show whether the method carries over.",
+    "limited": "These notes describe this practice only. Small numbers can mislead."
+  },
+  "cases": [
+    {
+      "caseId": "C1",
+      "caseVersion": "2.0.0",
+      "phase": "training",
+      "order": 1,
+      "title": "Morning tablets",
+      "learningObjectiveIds": [
+        "LO1"
+      ],
+      "decisionTag": "total_dose",
+      "simulationDateTime": "2026-11-11T08:00",
+      "secondCheckNote": null,
+      "patient": {
+        "familyName": "ELLIS",
+        "givenName": "Margaret",
+        "sex": "F",
+        "age": 78,
+        "dob": "14/03/1948",
+        "mrn": "4471023",
+        "bed": "12",
+        "reason": "Fall at home; right wrist fracture in a cast.",
+        "quote": "Still a bit achy, love. Are those my usual tablets?",
+        "band": "white",
+        "sprite": {
+          "hair": "#d8d3ca",
+          "skin": "#efc8a6",
+          "gown": "#b9cfe0"
+        }
+      },
+      "chart": {
+        "allergies": {
+          "text": "Nil known",
+          "checkedBy": "RN K. Lee 10/11"
+        },
+        "order": {
+          "type": "regular",
+          "medicine": "paracetamol",
+          "route": "Oral",
+          "dose": "1 g",
+          "frequency": "6-hourly",
+          "times": [
+            "02:00",
+            "08:00",
+            "14:00",
+            "20:00"
+          ],
+          "prnMax24h": null,
+          "indication": "Pain",
+          "prescriber": "Dr A. Patel",
+          "startDate": "10/11/2026"
+        },
+        "administrationRecord": [
+          {
+            "date": "11/11/2026",
+            "time": "02:00",
+            "dose": "1 g",
+            "route": "PO",
+            "givenBy": "KL",
+            "witness": null
+          }
+        ]
+      },
+      "prepared": {
+        "product": {
+          "name": "PARACETAMOL",
+          "strength": "500 mg",
+          "form": "tablet"
+        },
+        "quantity": "2 tablets",
+        "device": "Medicine cup",
+        "preparedFor": {
+          "name": "ELLIS, Margaret",
+          "dob": "14/03/1948",
+          "mrn": "4471023",
+          "bed": "12"
+        },
+        "forTime": "08:00 dose",
+        "preparedBy": "RN Jo"
+      },
+      "medicineCardIds": [
+        "paracetamol"
+      ],
+      "answerKey": {
+        "fields": {
+          "patient": "match",
+          "medicine": "match",
+          "dose": "match",
+          "route": "match",
+          "time": "match"
+        },
+        "acceptedPairs": [
+          {
+            "action": "continue_checks",
+            "evidenceId": "total_amount"
+          },
+          {
+            "action": "continue_checks",
+            "evidenceId": "all_fields_match"
+          }
+        ]
+      },
+      "feedback": {
+        "finding": "Nothing on this tray stops the dose. The order says 1 g; the cup holds 2 × 500 mg = 1000 mg = 1 g.",
+        "evidence": "Order: dose 1 g. Prepared: paracetamol 500 mg tablet × 2.",
+        "why": "Charts and packs often use different units. Convert before you compare: different numbers can be the same dose.",
+        "nextStep": "Carry on with the remaining bedside steps: ask Margaret to tell you her name and date of birth, explain the medicine, watch her take it, then sign the chart.",
+        "discussion": "Did you expect to find an error? How might expecting one change the way you check?",
+        "realWorld": null
+      },
+      "claims": [
+        {
+          "id": "C1-a",
+          "text": "1 g = 1000 mg",
+          "sourceIds": [
+            "S09"
+          ]
+        },
+        {
+          "id": "C1-b",
+          "text": "Paracetamol 500 mg tablet is a standard oral presentation",
+          "sourceIds": [
+            "S13",
+            "S12"
+          ]
+        }
+      ],
+      "openQuestions": [
+        "Is 1 g 6-hourly at 02/08/14/20 a realistic regular order for a 78-year-old in your context?"
+      ],
+      "changeNote": "v2.0.0 draft",
+      "reviewStatus": "draft",
+      "reviewerRole": null,
+      "reviewedAt": null,
+      "sourceCheckedAt": null
+    },
+    {
+      "caseId": "C2",
+      "caseVersion": "2.0.0",
+      "phase": "training",
+      "order": 2,
+      "title": "Antibiotic round",
+      "learningObjectiveIds": [
+        "LO1"
+      ],
+      "decisionTag": "identity",
+      "simulationDateTime": "2026-11-11T08:00",
+      "secondCheckNote": null,
+      "patient": {
+        "familyName": "SMYTH",
+        "givenName": "John",
+        "sex": "M",
+        "age": 64,
+        "dob": "03/07/1962",
+        "mrn": "4471302",
+        "bed": "15",
+        "reason": "Chest infection (pneumonia).",
+        "quote": "John Smyth. Third of July, sixty-two.",
+        "band": "white",
+        "sprite": {
+          "hair": "#6b4a32",
+          "skin": "#e2b38c",
+          "gown": "#b9cfe0"
+        }
+      },
+      "chart": {
+        "allergies": {
+          "text": "Nil known",
+          "checkedBy": "RN K. Lee 10/11"
+        },
+        "order": {
+          "type": "regular",
+          "medicine": "amoxicillin",
+          "route": "Oral",
+          "dose": "1 g",
+          "frequency": "8-hourly",
+          "times": [
+            "08:00",
+            "16:00",
+            "24:00"
+          ],
+          "prnMax24h": null,
+          "indication": "Pneumonia",
+          "prescriber": "Dr L. Chen",
+          "startDate": "10/11/2026"
+        },
+        "administrationRecord": [
+          {
+            "date": "11/11/2026",
+            "time": "00:00",
+            "dose": "1 g",
+            "route": "PO",
+            "givenBy": "KL",
+            "witness": null
+          }
+        ]
+      },
+      "prepared": {
+        "product": {
+          "name": "AMOXICILLIN",
+          "strength": "500 mg",
+          "form": "capsule"
+        },
+        "quantity": "2 capsules",
+        "device": "Medicine cup",
+        "preparedFor": {
+          "name": "SMITH, John",
+          "dob": "30/07/1952",
+          "mrn": "4471320",
+          "bed": "16"
+        },
+        "forTime": "08:00 dose",
+        "preparedBy": "RN Jo"
+      },
+      "medicineCardIds": [
+        "amoxicillin"
+      ],
+      "answerKey": {
+        "fields": {
+          "patient": "mismatch",
+          "medicine": "match",
+          "dose": "match",
+          "route": "match",
+          "time": "match"
+        },
+        "acceptedPairs": [
+          {
+            "action": "reprepare",
+            "evidenceId": "identifiers"
+          },
+          {
+            "action": "pause_clarify",
+            "evidenceId": "identifiers"
+          }
+        ]
+      },
+      "feedback": {
+        "finding": "The capsules were dispensed for John Smith in Bed 16, not John Smyth in Bed 15.",
+        "evidence": "Label: SMITH, John · DOB 30/07/1952 · MRN 4471320. Band and chart: SMYTH, John · DOB 03/07/1962 · MRN 4471302.",
+        "why": "Same first name, a similar surname and neighbouring beds is exactly when wrong-patient errors happen. All three identifiers must match, and the patient should tell you their name and date of birth rather than confirm one you read out.",
+        "nextStep": "Don't give these capsules. Return them, prepare John Smyth's dose from his own supply and re-check. Tell the nurse in charge so both patients can be flagged as having similar names.",
+        "discussion": "Which identifier did you check first? Would asking “Are you John Smith?” have caught this?",
+        "realWorld": null
+      },
+      "claims": [
+        {
+          "id": "C2-a",
+          "text": "Patient identification bands carry three core identifiers: name, date of birth and MRN",
+          "sourceIds": [
+            "S08",
+            "S07"
+          ]
+        }
+      ],
+      "openQuestions": [
+        "Does a patient-specific dispensed label for amoxicillin fit Australian ward practice, or should the mismatch sit on a 'prepared for' tray label instead?",
+        "Is a similar-name alert a usual local step?"
+      ],
+      "changeNote": "v2.0.0 draft",
+      "reviewStatus": "draft",
+      "reviewerRole": null,
+      "reviewedAt": null,
+      "sourceCheckedAt": null
+    },
+    {
+      "caseId": "C3",
+      "caseVersion": "2.0.0",
+      "phase": "training",
+      "order": 3,
+      "title": "After surgery",
+      "learningObjectiveIds": [
+        "LO1"
+      ],
+      "decisionTag": "total_dose",
+      "simulationDateTime": "2026-11-11T08:00",
+      "secondCheckNote": null,
+      "patient": {
+        "familyName": "HADDAD",
+        "givenName": "Lina",
+        "sex": "F",
+        "age": 45,
+        "dob": "21/05/1981",
+        "mrn": "4471551",
+        "bed": "9",
+        "reason": "Day 1 after keyhole appendix surgery.",
+        "quote": "It's sore when I move, but I can manage.",
+        "band": "white",
+        "sprite": {
+          "hair": "#2b1d16",
+          "skin": "#c99572",
+          "gown": "#b9cfe0"
+        }
+      },
+      "chart": {
+        "allergies": {
+          "text": "Nil known",
+          "checkedBy": "RN K. Lee 10/11"
+        },
+        "order": {
+          "type": "regular",
+          "medicine": "paracetamol",
+          "route": "Oral",
+          "dose": "1 g",
+          "frequency": "6-hourly",
+          "times": [
+            "02:00",
+            "08:00",
+            "14:00",
+            "20:00"
+          ],
+          "prnMax24h": null,
+          "indication": "Pain",
+          "prescriber": "Dr A. Patel",
+          "startDate": "10/11/2026"
+        },
+        "administrationRecord": [
+          {
+            "date": "11/11/2026",
+            "time": "02:00",
+            "dose": "1 g",
+            "route": "PO",
+            "givenBy": "KL",
+            "witness": null
+          }
+        ]
+      },
+      "prepared": {
+        "product": {
+          "name": "PARACETAMOL",
+          "strength": "500 mg",
+          "form": "tablet"
+        },
+        "quantity": "1 tablet",
+        "device": "Medicine cup",
+        "preparedFor": {
+          "name": "HADDAD, Lina",
+          "dob": "21/05/1981",
+          "mrn": "4471551",
+          "bed": "9"
+        },
+        "forTime": "08:00 dose",
+        "preparedBy": "RN Jo"
+      },
+      "medicineCardIds": [
+        "paracetamol"
+      ],
+      "answerKey": {
+        "fields": {
+          "patient": "match",
+          "medicine": "match",
+          "dose": "mismatch",
+          "route": "match",
+          "time": "match"
+        },
+        "acceptedPairs": [
+          {
+            "action": "reprepare",
+            "evidenceId": "total_amount"
+          }
+        ]
+      },
+      "feedback": {
+        "finding": "One 500 mg tablet is half of the 1 g ordered.",
+        "evidence": "Order: dose 1 g. Prepared: paracetamol 500 mg tablet × 1 = 500 mg.",
+        "why": "Same medicine and same strength as Case 1; only the number changed. Check the total amount, not just the strength. Giving too little matters too: Lina's pain may not be controlled.",
+        "nextStep": "Don't give it as prepared. Prepare the full dose and re-check. Don't change the order yourself.",
+        "discussion": "Did you compare the strength, or the total amount?",
+        "realWorld": null
+      },
+      "claims": [
+        {
+          "id": "C3-a",
+          "text": "Total amount = strength × number of tablets",
+          "sourceIds": [
+            "S09"
+          ]
+        }
+      ],
+      "openQuestions": [],
+      "changeNote": "v2.0.0 draft",
+      "reviewStatus": "draft",
+      "reviewerRole": null,
+      "reviewedAt": null,
+      "sourceCheckedAt": null
+    },
+    {
+      "caseId": "C4",
+      "caseVersion": "2.0.0",
+      "phase": "training",
+      "order": 4,
+      "title": "Pain relief request",
+      "learningObjectiveIds": [
+        "LO2",
+        "LO3"
+      ],
+      "decisionTag": "administration_history",
+      "simulationDateTime": "2026-11-11T08:15",
+      "secondCheckNote": "Schedule 8 medicine: this ward's policy requires two checkers.",
+      "patient": {
+        "familyName": "WILLIAMS",
+        "givenName": "Arthur",
+        "sex": "M",
+        "age": 83,
+        "dob": "02/09/1943",
+        "mrn": "4472816",
+        "bed": "14",
+        "reason": "Hip fracture, waiting for surgery.",
+        "quote": "Could I have something for the pain? The night nurse gave me some at about half past seven.",
+        "band": "white",
+        "sprite": {
+          "hair": "#c9c4bb",
+          "skin": "#eac3a1",
+          "gown": "#a9c7dc"
+        }
+      },
+      "chart": {
+        "allergies": {
+          "text": "Nil known",
+          "checkedBy": "RN J. Tan 10/11"
+        },
+        "order": {
+          "type": "prn",
+          "medicine": "morphine (oral liquid)",
+          "route": "Oral",
+          "dose": "2.5 mg",
+          "frequency": "4-hourly PRN",
+          "times": [],
+          "prnMax24h": "15 mg",
+          "indication": "Pain",
+          "prescriber": "Dr S. Okafor",
+          "startDate": "10/11/2026"
+        },
+        "administrationRecord": [
+          {
+            "date": "11/11/2026",
+            "time": "01:30",
+            "dose": "2.5 mg",
+            "route": "PO",
+            "givenBy": "JT",
+            "witness": "MK"
+          },
+          {
+            "date": "11/11/2026",
+            "time": "07:30",
+            "dose": "2.5 mg",
+            "route": "PO",
+            "givenBy": "JT",
+            "witness": "MK"
+          }
+        ]
+      },
+      "prepared": {
+        "product": {
+          "name": "MORPHINE HYDROCHLORIDE",
+          "strength": "1 mg/mL",
+          "form": "oral solution",
+          "schedule": "S8"
+        },
+        "quantity": "2.5 mL",
+        "device": "Oral syringe",
+        "preparedFor": {
+          "name": "WILLIAMS, Arthur",
+          "dob": "02/09/1943",
+          "mrn": "4472816",
+          "bed": "14"
+        },
+        "forTime": "PRN request 08:15",
+        "preparedBy": "RN Jo"
+      },
+      "medicineCardIds": [
+        "morphine-oral-liquid"
+      ],
+      "answerKey": {
+        "fields": {
+          "patient": "match",
+          "medicine": "match",
+          "dose": "match",
+          "route": "match",
+          "time": "match"
+        },
+        "acceptedPairs": [
+          {
+            "action": "pause_clarify",
+            "evidenceId": "admin_record"
+          }
+        ]
+      },
+      "feedback": {
+        "finding": "Everything on the tray matches the order, and it still isn't time for another dose.",
+        "evidence": "Administration record: 2.5 mg at 07:30 today. Order: 4-hourly PRN. Ward time: 08:15. The earliest next dose is 11:30.",
+        "why": "Matching records don't tell you when the last dose was given; only the administration record does. Arthur told you, and the record confirmed it.",
+        "nextStep": "Don't give it now. Dispose of the drawn-up dose following your hospital's Schedule 8 procedure, with a witness, and record it. Tell the nurse in charge, reassess Arthur's pain and involve the prescriber if it isn't controlled.",
+        "discussion": "If your partner had said “it all matches”, would you still have looked at the administration record?",
+        "realWorld": "Why two people here: many Australian hospitals require two people to check and witness Schedule 8 medicines such as morphine. In a 2026 simulation trial, independent double checks helped experienced nurses find more errors, but not early-career nurses."
+      },
+      "claims": [
+        {
+          "id": "C4-a",
+          "text": "PRN orders state the interval between doses; the administration record shows doses given",
+          "sourceIds": [
+            "S10"
+          ]
+        },
+        {
+          "id": "C4-b",
+          "text": "Many Australian hospitals require two people to check and witness S8 medicines",
+          "sourceIds": [
+            "S11"
+          ]
+        },
+        {
+          "id": "C4-c",
+          "text": "2026 simulation trial: IDC improved detection for experienced but not early-career nurses",
+          "sourceIds": [
+            "S05"
+          ]
+        },
+        {
+          "id": "C4-d",
+          "text": "Opioids are APINCHS high-risk medicines",
+          "sourceIds": [
+            "S06"
+          ]
+        }
+      ],
+      "openQuestions": [
+        "Is 2.5 mg oral morphine 4-hourly PRN (max 15 mg/24 h) plausible for an 83-year-old in your context?",
+        "Confirm S8 disposal-with-witness wording."
+      ],
+      "changeNote": "v2.0.0 draft",
+      "reviewStatus": "draft",
+      "reviewerRole": null,
+      "reviewedAt": null,
+      "sourceCheckedAt": null
+    },
+    {
+      "caseId": "C5",
+      "caseVersion": "2.0.0",
+      "phase": "training",
+      "order": 5,
+      "title": "First dose of a new antibiotic",
+      "learningObjectiveIds": [
+        "LO2",
+        "LO3"
+      ],
+      "decisionTag": "allergy_context",
+      "simulationDateTime": "2026-11-11T08:00",
+      "secondCheckNote": null,
+      "patient": {
+        "familyName": "NGUYEN",
+        "givenName": "Grace",
+        "sex": "F",
+        "age": 52,
+        "dob": "09/12/1973",
+        "mrn": "4473390",
+        "bed": "3",
+        "reason": "Chest infection (pneumonia).",
+        "quote": "Is this the new antibiotic? The doctor said I'd start one today.",
+        "band": "red",
+        "sprite": {
+          "hair": "#151515",
+          "skin": "#e8c3a0",
+          "gown": "#b9cfe0"
+        }
+      },
+      "chart": {
+        "allergies": {
+          "text": "Penicillin — hives and lip swelling (2019)",
+          "checkedBy": "RN J. Tan 10/11"
+        },
+        "order": {
+          "type": "regular",
+          "medicine": "amoxicillin",
+          "route": "Oral",
+          "dose": "1 g",
+          "frequency": "8-hourly",
+          "times": [
+            "08:00",
+            "16:00",
+            "24:00"
+          ],
+          "prnMax24h": null,
+          "indication": "Pneumonia",
+          "prescriber": "Dr L. Chen",
+          "startDate": "11/11/2026"
+        },
+        "administrationRecord": []
+      },
+      "prepared": {
+        "product": {
+          "name": "AMOXICILLIN",
+          "strength": "500 mg",
+          "form": "capsule"
+        },
+        "quantity": "2 capsules",
+        "device": "Medicine cup",
+        "preparedFor": {
+          "name": "NGUYEN, Grace",
+          "dob": "09/12/1973",
+          "mrn": "4473390",
+          "bed": "3"
+        },
+        "forTime": "08:00 dose",
+        "preparedBy": "RN Jo"
+      },
+      "medicineCardIds": [
+        "amoxicillin"
+      ],
+      "answerKey": {
+        "fields": {
+          "patient": "match",
+          "medicine": "match",
+          "dose": "match",
+          "route": "match",
+          "time": "match"
+        },
+        "acceptedPairs": [
+          {
+            "action": "pause_clarify",
+            "evidenceId": "allergy_record"
+          }
+        ]
+      },
+      "feedback": {
+        "finding": "The tray matches the order on all five checks, but Grace has a recorded penicillin allergy, and amoxicillin is a penicillin.",
+        "evidence": "Allergy box: Penicillin — hives and lip swelling (2019). Red ID band. Medicine card: amoxicillin belongs to the penicillin family.",
+        "why": "The five checks don't include allergies. A red band tells you there is an alert; the chart tells you what it is.",
+        "nextStep": "Don't give it. Tell the prescriber, who decides what to do instead, and document what happened. Don't choose another antibiotic yourself.",
+        "discussion": "Where did you find the allergy? What made you look, or not look?",
+        "realWorld": null
+      },
+      "claims": [
+        {
+          "id": "C5-a",
+          "text": "Amoxicillin is a penicillin-class antibiotic",
+          "sourceIds": [
+            "S14"
+          ]
+        },
+        {
+          "id": "C5-b",
+          "text": "A red band signals an alert; the allergy itself is recorded in the chart, not on the band",
+          "sourceIds": [
+            "S08",
+            "S07"
+          ]
+        }
+      ],
+      "openQuestions": [
+        "Confirm red-band practice in ACT hospitals (NSW policy used as source)."
+      ],
+      "changeNote": "v2.0.0 draft",
+      "reviewStatus": "draft",
+      "reviewerRole": null,
+      "reviewedAt": null,
+      "sourceCheckedAt": null
+    },
+    {
+      "caseId": "C6",
+      "caseVersion": "2.0.0",
+      "phase": "training",
+      "order": 6,
+      "title": "Breathless this morning",
+      "learningObjectiveIds": [
+        "LO1",
+        "LO3"
+      ],
+      "decisionTag": "route_form",
+      "simulationDateTime": "2026-11-11T08:00",
+      "secondCheckNote": null,
+      "patient": {
+        "familyName": "O'NEILL",
+        "givenName": "Peter",
+        "sex": "M",
+        "age": 71,
+        "dob": "17/01/1955",
+        "mrn": "4472207",
+        "bed": "7",
+        "reason": "Flare-up of COPD (a long-term lung disease).",
+        "quote": "I'm a bit puffed. At home I use my blue puffer with the spacer.",
+        "band": "white",
+        "sprite": {
+          "hair": "#8a8378",
+          "skin": "#e9bd98",
+          "gown": "#b9cfe0"
+        }
+      },
+      "chart": {
+        "allergies": {
+          "text": "Nil known",
+          "checkedBy": "RN K. Lee 10/11"
+        },
+        "order": {
+          "type": "prn",
+          "medicine": "salbutamol",
+          "route": "Inhaled (pMDI with spacer)",
+          "dose": "200 micrograms (2 puffs)",
+          "frequency": "4-hourly PRN",
+          "times": [],
+          "prnMax24h": null,
+          "indication": "Breathlessness or wheeze",
+          "prescriber": "Dr A. Patel",
+          "startDate": "10/11/2026"
+        },
+        "administrationRecord": [
+          {
+            "date": "11/11/2026",
+            "time": "02:40",
+            "dose": "200 micrograms",
+            "route": "INH",
+            "givenBy": "KL",
+            "witness": null
+          }
+        ]
+      },
+      "prepared": {
+        "product": {
+          "name": "SALBUTAMOL",
+          "strength": "5 mg/2.5 mL",
+          "form": "nebule"
+        },
+        "quantity": "1 nebule",
+        "device": "Nebuliser mask",
+        "preparedFor": {
+          "name": "O'NEILL, Peter",
+          "dob": "17/01/1955",
+          "mrn": "4472207",
+          "bed": "7"
+        },
+        "forTime": "PRN request 08:00",
+        "preparedBy": "RN Jo"
+      },
+      "medicineCardIds": [
+        "salbutamol"
+      ],
+      "answerKey": {
+        "fields": {
+          "patient": "match",
+          "medicine": "match",
+          "dose": "mismatch",
+          "route": "mismatch",
+          "time": "match"
+        },
+        "acceptedPairs": [
+          {
+            "action": "reprepare",
+            "evidenceId": "route_form"
+          },
+          {
+            "action": "reprepare",
+            "evidenceId": "total_amount"
+          }
+        ]
+      },
+      "feedback": {
+        "finding": "Two problems: a nebule is a different form and route from the ordered inhaler, and 5 mg is 25 times 200 micrograms.",
+        "evidence": "Order: inhaled via pMDI with spacer, 200 micrograms (2 puffs). Prepared: salbutamol 5 mg/2.5 mL nebule with a nebuliser mask.",
+        "why": "The medicine name matches, but the form changes the route and the units. Write micrograms in full so they can't be misread as milligrams.",
+        "nextStep": "Re-prepare as ordered — inhaler with spacer, 2 puffs — and re-check. If you think Peter needs a nebuliser, that is a conversation with the prescriber, not a substitution.",
+        "discussion": "After you found the first problem, did you finish the list?",
+        "realWorld": null
+      },
+      "claims": [
+        {
+          "id": "C6-a",
+          "text": "Write 'micrograms' in full; µg can be misread",
+          "sourceIds": [
+            "S09"
+          ]
+        },
+        {
+          "id": "C6-b",
+          "text": "Salbutamol pMDI 100 micrograms per actuation; nebule 5 mg/2.5 mL",
+          "sourceIds": [
+            "S12"
+          ]
+        }
+      ],
+      "openQuestions": [
+        "Should 'pause and clarify' also be accepted here (breathless patient)? Reviewer decision."
+      ],
+      "changeNote": "v2.0.0 draft",
+      "reviewStatus": "draft",
+      "reviewerRole": null,
+      "reviewedAt": null,
+      "sourceCheckedAt": null
+    },
+    {
+      "caseId": "T1",
+      "caseVersion": "2.0.0",
+      "phase": "transfer",
+      "order": 7,
+      "title": "New situation 1 · A liquid dose",
+      "learningObjectiveIds": [
+        "LO1"
+      ],
+      "decisionTag": "total_dose",
+      "simulationDateTime": "2026-11-11T10:00",
+      "secondCheckNote": "Schedule 8 medicine: this ward's policy requires two checkers.",
+      "patient": {
+        "familyName": "BROWN",
+        "givenName": "Helen",
+        "sex": "F",
+        "age": 69,
+        "dob": "30/04/1957",
+        "mrn": "4474012",
+        "bed": "18",
+        "reason": "Back pain after a fall.",
+        "quote": "The pain's getting worse. Can I have something?",
+        "band": "white",
+        "sprite": {
+          "hair": "#a8743f",
+          "skin": "#f0c9a0",
+          "gown": "#b9cfe0"
+        }
+      },
+      "chart": {
+        "allergies": {
+          "text": "Nil known",
+          "checkedBy": "RN J. Tan 10/11"
+        },
+        "order": {
+          "type": "prn",
+          "medicine": "morphine (oral liquid)",
+          "route": "Oral",
+          "dose": "5 mg",
+          "frequency": "4-hourly PRN",
+          "times": [],
+          "prnMax24h": "30 mg",
+          "indication": "Pain",
+          "prescriber": "Dr S. Okafor",
+          "startDate": "10/11/2026"
+        },
+        "administrationRecord": [
+          {
+            "date": "11/11/2026",
+            "time": "05:20",
+            "dose": "5 mg",
+            "route": "PO",
+            "givenBy": "JT",
+            "witness": "MK"
+          }
+        ]
+      },
+      "prepared": {
+        "product": {
+          "name": "MORPHINE HYDROCHLORIDE",
+          "strength": "10 mg/mL",
+          "form": "oral solution",
+          "schedule": "S8"
+        },
+        "quantity": "5 mL",
+        "device": "Oral syringe",
+        "preparedFor": {
+          "name": "BROWN, Helen",
+          "dob": "30/04/1957",
+          "mrn": "4474012",
+          "bed": "18"
+        },
+        "forTime": "PRN request 10:00",
+        "preparedBy": "RN Jo"
+      },
+      "medicineCardIds": [
+        "morphine-oral-liquid"
+      ],
+      "answerKey": {
+        "fields": {
+          "patient": "match",
+          "medicine": "match",
+          "dose": "mismatch",
+          "route": "match",
+          "time": "match"
+        },
+        "acceptedPairs": [
+          {
+            "action": "reprepare",
+            "evidenceId": "total_amount"
+          }
+        ]
+      },
+      "feedback": {
+        "finding": "10 mg/mL × 5 mL = 50 mg, ten times the 5 mg ordered.",
+        "evidence": "Order: 5 mg. Label: 10 mg/mL. Syringe: 5 mL.",
+        "why": "Oral morphine liquid comes in more than one strength, so a volume means nothing until you've read the strength.",
+        "nextStep": "Don't give it. Dispose of the drawn-up dose following your hospital's Schedule 8 procedure, with a witness, and record it. Re-prepare from the correct strength and re-check.",
+        "discussion": "Which number did you read first: the volume or the strength?",
+        "realWorld": null
+      },
+      "claims": [
+        {
+          "id": "T1-a",
+          "text": "Oral morphine liquid is available in more than one strength",
+          "sourceIds": [
+            "S12"
+          ]
+        }
+      ],
+      "openQuestions": [
+        "Confirm 10 mg/mL oral morphine liquid availability; time since last dose 05:20→10:00 = 4 h 40 min, so timing is not a problem here."
+      ],
+      "changeNote": "v2.0.0 draft",
+      "reviewStatus": "draft",
+      "reviewerRole": null,
+      "reviewedAt": null,
+      "sourceCheckedAt": null
+    },
+    {
+      "caseId": "T2",
+      "caseVersion": "2.0.0",
+      "phase": "transfer",
+      "order": 8,
+      "title": "New situation 2 · Overnight pain relief",
+      "learningObjectiveIds": [
+        "LO2"
+      ],
+      "decisionTag": "administration_history",
+      "simulationDateTime": "2026-11-11T04:00",
+      "secondCheckNote": null,
+      "patient": {
+        "familyName": "KOWALSKI",
+        "givenName": "Daniel",
+        "sex": "M",
+        "age": 38,
+        "dob": "12/08/1988",
+        "mrn": "4474530",
+        "bed": "5",
+        "reason": "Day 2 after knee surgery.",
+        "quote": "Sorry to bother you at this hour — my knee's throbbing.",
+        "band": "white",
+        "sprite": {
+          "hair": "#3a2b20",
+          "skin": "#e6b48e",
+          "gown": "#b9cfe0"
+        }
+      },
+      "chart": {
+        "allergies": {
+          "text": "Nil known",
+          "checkedBy": "RN K. Lee 09/11"
+        },
+        "order": {
+          "type": "prn",
+          "medicine": "paracetamol",
+          "route": "Oral",
+          "dose": "1 g",
+          "frequency": "6-hourly PRN",
+          "times": [],
+          "prnMax24h": "4 g",
+          "indication": "Pain",
+          "prescriber": "Dr A. Patel",
+          "startDate": "09/11/2026"
+        },
+        "administrationRecord": [
+          {
+            "date": "10/11/2026",
+            "time": "15:30",
+            "dose": "1 g",
+            "route": "PO",
+            "givenBy": "RS",
+            "witness": null
+          },
+          {
+            "date": "10/11/2026",
+            "time": "21:40",
+            "dose": "1 g",
+            "route": "PO",
+            "givenBy": "RS",
+            "witness": null
+          }
+        ]
+      },
+      "prepared": {
+        "product": {
+          "name": "PARACETAMOL",
+          "strength": "500 mg",
+          "form": "tablet"
+        },
+        "quantity": "2 tablets",
+        "device": "Medicine cup",
+        "preparedFor": {
+          "name": "KOWALSKI, Daniel",
+          "dob": "12/08/1988",
+          "mrn": "4474530",
+          "bed": "5"
+        },
+        "forTime": "PRN request 04:00",
+        "preparedBy": "RN Jo"
+      },
+      "medicineCardIds": [
+        "paracetamol"
+      ],
+      "answerKey": {
+        "fields": {
+          "patient": "match",
+          "medicine": "match",
+          "dose": "match",
+          "route": "match",
+          "time": "match"
+        },
+        "acceptedPairs": [
+          {
+            "action": "continue_checks",
+            "evidenceId": "admin_record"
+          }
+        ]
+      },
+      "feedback": {
+        "finding": "It is due: the last dose was 21:40 on 10 November, and 6 hours later is 03:40 on 11 November. It is now 04:00.",
+        "evidence": "Administration record: 1 g at 21:40 on 10/11. Order: 6-hourly PRN, maximum 4 g in 24 hours. Ward time: 04:00 on 11/11. Doses in the last 24 hours: 2 g, so this dose keeps the total at 3 g.",
+        "why": "Count across midnight using the date as well as the time. Checking the record can tell you to go ahead, not only to stop.",
+        "nextStep": "Carry on with the remaining bedside steps: ask Daniel to tell you his name and date of birth, explain the medicine, watch him take it, then sign.",
+        "discussion": "What told you it was due: the time alone, or the time and the date?",
+        "realWorld": null
+      },
+      "claims": [
+        {
+          "id": "T2-a",
+          "text": "The interval and 24-hour maximum come from this order, not a universal rule",
+          "sourceIds": [
+            "S10"
+          ]
+        }
+      ],
+      "openQuestions": [
+        "Is 1 g 6-hourly PRN with 4 g/24 h max a plausible order for this patient?"
+      ],
+      "changeNote": "v2.0.0 draft",
+      "reviewStatus": "draft",
+      "reviewerRole": null,
+      "reviewedAt": null,
+      "sourceCheckedAt": null
+    },
+    {
+      "caseId": "T3",
+      "caseVersion": "2.0.0",
+      "phase": "transfer",
+      "order": 9,
+      "title": "New situation 3 · A different antibiotic",
+      "learningObjectiveIds": [
+        "LO2",
+        "LO3"
+      ],
+      "decisionTag": "allergy_context",
+      "simulationDateTime": "2026-11-11T08:00",
+      "secondCheckNote": null,
+      "patient": {
+        "familyName": "RAHMAN",
+        "givenName": "Aisha",
+        "sex": "F",
+        "age": 34,
+        "dob": "05/02/1992",
+        "mrn": "4474777",
+        "bed": "11",
+        "reason": "Skin infection (cellulitis) of the lower leg.",
+        "quote": "My leg feels hot and tight. The doctor said I'm starting a drip antibiotic.",
+        "band": "red",
+        "sprite": {
+          "hair": "#1e1410",
+          "skin": "#b98463",
+          "gown": "#b9cfe0"
+        }
+      },
+      "chart": {
+        "allergies": {
+          "text": "Penicillin — rash (2015)",
+          "checkedBy": "RN J. Tan 10/11"
+        },
+        "order": {
+          "type": "regular",
+          "medicine": "flucloxacillin",
+          "route": "IV",
+          "dose": "2 g",
+          "frequency": "6-hourly",
+          "times": [
+            "08:00",
+            "14:00",
+            "20:00",
+            "02:00"
+          ],
+          "prnMax24h": null,
+          "indication": "Cellulitis",
+          "prescriber": "Dr L. Chen",
+          "startDate": "11/11/2026"
+        },
+        "administrationRecord": []
+      },
+      "prepared": {
+        "product": {
+          "name": "FLUCLOXACILLIN",
+          "strength": "1 g",
+          "form": "vial (powder for injection)"
+        },
+        "quantity": "2 vials, reconstituted",
+        "device": "IV infusion bag",
+        "preparedFor": {
+          "name": "RAHMAN, Aisha",
+          "dob": "05/02/1992",
+          "mrn": "4474777",
+          "bed": "11"
+        },
+        "forTime": "08:00 dose",
+        "preparedBy": "RN Jo"
+      },
+      "medicineCardIds": [
+        "flucloxacillin"
+      ],
+      "answerKey": {
+        "fields": {
+          "patient": "match",
+          "medicine": "match",
+          "dose": "match",
+          "route": "match",
+          "time": "match"
+        },
+        "acceptedPairs": [
+          {
+            "action": "pause_clarify",
+            "evidenceId": "allergy_record"
+          }
+        ]
+      },
+      "feedback": {
+        "finding": "Flucloxacillin is also a penicillin, and Aisha has a recorded penicillin allergy.",
+        "evidence": "Allergy box: Penicillin — rash (2015). Red ID band. Medicine card: flucloxacillin belongs to the penicillin family.",
+        "why": "Medicine names don't always say which family they belong to. Check the medicine information against the allergy record.",
+        "nextStep": "Don't give it. Tell the prescriber, who decides what to do instead, and document what happened.",
+        "discussion": "What told you flucloxacillin is a penicillin?",
+        "realWorld": null
+      },
+      "claims": [
+        {
+          "id": "T3-a",
+          "text": "Flucloxacillin is a penicillin-class antibiotic",
+          "sourceIds": [
+            "S12"
+          ]
+        }
+      ],
+      "openQuestions": [
+        "Confirm flucloxacillin 2 g IV 6-hourly is a plausible cellulitis order; confirm penicillin-class wording in PI."
+      ],
+      "changeNote": "v2.0.0 draft",
+      "reviewStatus": "draft",
+      "reviewerRole": null,
+      "reviewedAt": null,
+      "sourceCheckedAt": null
+    }
+  ],
+  "sources": [
+    {
+      "id": "S01",
+      "group": "independent checking",
+      "org": "ISMP Canada",
+      "title": "Definitions of Terms: Independent Double Check",
+      "url": "https://ismpcanada.ca/resource/definitions-of-terms/",
+      "published": null,
+      "accessed": "2026-11-11",
+      "supports": "Why the partner's answer is hidden before both sign",
+      "limits": "Hiding answers does not guarantee independence or remove shared blind spots",
+      "verification": "listed in v1.0 baseline"
+    },
+    {
+      "id": "S02",
+      "group": "independent checking",
+      "org": "ISMP / ECRI",
+      "title": "Independent Double Checks: Worth the Effort if Used Judiciously and Properly",
+      "url": "https://home.ecri.org/blogs/ismp-alerts-and-articles-library/independent-double-checks-worth-the-effort-if-used-judiciously-and-properly",
+      "published": "2019",
+      "accessed": "2026-11-11",
+      "supports": "Double checks should be used selectively",
+      "limits": "Effect figures in the article do not transfer to this game",
+      "verification": "opened 2026-11-11"
+    },
+    {
+      "id": "S03",
+      "group": "independent checking",
+      "org": "Koyama AK et al.",
+      "title": "Effectiveness of double checking to reduce medication administration errors: a systematic review. BMJ Qual Saf 2020;29(7):595–603",
+      "url": "https://doi.org/10.1136/bmjqs-2019-009552",
+      "published": "2020",
+      "accessed": "2026-11-11",
+      "supports": "Evidence of effect is limited",
+      "limits": "",
+      "verification": "listed in v1.0 baseline"
+    },
+    {
+      "id": "S04",
+      "group": "independent checking",
+      "org": "Westbrook JI et al.",
+      "title": "Associations between double-checking and medication administration errors: a direct observational study of paediatric inpatients. BMJ Qual Saf 2021;30(4):320–330",
+      "url": "https://doi.org/10.1136/bmjqs-2020-011473",
+      "published": "2021",
+      "accessed": "2026-11-11",
+      "supports": "Mandated checks were rarely independent; primed checks showed no benefit",
+      "limits": "Paediatric hospital setting",
+      "verification": "opened 2026-11-11"
+    },
+    {
+      "id": "S05",
+      "group": "independent checking",
+      "org": "Westbrook JI, McMullan RD, Fitzpatrick E et al.",
+      "title": "Is independent double-checking superior to single-checking in medication administration error detection? A randomised controlled simulation trial. BMJ Qual Saf 2026",
+      "url": "https://researchers.mq.edu.au/en/publications/is-independent-double-checking-superior-to-single-checking-in-med/",
+      "published": "2026 (epub 13 Mar)",
+      "accessed": "2026-11-11",
+      "supports": "IDC improved detection for experienced nurses but not early-career nurses; social loafing",
+      "limits": "Simulation; paediatric nurses",
+      "verification": "opened 2026-11-11"
+    },
+    {
+      "id": "S06",
+      "group": "medicines",
+      "org": "ACSQHC",
+      "title": "High risk medicines and systems (APINCHS)",
+      "url": "https://www.safetyandquality.gov.au/clinical-topics/medicines-safety-and-quality/high-risk-medicines-and-systems",
+      "published": null,
+      "accessed": "2026-11-11",
+      "supports": "APINCHS categories",
+      "limits": "Categorisation varies between states and services",
+      "verification": "opened 2026-11-11"
+    },
+    {
+      "id": "S07",
+      "group": "charts and records",
+      "org": "ACSQHC",
+      "title": "Specifications for a standard patient identification band",
+      "url": "https://www.safetyandquality.gov.au/sites/default/files/migrated/Specs-PatID-Band.pdf",
+      "published": null,
+      "accessed": "2026-11-11",
+      "supports": "White band; red band only for alerts",
+      "limits": "Implementation varies by jurisdiction",
+      "verification": "opened 2026-11-11"
+    },
+    {
+      "id": "S08",
+      "group": "charts and records",
+      "org": "NSW Health",
+      "title": "PD2021_033 Patient Identification Bands",
+      "url": "https://www1.health.nsw.gov.au/pds/ActivePDSDocuments/PD2021_033.pdf",
+      "published": "2021",
+      "accessed": "2026-11-11",
+      "supports": "Three core identifiers; red band for medicine allergy; allergy not written on band",
+      "limits": "NSW policy; check ACT practice",
+      "verification": "opened 2026-11-11"
+    },
+    {
+      "id": "S09",
+      "group": "charts and records",
+      "org": "ACSQHC",
+      "title": "Recommendations for safe use of medicines terminology",
+      "url": "https://www.safetyandquality.gov.au/sites/default/files/2024-12/recommendations-for-safe-use-of-medicines-terminology.pdf",
+      "published": "2024",
+      "accessed": "2026-11-11",
+      "supports": "Units written in full; leading/trailing zeros; 24-hour time",
+      "limits": "",
+      "verification": "opened 2026-11-11"
+    },
+    {
+      "id": "S10",
+      "group": "charts and records",
+      "org": "ACSQHC",
+      "title": "National Inpatient Medication Chart (NIMC) User Guide",
+      "url": "https://www.safetyandquality.gov.au/resources/national-inpatient-medication-chart-nimc-user-guide",
+      "published": "2019",
+      "accessed": "2026-11-11",
+      "supports": "Structure of regular and PRN orders and administration records",
+      "limits": "Not every hospital's current policy; chart is simplified here, not copied",
+      "verification": "opened 2026-11-11"
+    },
+    {
+      "id": "S11",
+      "group": "medicines",
+      "org": "South Eastern Sydney LHD",
+      "title": "SESLHDPD/160 Medication Administration by Enrolled Nurses (2024) — S8/S4D checking and witnessing",
+      "url": "https://www.seslhd.health.nsw.gov.au/sites/default/files/documents/SESLHDPD%20160%20-%20Medication%20Administration%20by%20Enrolled%20Nurses1.pdf",
+      "published": "2024",
+      "accessed": "2026-11-11",
+      "supports": "Example of a hospital policy requiring two people to check and witness S8 administration",
+      "limits": "One local health district; policies vary",
+      "verification": "opened 2026-11-11"
+    },
+    {
+      "id": "S12",
+      "group": "medicines",
+      "org": "TGA",
+      "title": "PI/CMI search facility (cite the specific product document and section)",
+      "url": "https://www.tga.gov.au/how-we-regulate/labelling-and-packaging/medicines-and-biologicals/picmi-search-facility",
+      "published": null,
+      "accessed": null,
+      "supports": "Product-level facts (presentations, strengths)",
+      "limits": "Search page is not a citation; each claim needs the specific PI/CMI and section",
+      "verification": "TO VERIFY — from attachment"
+    },
+    {
+      "id": "S13",
+      "group": "medicines",
+      "org": "TGA",
+      "title": "OTC medicine monograph: Paracetamol for oral use",
+      "url": "https://www.tga.gov.au/resources/guidance/over-counter-otc-medicine-monograph-paracetamol-oral-use",
+      "published": null,
+      "accessed": null,
+      "supports": "Oral paracetamol product information",
+      "limits": "OTC scope; not individual inpatient dosing guidance",
+      "verification": "TO VERIFY — from attachment"
+    },
+    {
+      "id": "S14",
+      "group": "medicines",
+      "org": "ACSQHC",
+      "title": "Medicine Finder: amoxicillin",
+      "url": "https://www.safetyandquality.gov.au/medicine-finder/amoxycillin-generichealth",
+      "published": null,
+      "accessed": null,
+      "supports": "Amoxicillin is a penicillin-class antibiotic",
+      "limits": "",
+      "verification": "TO VERIFY — from attachment"
+    },
+    {
+      "id": "S15",
+      "group": "teaching design",
+      "org": "INACSL Standards Committee",
+      "title": "Healthcare Simulation Standards of Best Practice (Prebriefing; Debriefing)",
+      "url": "https://www.inacsl.org/healthcare-simulation-standards-of-best-practice",
+      "published": "2021; some modules revised 2025",
+      "accessed": "2026-11-11",
+      "supports": "Objectives, prebriefing and planned debriefing",
+      "limits": "This site is not accredited by INACSL",
+      "verification": "standards found via search 2026-11-11; landing URL from attachment"
+    },
+    {
+      "id": "S16",
+      "group": "AI and scope",
+      "org": "WHO",
+      "title": "Ethics and governance of artificial intelligence for health: guidance on large multi-modal models",
+      "url": "https://www.who.int/publications/i/item/9789240084759",
+      "published": "2024",
+      "accessed": null,
+      "supports": "Why runtime AI is not used for medical feedback",
+      "limits": "Not a source for any medicine fact",
+      "verification": "TO VERIFY — from attachment"
+    },
+    {
+      "id": "S17",
+      "group": "accessibility",
+      "org": "W3C",
+      "title": "Web Content Accessibility Guidelines (WCAG) 2.2",
+      "url": "https://www.w3.org/TR/WCAG22/",
+      "published": "2023",
+      "accessed": null,
+      "supports": "Contrast, focus and keyboard targets",
+      "limits": "Passing some checks is not full conformance",
+      "verification": "standard reference"
+    },
+    {
+      "id": "S18",
+      "group": "teaching design",
+      "org": "Simulation Canada",
+      "title": "Clinical Procedure: Medication Administration and Safety Using Different Routes: Adult Population",
+      "url": "https://simulationcanada.ca/scenario/medication-administration-safety-adult/",
+      "published": null,
+      "accessed": null,
+      "supports": "Example of published objectives, peer review and student testing",
+      "limits": "Its validation is not evidence for this project",
+      "verification": "TO VERIFY — from attachment"
+    },
+    {
+      "id": "S19",
+      "group": "teaching design",
+      "org": "Lee S et al.; and an interprofessional pilot",
+      "title": "Room of Horrors simulation studies (BMC Nursing 2025; J Multidiscip Healthc 2022)",
+      "url": "https://doi.org/10.1186/s12912-025-03700-x",
+      "published": "2025",
+      "accessed": "2026-11-11",
+      "supports": "Find-the-hazard simulation; teams found more hazards than individuals",
+      "limits": "Different format from this game",
+      "verification": "opened 2026-11-11"
+    },
+    {
+      "id": "S20",
+      "group": "teaching design",
+      "org": "Amber Case",
+      "title": "Principles of Calm Technology",
+      "url": "https://calmtech.com/",
+      "published": null,
+      "accessed": "2026-11-11",
+      "supports": "No timers, minimal notifications",
+      "limits": "Not a claim that the game is calm technology",
+      "verification": "listed in v1.0 baseline"
+    }
+  ]
+}

@@ -1,767 +1,829 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Second Pair of Eyes — UI reference v2.1</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='3' y='5' width='17' height='22' rx='3' fill='%23e3eff4' stroke='%230d5c7a' stroke-width='2'/%3E%3Crect x='12' y='5' width='17' height='22' rx='3' fill='%23ffffff' stroke='%230d5c7a' stroke-width='2'/%3E%3Cpath d='M16 16l3 3 6-7' fill='none' stroke='%230d5c7a' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<!--
-  REFERENCE FOR THE BUILD AGENT (docs/reference/ui-reference.html) — v2, clinical-document style
-  1. Copy everything inside <style id="app-css"> verbatim into public/style.css (replace the v1 file).
-  2. Do NOT copy <style id="ref-css">, or any element whose class starts with "ref-".
-  3. Each <section class="ref-state"> shows one app state inside .ref-frame.
-     Reuse that markup, its class names and its English copy. Values shown are examples.
-  4. Copy the <link rel="icon"> line above as the favicon. The only other graphics are the
-     inline header SVG and the CSS barcode stripe (decorative, aria-hidden). No images.
-  5. No new colours, fonts, shadows or animation. If a state is missing, compose it
-     from existing classes only and mention it in your report.
--->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='12' y='2' width='17' height='22' rx='4' fill='%232f7f77'/%3E%3Crect x='3' y='8' width='18' height='22' rx='4' fill='%230f5257' stroke='%23fff' stroke-width='1.5'/%3E%3Cpath d='M7.5 19.5l3.2 3.2 6-7' stroke='%23fff' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <style id="app-css">
-/* Second Pair of Eyes — app styles v2 (copy verbatim) */
+/* ===== Second Pair of Eyes — app stylesheet (copy verbatim) ===== */
 :root{
-  --bg:#edf1f3;
-  --surface:#ffffff;
-  --surface-2:#f5f7f8;
-  --ink:#14212b;
-  --ink-2:#4a5a66;
-  --line:#d3dbe0;
-  --line-strong:#a7b4bd;
-  --header:#10283a;
-  --header-ink:#c9d6df;
-  --accent:#0d5c7a;
-  --accent-hover:#094a63;
-  --accent-soft:#e3eff4;
-  --ok:#1f6b45;
-  --ok-soft:#e6f2eb;
-  --ok-line:#b7d6c3;
-  --bad:#9a3412;
-  --bad-soft:#fbede4;
-  --bad-line:#ecc3ad;
-  --note-soft:#fff4d6;
-  --note-line:#e6cb7d;
-  --note-ink:#5c4300;
-  --focus:#0d5c7a;
-  --radius:6px;
-  --radius-sm:4px;
-  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
-  --font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
-  --max:1040px;
-  color-scheme:light;
+  --bg:#f5f2ec; --surface:#fffdf8; --paper:#fffefa; --ink:#1f2a2e; --muted:#5b6669;
+  --line:#ddd6ca; --line-strong:#c4baa9;
+  --primary:#0f5257; --primary-2:#2f7f77; --primary-soft:#e3efec;
+  --amber:#8a5300; --amber-bg:#fdf1dc; --amber-line:#d99a2b;
+  --alert:#a1251b; --alert-bg:#fbe7e5; --band-red:#b3261e;
+  --ok:#2e6b3f; --ok-bg:#e5f1e7;
+  --radius:10px; --tap:44px;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
 }
-*,*::before,*::after{box-sizing:border-box}
+*{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.55 var(--font)}
-h1,h2,h3{line-height:1.25;margin:0 0 var(--s3)}
-h1{font-size:28px;font-weight:700}
-h2{font-size:21px;font-weight:650}
-h3{font-size:17px;font-weight:650}
-p{margin:0 0 var(--s4)}
-a{color:var(--accent)}
-a:hover{color:var(--accent-hover)}
-:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
-.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-.skip{position:absolute;left:var(--s4);top:-60px;background:var(--surface);padding:var(--s2) var(--s3);border-radius:var(--radius-sm);z-index:10}
-.skip:focus{top:var(--s2)}
-.wrap{max-width:var(--max);margin:0 auto;padding:0 var(--s4)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--sans)}
+a{color:var(--primary)}
+:focus-visible{outline:3px solid var(--amber-line);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
+.mono{font-family:var(--mono)}
+.px{image-rendering:pixelated;shape-rendering:crispEdges;display:block}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+h1,h2,h3{line-height:1.25;margin:0}
+h1{font-size:26px} h2{font-size:20px} h3{font-size:16px}
+p{margin:.5em 0}
+.fine{font-size:13px;color:var(--muted)}
+.kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--muted);margin:0 0 6px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}
+.pad{padding:16px 20px}
+.stack{display:grid;gap:16px}
+.mt{margin-top:16px}
 
-/* page shell */
-.site-header{background:var(--header);color:#fff}
-.site-header .wrap{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--s2) var(--s4);min-height:56px;padding-top:var(--s2);padding-bottom:var(--s2)}
-.brand{display:inline-flex;align-items:center;gap:var(--s2);font-weight:700;font-size:17px;color:#fff;text-decoration:none}
-.brand:hover{color:#fff}
-.brand svg{width:24px;height:24px;flex:none}
-.brand .sub{font-weight:400;font-size:13px;color:var(--header-ink);border-left:1px solid #34506a;padding-left:var(--s2);margin-left:var(--s1)}
-.nav{display:flex;gap:var(--s4);font-size:15px}
-.nav a{color:var(--header-ink);text-decoration:none}
-.nav a:hover{color:#fff;text-decoration:underline}
-.nav a[aria-current="page"]{color:#fff;font-weight:600;text-decoration:underline;text-underline-offset:4px}
-.site-header :focus-visible{outline-color:#fff}
-.disclaimer{background:var(--note-soft);border-bottom:1px solid var(--note-line);color:var(--note-ink);font-size:14px}
-.disclaimer .wrap{padding-top:var(--s2);padding-bottom:var(--s2)}
-.badge{display:inline-block;margin-right:var(--s2);padding:1px 6px;border:1px solid var(--note-line);border-radius:3px;background:var(--surface);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;vertical-align:1px}
-main{padding:var(--s6) 0 var(--s7)}
-.site-footer{border-top:1px solid var(--line);color:var(--ink-2);font-size:14px;padding:var(--s5) 0}
+/* header */
+.topbar{background:var(--primary);color:#fff}
+.topbar .wrap{display:flex;align-items:center;gap:16px;min-height:60px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:700;font-size:19px}
+.ctx{opacity:.92;font-size:15px;padding-left:16px;border-left:1px solid rgba(255,255,255,.35)}
+.nav{margin-left:auto;display:flex;gap:18px;flex-wrap:wrap}
+.nav a{color:#fff;text-decoration:none;font-size:15px;min-height:var(--tap);display:inline-flex;align-items:center}
+.nav a[aria-current]{text-decoration:underline;text-underline-offset:6px}
+.notice{background:#ece6da;color:var(--muted);font-size:14px}
+.notice .wrap{padding-top:6px;padding-bottom:6px}
 
-/* text helpers */
-.lead{font-size:19px;color:var(--ink-2);max-width:60ch}
-.muted{color:var(--ink-2)}
-.small{font-size:14px}
-.eyebrow{display:block;font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:var(--s1)}
+/* status strip */
+.status{display:flex;flex-wrap:wrap;align-items:center;gap:8px 22px;padding:14px 0;font-size:15px;color:var(--muted)}
+.status b{color:var(--ink)}
+.seat{display:inline-flex;align-items:center;gap:8px}
+.badge{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;font:700 13px var(--sans);color:#fff;background:var(--primary-2)}
+.badge.b{background:#5d6f8a}
+.pill{display:inline-block;padding:1px 9px;border-radius:999px;font-size:13px;font-weight:600;border:1px solid}
+.pill.ok{color:var(--ok);background:var(--ok-bg);border-color:#b9d6c0}
+.pill.wait{color:var(--muted);background:var(--surface);border-color:var(--line)}
+.dots{display:inline-flex;gap:3px;vertical-align:middle;margin-left:6px}
+.dots i{width:16px;height:6px;border-radius:3px;background:var(--line)}
+.dots i.done{background:var(--primary-2)} .dots i.now{background:var(--primary)}
+.conn::before{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:6px}
 
-/* buttons and actions */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);min-height:44px;padding:0 var(--s5);border:1px solid var(--accent);border-radius:var(--radius-sm);background:var(--accent);color:#fff;font:600 16px/1.2 var(--font);text-decoration:none;cursor:pointer}
-.btn:hover{background:var(--accent-hover);border-color:var(--accent-hover);color:#fff}
-.btn-secondary{background:var(--surface);color:var(--accent)}
-.btn-secondary:hover{background:var(--accent-soft);color:var(--accent-hover)}
-.btn[disabled],.btn[aria-disabled="true"]{opacity:.55;cursor:not-allowed}
-.actions{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s3);margin-top:var(--s5)}
+/* buttons */
+.btn{font:700 16px var(--sans);border:0;border-radius:8px;padding:0 18px;min-height:var(--tap);background:var(--primary);color:#fff;cursor:pointer;display:inline-flex;align-items:center;gap:8px;text-decoration:none}
+.btn.ghost{background:#fff;color:var(--primary);border:1px solid var(--primary)}
+.btns{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 
-/* panels, notices, lists */
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:var(--s5)}
-.try-box{border-left:4px solid var(--accent);margin-bottom:var(--s6)}
-.steps{margin:0 0 var(--s4);padding-left:1.4em}
-.steps li{margin-bottom:var(--s2)}
-.notice{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:var(--radius-sm);padding:var(--s3) var(--s4);margin:0 0 var(--s5)}
-.notice-agreed-wrong{background:var(--bad-soft);border-color:var(--bad-line);border-left-color:var(--bad)}
-.form-error{background:var(--bad-soft);border:1px solid var(--bad);border-radius:var(--radius-sm);color:var(--bad);padding:var(--s3) var(--s4);margin-top:var(--s4)}
-.hint{font-size:15px;color:var(--ink-2);margin:var(--s3) 0 0}
-.invite{display:flex;flex-wrap:wrap;gap:var(--s2);align-items:center;margin-top:var(--s2)}
-.invite input{flex:1 1 260px;min-width:0;min-height:44px;padding:0 var(--s3);border:1px solid var(--line-strong);border-radius:var(--radius-sm);background:var(--surface-2);color:var(--ink);font:15px var(--mono)}
+/* case heading + patient strip */
+.casehead{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin:4px 0 10px}
+.casehead h1{font-size:24px}
+.bed{display:grid;grid-template-columns:auto 1fr auto;gap:16px 22px;align-items:start;padding:18px 20px}
+.portrait{width:84px;height:84px;border-radius:12px;background:#e9e2d4;padding:6px;border:1px solid var(--line)}
+.bed h2{font-size:22px}
+.meta{color:var(--muted);font-size:15px;margin-top:2px}
+.bubble{position:relative;margin-top:10px;background:#fff;border:1px solid var(--line-strong);border-radius:12px;padding:9px 14px;max-width:640px}
+.bubble::before{content:"";position:absolute;left:-8px;top:14px;width:14px;height:14px;background:#fff;border-left:1px solid var(--line-strong);border-bottom:1px solid var(--line-strong);transform:rotate(45deg)}
+.bandrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px}
+.band{display:flex;align-items:center;border-radius:999px;padding:7px 18px;background:#f7f7f4;border:1px solid #cfcfc8;max-width:560px}
+.band.red{background:var(--band-red);border-color:#8e1d17}
+.band .panel{background:#fff;border-radius:6px;padding:6px 12px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;border:1px solid #e3e3dc;min-width:0}
+.band .who{font-weight:700;font-size:15px}
+.band .ids{font:14px/1.35 var(--mono)}
+.barcode{width:70px;height:30px;flex:none;background:repeating-linear-gradient(90deg,#222 0 2px,#fff 2px 3px,#222 3px 4px,#fff 4px 7px,#222 7px 8px,#fff 8px 10px)}
+.clock{text-align:center;padding:10px 16px;border:1px solid var(--line);border-radius:12px;background:var(--paper);min-width:190px}
+.clock .d{font-size:13px;color:var(--muted)}
+.clock .t{font:700 28px/1.1 var(--mono)}
+.tag{display:inline-flex;gap:6px;align-items:center;font-size:13px;font-weight:600;color:var(--amber);background:var(--amber-bg);border:1px solid #efcf95;border-radius:8px;padding:3px 10px;margin-top:8px;max-width:240px;text-align:left}
+.coach{display:flex;gap:12px;align-items:flex-start;font-size:15px}
+.coach .ava{width:44px;height:44px;flex:none;border-radius:8px;background:var(--primary-soft);padding:3px}
+.coach b{color:var(--primary)}
+.bed .coach{grid-column:1/-1;border-top:1px dashed var(--line);padding-top:14px}
 
-/* table meta and sign-off strip */
-.table-meta{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s5);font-size:15px;color:var(--ink-2);margin-bottom:var(--s3)}
-.table-meta strong{color:var(--ink)}
-.conn{color:var(--ink-2)}
-.conn.is-reconnecting{color:var(--bad);font-weight:600}
-.signoff{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3);margin:0 0 var(--s5)}
-.sig{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-sm);padding:var(--s2) var(--s4) var(--s3)}
-.sig-role{display:block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-2)}
-.sig-line{display:block;margin-top:var(--s2);padding-bottom:2px;border-bottom:1px dashed var(--line-strong);font-weight:600;color:var(--ink-2)}
-.sig-note{display:block;margin-top:var(--s1);font-size:13px;color:var(--ink-2)}
-.sig.is-signed{background:var(--accent-soft);border-color:var(--accent)}
-.sig.is-signed .sig-line{color:var(--accent);border-bottom:1px solid var(--accent)}
+/* records */
+.records{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;margin-top:16px}
+.rec-h{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start;padding:12px 16px;border-bottom:2px solid var(--primary);background:#f1f6f4;border-radius:var(--radius) var(--radius) 0 0}
+.rec-h .ttl{font-weight:700;color:var(--primary)}
+.rec-h .ttl small{display:block;font-weight:400;color:var(--muted);font-size:13px}
+.rec-h.prep{border-bottom-color:var(--primary-2);background:#f3f1ea}
+.idbox{border:1px solid var(--line-strong);background:#fff;border-radius:6px;padding:4px 10px;font:13px/1.45 var(--mono)}
+.adr{margin:12px 16px 0;border:2px solid var(--alert);border-radius:6px;padding:6px 10px;font-size:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:baseline}
+.adr .k{font-weight:700;color:var(--alert);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:12px 16px 0;border:1px solid var(--line-strong);border-radius:6px;overflow:hidden}
+.grid4 div{padding:6px 10px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-width:0}
+.grid4 div:nth-child(4n){border-right:0}
+.grid4 .wide{grid-column:span 2}
+.k{display:block;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.v{font:15px/1.35 var(--mono);overflow-wrap:anywhere}
+.sig{font-family:"Segoe Script","Bradley Hand",cursive;font-size:15px}
+.admin{width:calc(100% - 32px);margin:12px 16px 16px;border-collapse:collapse;font:14px/1.3 var(--mono)}
+.admin caption{text-align:left;font:700 12px/1.6 var(--sans);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.admin th{font:600 12px var(--sans);color:var(--muted);text-align:left;border-bottom:1px solid var(--line-strong);padding:4px 6px}
+.admin td{border-bottom:1px solid var(--line);padding:6px}
+.admin tr.empty td{color:#b4ac9c}
+.prep-body{padding:14px 16px;display:grid;gap:14px}
+.label{border:1px solid #bdb5a6;border-radius:8px;background:#fff;overflow:hidden}
+.label .stripe{height:8px;background:repeating-linear-gradient(135deg,var(--primary-2) 0 10px,#fff 10px 14px)}
+.label .in{padding:10px 12px}
+.label .gen{font-weight:800;letter-spacing:.02em;font-size:17px}
+.label .form{color:var(--muted);font-size:14px}
+.label .str{font:800 26px/1.1 var(--mono);margin:6px 0 2px}
+.label .row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px}
+.s8{font-weight:800;color:#fff;background:var(--band-red);border-radius:4px;padding:1px 7px;font-size:12px;letter-spacing:.04em}
+.train{font:11px var(--mono);letter-spacing:.12em;color:var(--muted)}
+.qty .vol{font:700 18px var(--mono)}
+.forbox{border:1px dashed var(--line-strong);border-radius:8px;padding:8px 12px;font:14px/1.45 var(--mono);background:var(--paper)}
+.forbox .k{font-family:var(--sans)}
+.ev{border-radius:4px}
+.reveal .ev{outline:2px solid var(--amber-line);outline-offset:1px;background:var(--amber-bg)}
+.reveal .ev{white-space:nowrap}
+.reveal .ev::after{content:" ◆";color:var(--amber);font-size:11px}
 
-.progress{display:grid;grid-template-columns:repeat(6,1fr);gap:var(--s1);list-style:none;margin:0 0 var(--s4);padding:0}
-.progress li{padding:2px 0;border:2px solid transparent;border-radius:var(--radius-sm);background:var(--line);color:var(--ink-2);font-size:13px;font-weight:600;text-align:center}
-.progress li.is-done{background:var(--accent);color:#fff}
-.progress li.is-current{background:var(--surface);border-color:var(--accent);color:var(--accent)}
+/* answer area */
+.answer{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:16px}
+.part h2{font-size:18px}
+.part .sub{color:var(--muted);font-size:14px;margin:4px 0 8px}
+.q{border:0;margin:0;padding:10px 0;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center}
+.q legend{float:left;padding:0;font-weight:700;font-size:15px}
+.q .hint{grid-column:1;font-size:13px;color:var(--muted);line-height:1.35}
+.seg{grid-column:2;grid-row:1/3;display:flex;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;background:#fff}
+.seg label{display:flex;align-items:center;gap:6px;padding:0 12px;min-height:var(--tap);font-size:14px;cursor:pointer;white-space:nowrap}
+.seg label+label{border-left:1px solid var(--line-strong)}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label:has(input:checked){background:var(--primary-soft);color:var(--primary);font-weight:700}
+.seg label.no:has(input:checked){background:var(--amber-bg);color:var(--amber)}
+.seg label:has(input:focus-visible){outline:3px solid var(--amber-line);outline-offset:-3px}
+.note{font-size:13px;color:var(--muted);border-left:3px solid var(--line-strong);padding:4px 10px;margin:10px 0 0}
+fieldset.opts{border:0;margin:0;padding:0}
+fieldset.opts legend{font-weight:700;font-size:15px;padding:0;margin:4px 0 8px}
+.opt{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:start;border:1px solid var(--line-strong);border-radius:8px;padding:10px 12px;margin-bottom:8px;background:#fff;cursor:pointer;min-height:var(--tap)}
+.opt input{margin-top:4px;accent-color:var(--primary)}
+.opt b{font-size:15px}
+.opt span{grid-column:2;font-size:13px;color:var(--muted);line-height:1.35}
+.opt:has(input:checked){border-color:var(--primary);background:var(--primary-soft)}
+.evlist .opt{padding:8px 12px;margin-bottom:6px;font-size:15px;align-items:center}
+.evlist .opt input{margin-top:0}
+.sign{display:flex;gap:12px;align-items:center;margin-top:14px;padding:12px;border:1px dashed var(--line-strong);border-radius:8px;background:#f8f5ef;flex-wrap:wrap}
+.sign p{margin:0;font-size:13px;color:var(--muted);flex:1;min-width:180px}
+.err{border:2px solid var(--alert);background:var(--alert-bg);color:var(--alert);border-radius:8px;padding:8px 12px;font-size:14px;margin-top:10px}
+.sealed{list-style:none;margin:8px 0 0;padding:0;font-size:15px}
+.sealed li{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--line)}
+.sealed li span:last-child{font-weight:700}
 
-/* the two records: medication chart and pharmacy label */
-.records{display:grid;grid-template-columns:1fr;align-items:start;gap:var(--s4);margin-bottom:var(--s5)}
-.record{background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden}
-.record-head{display:flex;justify-content:space-between;align-items:baseline;gap:var(--s2);padding:var(--s2) var(--s4);background:var(--accent);color:#fff}
-.record-head h2{margin:0;font-size:14px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fff}
-.record-head .kind{font-size:13px;color:#d7e7ee}
-.record dl{display:grid;grid-template-columns:minmax(8.5em,auto) 1fr;margin:0}
-.record dt,.record dd{padding:10px var(--s4);border-bottom:1px solid var(--line)}
-.record dt{background:var(--surface-2);border-right:1px solid var(--line);color:var(--ink-2);font-size:14px}
-.record dd{margin:0;font-family:var(--mono);font-size:16px;overflow-wrap:anywhere}
-.record dl > :nth-last-child(-n+2){border-bottom:0}
-.record-label .record-head{background:var(--header)}
-.record-label .record-head .kind{color:var(--header-ink)}
-.label-foot{display:flex;align-items:center;gap:var(--s3);padding:var(--s2) var(--s4) var(--s3);border-top:1px dashed var(--line-strong)}
-.barcode{flex:1 1 auto;height:26px;max-width:220px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 4px,var(--ink) 4px 5px,transparent 5px 8px,var(--ink) 8px 11px,transparent 11px 13px,var(--ink) 13px 14px,transparent 14px 17px);opacity:.7}
-.label-foot .code{font:12px var(--mono);color:var(--ink-2);letter-spacing:.04em}
+/* toolbox */
+.toolbox{margin-top:16px;padding:6px 16px 10px}
+.toolbox h2{font-size:16px;padding:8px 0 4px}
+.toolbox details{border-top:1px solid var(--line);padding:4px 0}
+.toolbox summary{cursor:pointer;font-weight:600;color:var(--primary);min-height:var(--tap);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.toolbox dl{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;margin:6px 0 8px;font-size:15px}
+.toolbox dt{color:var(--muted)} .toolbox dd{margin:0}
+.hr-tag{font-size:12px;font-weight:700;color:var(--amber);background:var(--amber-bg);border-radius:4px;padding:1px 6px}
+.know{margin:6px 0 10px;padding:0;list-style:none;display:grid;gap:8px;font-size:15px}
+.know b{color:var(--primary)}
 
-/* the check form */
-.check{background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden}
-.check-head{padding:var(--s3) var(--s5);background:var(--surface-2);border-bottom:1px solid var(--line)}
-.check-head h2{margin:0;font-size:18px}
-.check-head p{margin:2px 0 0;font-size:14px;color:var(--ink-2)}
-.check-body{padding:var(--s1) var(--s5) var(--s5)}
-.field{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s2) var(--s4);border:0;border-bottom:1px solid var(--line);margin:0;padding:var(--s3) 0;min-width:0}
-.field legend{float:left;width:10em;padding:0;font-weight:600}
-.field.overall{border-top:2px solid var(--ink);margin-top:-1px}
-.choices{display:flex;flex-wrap:wrap;gap:var(--s2)}
-.choice{display:inline-flex;align-items:center;gap:var(--s2);min-height:44px;padding:0 var(--s4);border:1px solid var(--line-strong);border-radius:var(--radius-sm);background:var(--surface);font-size:16px;cursor:pointer}
-.choice input{width:18px;height:18px;margin:0;accent-color:var(--accent)}
-.choice:has(input:checked){border-color:var(--accent);background:var(--accent-soft);font-weight:600}
-.choice:has(input:focus-visible){outline:3px solid var(--focus);outline-offset:2px}
-.choice:has(input:disabled){cursor:default;opacity:.8}
-.sign{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s3) var(--s4);margin-top:var(--s4);padding:var(--s4);border:1px dashed var(--line-strong);border-radius:var(--radius-sm);background:var(--surface-2)}
-.sign-label{flex:1 1 260px;font-size:14px;color:var(--ink-2)}
+/* debrief */
+.result{padding:16px 20px;margin-top:16px}
+.result h2{font-size:22px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{font-size:14px;border:1px solid var(--line-strong);border-radius:999px;padding:3px 12px;background:#fff}
+.chip.ok{border-color:#b9d6c0;background:var(--ok-bg);color:var(--ok);font-weight:600}
+.chip.amb{border-color:#efcf95;background:var(--amber-bg);color:var(--amber);font-weight:600}
+.cmp{width:100%;border-collapse:collapse;margin-top:14px;font-size:15px}
+.cmp th{text-align:left;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:6px 10px;border-bottom:1px solid var(--line-strong)}
+.cmp td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.cmp tr.hl td{background:#fbf6ec}
+.cmp tr.sep td{border-top:2px solid var(--ink)}
+.mk{font-weight:700;white-space:nowrap}
+.mk.ok{color:var(--ok)} .mk.no{color:var(--amber)} .mk.miss{color:var(--alert)}
+.dgrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px;margin-top:16px;align-items:start}
+.lee{display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:10px}
+.lee .ava{width:44px;height:44px;border-radius:8px;background:var(--primary-soft);padding:3px}
+.lee small{display:block;color:var(--muted);font-size:13px}
+.blocks{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.blk{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--paper)}
+.blk h3{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--primary);margin-bottom:4px}
+.blk p{margin:0;font-size:15px}
+.lines{margin-top:12px;font-size:15px}
+.lines p{margin:6px 0}
+.whotag{font-size:12px;font-weight:700;border-radius:4px;padding:1px 6px;background:var(--primary-soft);color:var(--primary);margin-right:6px}
+.realw{margin-top:12px;font-size:15px;border-left:4px solid var(--primary-2);padding:4px 12px}
+.talk{margin-top:12px;border:2px solid var(--primary-2);border-radius:10px;padding:10px 14px;background:#f0f7f5}
+.talk h3{color:var(--primary);font-size:15px}
+.review{display:inline-block;font-size:12px;font-weight:700;border-radius:4px;padding:2px 8px;border:1px dashed var(--amber);color:var(--amber);background:#fff}
+.review.ok{border-style:solid;border-color:var(--ok);color:var(--ok)}
+.src{font-size:13px;color:var(--muted);margin-top:12px}
 
-/* glossary */
-.glossary{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:var(--s2) var(--s5);margin-top:var(--s5)}
-.glossary summary{cursor:pointer;font-weight:600;padding:var(--s2) 0}
-.glossary dl{display:grid;grid-template-columns:minmax(8em,auto) 1fr;gap:var(--s2) var(--s4);margin:var(--s2) 0;font-size:15px}
-.glossary dt{font-weight:600}
-.glossary dd{margin:0;color:var(--ink-2)}
+/* summary + end */
+.sumhead{display:flex;gap:14px;align-items:flex-start;padding:18px 20px;margin-top:16px}
+.sumhead .ava{width:52px;height:52px;border-radius:8px;background:var(--primary-soft);padding:3px;flex:none}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:16px}
+.tile{padding:14px 16px}
+.tile .n{font:800 26px/1.15 var(--mono);color:var(--primary)}
+.tile .l{font-size:14px;color:var(--muted)}
+.bar{height:8px;border-radius:4px;background:var(--line);margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--primary-2)}
+.bar.amb i{background:var(--amber-line)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;margin-top:16px;align-items:start}
+.tbl{width:100%;border-collapse:collapse;font-size:15px}
+.tbl caption{text-align:left;font-weight:700;padding:0 0 8px;font-size:16px}
+.tbl th{text-align:left;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:6px 10px;border-bottom:1px solid var(--line-strong)}
+.tbl td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.na{color:var(--muted);font-style:italic}
+.dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0;font-size:15px}
+.dl dt{color:var(--muted)} .dl dd{margin:0}
+.sugg{margin:8px 0 0;padding-left:22px}
+.sugg li{margin:6px 0}
+.caveat{font-size:13px;color:var(--muted);border-top:1px solid var(--line);margin-top:12px;padding-top:8px}
 
-/* reveal */
-.summary{display:flex;flex-wrap:wrap;gap:var(--s2);list-style:none;margin:0 0 var(--s4);padding:0}
-.tag{display:inline-block;padding:4px var(--s3);border:1px solid var(--line);border-radius:999px;font-size:14px;font-weight:600}
-.tag-ok{background:var(--ok-soft);border-color:var(--ok-line);color:var(--ok)}
-.tag-bad{background:var(--bad-soft);border-color:var(--bad-line);color:var(--bad)}
-.tag-neutral{background:var(--accent-soft);border-color:#b9d4e0;color:var(--accent)}
-.reveal{width:100%;border-collapse:separate;border-spacing:0;background:var(--surface);border:1px solid var(--line-strong);border-radius:var(--radius);margin-bottom:var(--s4);font-size:16px}
-.reveal caption{caption-side:top;text-align:left;font-weight:650;padding:0 0 var(--s2)}
-.reveal th,.reveal td{padding:var(--s3) var(--s4);text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
-.reveal thead th{background:var(--header);color:#fff;font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
-.reveal thead th:first-child{border-top-left-radius:var(--radius)}
-.reveal thead th:last-child{border-top-right-radius:var(--radius)}
-.reveal tbody tr:last-child th,.reveal tbody tr:last-child td{border-bottom:0}
-.reveal th[scope="row"]{white-space:nowrap}
-.reveal tr.overall-row th,.reveal tr.overall-row td{border-top:2px solid var(--ink)}
-.vals{display:block;font-family:var(--mono);font-size:14px;color:var(--ink-2)}
-.res{display:block;font-size:14px;font-weight:600;margin-top:2px}
-.res-ok{color:var(--ok)}
-.res-bad{color:var(--bad)}
-.explain{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:var(--radius-sm);padding:var(--s4) var(--s5);margin-bottom:var(--s5)}
-.explain h3{margin-bottom:var(--s2)}
-.explain p:last-child{margin-bottom:0}
+/* start */
+.hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:20px;padding:24px;margin-top:20px}
+.hero h1{font-size:32px}
+.goals{margin:12px 0 0;padding-left:22px;font-size:16px}
+.goals li{margin:6px 0}
+.steps{counter-reset:s;list-style:none;margin:8px 0 0;padding:0;display:grid;gap:10px}
+.steps li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:8px;align-items:start}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--primary-soft);color:var(--primary);font-weight:700;font-size:14px}
+.invite{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.invite input{flex:1;min-width:220px;font:15px var(--mono);padding:0 10px;min-height:var(--tap);border:1px solid var(--line-strong);border-radius:8px;background:#fff}
 
-.pair{background:var(--surface);border:1px solid var(--accent);border-radius:var(--radius-sm);padding:var(--s3) var(--s4);margin:0 0 var(--s4)}
-.pair .eyebrow{margin-bottom:2px}
-.pair p{margin:0;font-weight:600}
-.pair p.detail{margin-top:var(--s1);font-size:14px;font-weight:400;color:var(--ink-2)}
+/* prose pages: /sources/ /guide/ /readme/ */
+.prose{max-width:820px;margin:20px auto 48px;padding:24px 28px}
+.prose h1{font-size:28px;margin-bottom:8px}
+.prose h2{font-size:20px;margin:24px 0 6px}
+.prose h3{font-size:16px;margin:16px 0 4px}
+.prose ul{padding-left:22px}
+.prose li{margin:6px 0}
+.legend{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;margin:8px 0}
 
-/* review and lists */
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:var(--s4);list-style:none;margin:0 0 var(--s4);padding:0}
-.stat{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--accent);border-radius:var(--radius-sm);padding:var(--s4)}
-.stat .num{display:block;font-size:28px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
-.stat .lbl{color:var(--ink-2);font-size:15px}
-.item-list{list-style:none;margin:0 0 var(--s4);padding:0;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}
-.item-list li{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:var(--s2) var(--s4);padding:var(--s3) var(--s4);border-bottom:1px solid var(--line)}
-.item-list li:last-child{border-bottom:0}
-
-/* README prose on /readme/ */
-.prose{max-width:68ch}
-.prose h1{font-size:28px}
-.prose h2{margin-top:var(--s6)}
-.prose h3{margin-top:var(--s5)}
-.prose ul,.prose ol{padding-left:1.4em;margin:0 0 var(--s4)}
-.prose li{margin-bottom:var(--s1)}
-.prose blockquote{margin:0 0 var(--s4);padding-left:var(--s4);border-left:3px solid var(--line-strong);color:var(--ink-2)}
-.prose code{font-family:var(--mono);font-size:.92em;background:#e4e9ec;padding:1px 4px;border-radius:3px}
-.prose table{display:block;max-width:100%;overflow-x:auto;border-collapse:collapse;margin:0 0 var(--s4)}
-.prose th,.prose td{border:1px solid var(--line);padding:var(--s2) var(--s3);text-align:left}
-
-/* wide screens */
-@media (min-width:760px){
-  .wrap{padding:0 var(--s5)}
-  .records{grid-template-columns:1fr 1fr;gap:var(--s5)}
+/* narrow */
+@media (max-width:1099px){
+  .records,.answer,.dgrid,.two,.hero{grid-template-columns:minmax(0,1fr)}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
-
-/* narrow screens (390x844 marking viewport) */
 @media (max-width:640px){
-  body{font-size:16px}
-  h1{font-size:24px}
-  main{padding:var(--s5) 0 var(--s6)}
-  .lead{font-size:17px}
-  .brand .sub{display:none}
-  .panel{padding:var(--s4)}
-  .check-head{padding:var(--s3) var(--s4)}
-  .check-body{padding:var(--s1) var(--s4) var(--s4)}
-  .field legend{width:100%}
-  .record dl{grid-template-columns:7.5em 1fr}
-  .record dt,.record dd{padding:var(--s2) var(--s3)}
-  .glossary{padding:var(--s2) var(--s4)}
-  .glossary dl{grid-template-columns:1fr;gap:0}
-  .glossary dd{margin-bottom:var(--s2)}
-  .reveal thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
-  .reveal,.reveal tbody,.reveal tr,.reveal th,.reveal td{display:block;width:100%}
-  .reveal caption{display:block;padding:var(--s3) var(--s4) 0}
-  .reveal tr{padding:var(--s3) var(--s4);border-bottom:1px solid var(--line)}
-  .reveal tbody tr:last-child{border-bottom:0}
-  .reveal th,.reveal td{border:0;padding:2px 0}
-  .reveal th[scope="row"]{font-size:17px;padding-bottom:var(--s2)}
-  .reveal td{display:grid;grid-template-columns:7.5em 1fr;gap:var(--s3)}
-  .reveal td::before{content:attr(data-label);color:var(--ink-2);font-size:14px;grid-row:span 2}
-  .reveal td > *{grid-column:2}
-  .reveal tr.overall-row{border-top:2px solid var(--ink)}
-  .reveal tr.overall-row th,.reveal tr.overall-row td{border-top:0}
+  .wrap{padding:0 14px}
+  h1{font-size:22px}
+  .ctx{display:none}
+  .nav{gap:14px;margin-left:0;width:100%}
+  .bed{display:block;padding:14px}
+  .bed .portrait{float:left;width:64px;height:64px;margin:0 12px 8px 0}
+  .bed .bubble{clear:both}
+  .bed .bandrow{display:block}
+  .band{border-radius:14px;max-width:100%}
+  .clock{margin-top:12px;text-align:left;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .bed .coach{margin-top:12px}
+  .grid4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid4 div:nth-child(4n){border-right:1px solid var(--line)}
+  .grid4 div:nth-child(2n){border-right:0}
+  .admin{font-size:13px}
+  .q{grid-template-columns:1fr}
+  .seg{grid-column:1;grid-row:auto;justify-self:start}
+  .toolbox dl{grid-template-columns:1fr}
+  .blocks{grid-template-columns:1fr}
+  .tiles{grid-template-columns:1fr}
+  .hero{padding:16px}
+  .hero h1{font-size:26px}
+  .prose{padding:18px 16px}
+  .cmp thead,.tbl thead{display:none}
+  .cmp tr,.tbl tr{display:block;border-bottom:1px solid var(--line-strong);padding:6px 0}
+  .cmp td,.tbl td{display:flex;justify-content:space-between;gap:12px;border:0;padding:4px 6px;text-align:right}
+  .cmp td::before,.tbl td::before{content:attr(data-l);color:var(--muted);font-size:13px;text-align:left}
+  .cmp td:first-child,.tbl td:first-child{font-weight:700;justify-content:flex-start;text-align:left}
+  .cmp td:first-child::before,.tbl td:first-child::before{content:none}
+  .cmp tr.sep td{border-top:0}
+}
+@media (prefers-reduced-motion:no-preference){
+  .opt,.seg label,.chip{transition:background-color .15s,border-color .15s}
+}
+@media print{
+  .topbar,.nav,.notice,.btn,.btns,.status,.mockbar{display:none !important}
+  body{background:#fff}
+  .card{border-color:#999}
+  .two,.tiles{grid-template-columns:1fr 1fr}
+  .tbl tr{break-inside:avoid}
 }
 </style>
-
-<style id="ref-css">
-/* reference-only frames: do not copy */
-.ref-intro{width:calc(100% - 32px);max-width:1040px;margin:24px auto;padding:16px 20px;background:#222;color:#eee;border-radius:8px;font:14px/1.6 ui-monospace,Menlo,monospace}
-.ref-intro b{color:#fff}
-.ref-state{margin:48px 0}
-.ref-label{max-width:1040px;margin:0 auto 8px;padding:0 16px;font:700 13px/1.4 ui-monospace,Menlo,monospace;color:#9a3412;text-transform:uppercase;letter-spacing:.05em}
-.ref-note{max-width:1040px;margin:8px auto 0;padding:0 16px;font:13px/1.5 ui-monospace,Menlo,monospace;color:#7c2d12}
-.ref-frame{border-top:3px dashed #c2410c;border-bottom:3px dashed #c2410c}
-.ref-frame main{padding-top:24px;padding-bottom:24px}
+<style id="mock-only">
+/* Reference-only: switches between screen states. Do not copy into the app. */
+.mockbar{background:#2a2a2a;color:#eee;font:13px var(--sans)}
+.mockbar .wrap{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding-top:6px;padding-bottom:6px}
+.mockbar button{font:600 13px var(--sans);background:#444;color:#fff;border:1px solid #666;border-radius:6px;padding:4px 10px;cursor:pointer}
+.mockbar button[aria-pressed="true"]{background:#fff;color:#111}
 </style>
 </head>
 <body>
 
-<div class="ref-intro">
-  <b>UI reference v2 — Second Pair of Eyes (clinical-document style).</b> Copy the CSS in &lt;style id="app-css"&gt; verbatim to public/style.css, replacing v1.
-  Everything with an orange dashed frame or a class starting with "ref-" is reference-only.
-  Reuse each state's markup, class names and copy. Target viewports: 1920×1080 and 390×844.
+<div class="mockbar"><div class="wrap">
+  <span>UI reference v2.1 · state:</span>
+  <button type="button" data-go="start">start</button>
+  <button type="button" data-go="waiting">waiting</button>
+  <button type="button" data-go="checking">checking</button>
+  <button type="button" data-go="signed">signed</button>
+  <button type="button" data-go="debrief">debrief</button>
+  <button type="button" data-go="summary">summary</button>
+  <button type="button" data-go="transfer-intro">transfer-intro</button>
+  <button type="button" data-go="end">end</button>
+  <button type="button" data-go="sources">sources</button>
+</div></div>
+
+<header class="topbar"><div class="wrap">
+  <a class="brand" href="/">
+    <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect x="12" y="2" width="17" height="22" rx="4" fill="#7fc4ba"/><path d="M22 6v7l2.5-1.7L27 13V6z" fill="#0f5257"/><rect x="3" y="8" width="18" height="22" rx="4" fill="#fff"/><rect x="4.5" y="9.5" width="15" height="19" rx="3" fill="#0f5257"/><path d="M7.5 19.5l3.2 3.2 6-7" stroke="#fff" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Second Pair of Eyes
+  </a>
+  <span class="ctx">Adult ward · Paired medication-check practice</span>
+  <nav class="nav" aria-label="Main"><a href="/" aria-current="page">Play</a><a href="/#my-tables">My tables</a><a href="/guide/">Guide</a><a href="/sources/">Sources</a><a href="/readme/">Readme</a></nav>
+</div></header>
+<div class="notice"><div class="wrap">Educational simulation · Fictional patients · Not for clinical decision-making. <a href="/sources/">View scope and sources</a></div></div>
+
+<main class="wrap">
+
+<!-- ===================== STATE: start ===================== -->
+<section data-state="start">
+  <div class="card hero">
+    <div>
+      <p class="kicker">Paired medication-check practice</p>
+      <h1>Check on your own. Compare together.</h1>
+      <p>You and a partner are nursing students on a simulated adult ward at the 08:00 medicine round. For six patients, compare the order with what was prepared, decide what happens next, then see what each of you found.</p>
+      <h2 class="mt">What you'll practise</h2>
+      <ol class="goals">
+        <li>Checking the <b>total amount</b>: units, strength and quantity.</li>
+        <li>Using the <b>records and the patient's words</b> — the administration record and the allergy box — even when the order and the medicine match.</li>
+        <li>Choosing a <b>next step with evidence</b>, and telling agreement apart from being right.</li>
+      </ol>
+      <div class="btns mt"><a class="btn" href="#">Create a practice table</a><a class="btn ghost" href="#my-tables">My tables</a></div>
+      <p class="fine mt">About 20–25 minutes · two people, two browsers · fictional patients · content status: draft (<a href="/sources/">see Sources</a>)</p>
+    </div>
+    <div>
+      <h2>How it works</h2>
+      <ol class="steps">
+        <li><span>Create a table and send the invite link to your partner. Use two normal browser windows or devices.</span></li>
+        <li><span>For each case, check on your own and sign. Your partner can't see your answers until you've both signed.</span></li>
+        <li><span>See both answers, the reference answer and the debrief together. Talk it through.</span></li>
+        <li><span>A summary, three new situations, then an end review you can print.</span></li>
+      </ol>
+      <p class="note">A private window loses your place when it closes. Your records stay in this browser only.</p>
+    </div>
+  </div>
+  <div class="card pad mt" id="my-tables">
+    <h2>My tables</h2>
+    <table class="tbl mt">
+      <thead><tr><th>Table</th><th>Started</th><th>Progress</th><th></th></tr></thead>
+      <tbody>
+        <tr><td>FHJE</td><td data-l="Started">11 Nov 2026</td><td data-l="Progress">Case 4 of 6 · in progress</td><td data-l=""><a href="#">Continue</a></td></tr>
+        <tr><td>KQ2M</td><td data-l="Started">10 Nov 2026</td><td data-l="Progress">Completed</td><td data-l=""><a href="#">View</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===================== STATE: waiting ===================== -->
+<section data-state="waiting">
+  <div class="status" role="status" aria-live="polite">
+    <span>Table <b class="mono">FHJE</b></span>
+    <span class="seat"><span class="badge" aria-hidden="true">A</span><b>You</b> (Checker A)</span>
+    <span class="seat"><span class="badge b" aria-hidden="true">B</span>Checker B <span class="pill wait">Waiting to join</span></span>
+    <span class="conn">Connected</span>
+  </div>
+  <div class="two" style="margin-top:0">
+    <div class="card pad">
+      <h1>Waiting for your partner</h1>
+      <p>Send this link to your partner. They open it in their own browser and click <b>Join</b>.</p>
+      <div class="invite"><label class="sr" for="inv">Invite link</label><input id="inv" readonly value="https://comp4020-final-roselynjiang123.fly.dev/t/FHJE?join=k7Qx…"><button class="btn" type="button">Copy link</button></div>
+      <p class="fine">The link admits one second browser. It doesn't check who is using it.</p>
+      <div class="coach mt" style="border-top:1px dashed var(--line);padding-top:14px">
+        <span class="ava" data-sprite="lee" data-scale="2.4"></span>
+        <div><b>Lee · clinical facilitator</b><br>Morning. Six patients, six medicines. Check each one on your own — don't tell your partner what you find until you've both signed. Mistakes here are how we learn; nothing you choose reaches a real patient.</div>
+      </div>
+      <p class="note">On real wards, independent double checks are kept for selected high-risk medicines and tasks. In this practice you check every medicine twice so you can practise independent judgement.</p>
+    </div>
+    <div class="card pad">
+      <h2>Before you start</h2>
+      <ul class="know">
+        <li><b>Units.</b> 1 g = 1000 mg. 1 mg = 1000 micrograms. Write “micrograms” and “units” in full: “µg” and “U” are easily misread. Convert to the same unit before you compare.</li>
+        <li><b>Total amount.</b> Tablets and capsules: strength × number. Liquids: strength (mg per mL) × volume (mL). Example: 2 mg/mL × 3 mL = 6 mg.</li>
+        <li><b>Routes and forms.</b> Oral: swallowed. Inhaled: from an inhaler, often through a spacer. Nebulised: a liquid turned into mist through a mask. IV: into a vein.</li>
+        <li><b>PRN orders.</b> “When required”. The order says the shortest gap between doses and may give a 24-hour maximum. Use the interval written on each order.</li>
+        <li><b>Reading the chart.</b> Allergy box at the top; the order; the administration record with date and time. Count across midnight using the date.</li>
+        <li><b>Patient identifiers.</b> Full name, date of birth and MRN. Ask the patient to tell you, rather than asking “Are you…?”.</li>
+        <li><b>This practice.</b> First compare the order with what was prepared on five checks. Then choose a next step and the evidence that decided it.</li>
+      </ul>
+      <p class="fine">Draft · not yet source checked · <a href="/sources/">sources</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== shared case header (checking / signed / debrief) ===================== -->
+<div data-state="checking signed debrief">
+  <div class="status" role="status" aria-live="polite">
+    <span>Table <b class="mono">FHJE</b></span>
+    <span class="seat"><span class="badge" aria-hidden="true">A</span>Checker A
+      <span class="pill ok" data-state="checking">✓ Signed</span><span class="pill wait" data-state="signed">Checking…</span><span class="pill ok" data-state="debrief">✓ Signed</span></span>
+    <span class="seat"><span class="badge b" aria-hidden="true">B</span><b>You</b> (Checker B)
+      <span class="pill wait" data-state="checking">Checking…</span><span class="pill ok" data-state="signed">✓ Signed</span><span class="pill ok" data-state="debrief">✓ Signed</span></span>
+    <span>Case <b>4</b> of 6 <span class="dots" aria-hidden="true"><i class="done"></i><i class="done"></i><i class="done"></i><i class="now"></i><i></i><i></i></span></span>
+    <span class="conn">Connected</span>
+  </div>
+  <div class="casehead"><p class="kicker" style="margin:0">Case 4 of 6</p><h1>Pain relief request</h1><span class="review">Draft · not yet source checked</span></div>
+  <section class="card bed" aria-label="Patient">
+    <div class="portrait" data-sprite="patient" data-hair="#c9c4bb" data-skin="#eac3a1" data-gown="#a9c7dc" data-scale="4.5"></div>
+    <div>
+      <p class="kicker">Bed 14 · Banksia Ward</p>
+      <h2>Arthur WILLIAMS</h2>
+      <div class="meta">83 years · Hip fracture, waiting for surgery</div>
+      <div class="bubble">“Could I have something for the pain? The night nurse gave me some at about half past seven.”</div>
+      <div class="bandrow"><span class="kicker" style="margin:0">ID band</span>
+        <div class="band"><div class="panel"><div><div class="who">WILLIAMS, Arthur</div><div class="ids">DOB 02/09/1943 · M<br>MRN 4472816</div></div><div class="barcode" aria-hidden="true"></div></div></div>
+      </div>
+    </div>
+    <div class="clock">
+      <div><div class="d">Wed 11 Nov 2026</div><div class="t"><span class="ev" data-evidence="admin_record">08:15</span></div><div class="d">Ward time</div></div>
+      <span class="tag">⚑ Schedule 8 medicine: this ward's policy requires two checkers.</span>
+    </div>
+    <div class="coach" data-state="checking">
+      <span class="ava" data-sprite="lee" data-scale="2.4"></span>
+      <div><b>Lee · clinical facilitator</b><br>Jo has drawn up Mr Williams' morphine and asked you both to check it before it goes to the bedside. Check on your own first.</div>
+    </div>
+  </section>
 </div>
 
-<!-- ============ STATE 0: PAGE SHELL ============ -->
-<section class="ref-state">
-  <p class="ref-label">State 0 · Page shell on every page (header, disclaimer, main, footer)</p>
-  <div class="ref-frame">
-    <a class="skip" href="#main">Skip to content</a>
-    <header class="site-header">
-      <div class="wrap">
-        <a class="brand" href="/">
-          <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="5" width="17" height="22" rx="3" fill="#0d5c7a" stroke="#ffffff" stroke-width="2"/><rect x="12" y="5" width="17" height="22" rx="3" fill="#10283a" stroke="#ffffff" stroke-width="2"/><path d="M16 16l3 3 6-7" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Second Pair of Eyes
-          <span class="sub">Medication double-check simulation</span>
-        </a>
-        <nav class="nav" aria-label="Main">
-          <a href="/" aria-current="page">Play</a>
-          <a href="/tables">My tables</a>
-          <a href="/readme/">Readme</a>
-        </nav>
-      </div>
-    </header>
-    <div class="disclaimer"><div class="wrap"><span class="badge">Training</span>Educational simulation. All records are fictional. Compare the supplied records; do not use this game to make clinical decisions.</div></div>
-    <main id="main"><div class="wrap"><p class="muted">Page content goes here. One polite live region per page: <code>&lt;p class="sr-only" aria-live="polite" id="announcer"&gt;&lt;/p&gt;</code></p></div></main>
-    <footer class="site-footer"><div class="wrap">Two checkers, one record, answers revealed together. <a href="/readme/">Why it works this way</a></div></footer>
+<!-- ===================== STATE: debrief — result strip ===================== -->
+<section class="card result" data-state="debrief" aria-labelledby="res-h">
+  <p class="kicker">Both signed · Case 4 debrief</p>
+  <h2 id="res-h">Only Checker A chose a next step and evidence that fit this scenario.</h2>
+  <div class="chips">
+    <span class="chip amb">✗ Your next step doesn't fit this scenario</span>
+    <span class="chip">Agreement: no — you differed on next step and evidence</span>
+    <span class="chip">No mismatches on this tray</span>
   </div>
+  <table class="cmp">
+    <caption class="sr">Both answers and the reference answer</caption>
+    <thead><tr><th scope="col">Check</th><th scope="col">Checker A</th><th scope="col">You</th><th scope="col">Reference</th><th scope="col">Between you</th></tr></thead>
+    <tbody>
+      <tr><td>Patient</td><td data-l="Checker A"><span class="mk ok">✓ Matches</span></td><td data-l="You"><span class="mk ok">✓ Matches</span></td><td data-l="Reference">Matches</td><td data-l="Between you">—</td></tr>
+      <tr><td>Medicine</td><td data-l="Checker A"><span class="mk ok">✓ Matches</span></td><td data-l="You"><span class="mk ok">✓ Matches</span></td><td data-l="Reference">Matches</td><td data-l="Between you">—</td></tr>
+      <tr><td>Dose</td><td data-l="Checker A"><span class="mk ok">✓ Matches</span></td><td data-l="You"><span class="mk ok">✓ Matches</span></td><td data-l="Reference">Matches</td><td data-l="Between you">—</td></tr>
+      <tr><td>Route &amp; form</td><td data-l="Checker A"><span class="mk ok">✓ Matches</span></td><td data-l="You"><span class="mk ok">✓ Matches</span></td><td data-l="Reference">Matches</td><td data-l="Between you">—</td></tr>
+      <tr><td>Time on record</td><td data-l="Checker A"><span class="mk ok">✓ Matches</span></td><td data-l="You"><span class="mk ok">✓ Matches</span></td><td data-l="Reference">Matches</td><td data-l="Between you">—</td></tr>
+      <tr class="sep hl"><td>Next step</td><td data-l="Checker A"><span class="mk ok">✓ Pause and clarify</span></td><td data-l="You"><span class="mk miss">✗ Continue with the remaining checks</span></td><td data-l="Reference">Pause and clarify</td><td data-l="Between you">Only Checker A</td></tr>
+      <tr class="hl"><td>Evidence</td><td data-l="Checker A"><span class="mk ok">✓ Administration record</span></td><td data-l="You"><span class="mk miss">✗ All five checks match</span></td><td data-l="Reference">Administration record</td><td data-l="Between you">Only Checker A</td></tr>
+    </tbody>
+  </table>
 </section>
 
-<!-- ============ STATE 1: LANDING ============ -->
-<section class="ref-state">
-  <p class="ref-label">State 1 · Landing ( / )</p>
-  <div class="ref-frame">
-    <main><div class="wrap">
-      <span class="eyebrow">Independent double check</span>
-      <h1>Second Pair of Eyes</h1>
-      <p class="lead">You and another learner are a checking pair for six fictional medication records. Each of you checks on your own; neither sees the other's answer until both have signed. Then you review together: did you agree, and were you right?</p>
-      <div class="panel">
-        <h2>How to play</h2>
-        <ol class="steps">
-          <li>Open this site in two Chrome profiles or two browsers. An incognito window works but forgets who you are when it closes.</li>
-          <li>In the first, choose Create a table, then Copy invite link.</li>
-          <li>Open the link in the second and choose Join. Check each case on your own; both answers appear once you have both signed.</li>
-        </ol>
-        <p class="small muted">Six short cases. No timer, no leaderboard.</p>
-        <div class="actions">
-          <button class="btn" type="button">Create a table</button>
-          <a class="btn btn-secondary" href="/tables">My tables</a>
-        </div>
+<!-- ===================== records (checking / signed / debrief) ===================== -->
+<div data-state="checking signed debrief" id="recwrap">
+  <div class="dgrid" id="dgrid">
+    <!-- debrief column (debrief only) -->
+    <section class="card pad" data-state="debrief" aria-labelledby="deb-h">
+      <div class="lee"><span class="ava" data-sprite="lee" data-scale="2.4"></span><div><b id="deb-h">Lee · debrief</b><small>Built from what you each chose</small></div></div>
+      <div class="blocks">
+        <div class="blk"><h3>Finding</h3><p>Everything on the tray matches the order, and it still isn't time for another dose.</p></div>
+        <div class="blk"><h3>Evidence</h3><p>Administration record: 2.5 mg at 07:30 today. Order: 4-hourly PRN. Ward time: 08:15. The earliest next dose is 11:30.</p></div>
+        <div class="blk"><h3>Why it matters</h3><p>Matching records don't tell you when the last dose was given; only the administration record does. Arthur told you, and the record confirmed it.</p></div>
+        <div class="blk"><h3>Next step</h3><p>Don't give it now. Dispose of the drawn-up dose following your hospital's Schedule 8 procedure, with a witness, and record it. Tell the nurse in charge, reassess Arthur's pain and involve the prescriber if it isn't controlled.</p></div>
       </div>
-    </div></main>
-  </div>
-</section>
+      <div class="lines">
+        <p><span class="whotag">You</span>You judged all five checks correctly. This scenario called for a different next step and evidence.</p>
+        <p><span class="whotag">Between you</span>There were no mismatches between the order and the prepared medicine on this tray. Only Checker A chose a next step and evidence that fit this scenario.</p>
+      </div>
+      <div class="realw">Why two people here: many Australian hospitals require two people to check and witness Schedule 8 medicines such as morphine. In a 2026 simulation trial, independent double checks helped experienced nurses find more errors, but not early-career nurses.</div>
+      <div class="talk"><h3>Talk it through · out loud</h3><p style="margin:4px 0 0">If your partner had said “it all matches”, would you still have looked at the administration record?</p></div>
+      <p class="src">Case C4 · v2.0.0 · <span class="review">Draft · not yet source checked</span><br>Sources: <a href="#">ACSQHC · NIMC User Guide (2019)</a> · <a href="#">SESLHD S8 checking and witnessing (2024)</a> · <a href="#">Westbrook et al., BMJ Qual Saf 2026</a> · <a href="#">ACSQHC · High risk medicines (APINCHS)</a></p>
+      <div class="sign" style="border-style:solid"><button class="btn" type="button">Next case →</button><p>Either of you can move on. The other screen follows.</p></div>
+    </section>
 
-<!-- ============ STATE 2: WAITING FOR PARTNER ============ -->
-<section class="ref-state">
-  <p class="ref-label">State 2 · Table created, waiting for Checker B to join</p>
-  <div class="ref-frame">
-    <main><div class="wrap">
-      <div class="table-meta"><span>Table <strong>HK3V</strong></span><span>You are <strong>Checker A</strong></span><span class="conn">Connected</span></div>
-      <div class="signoff" aria-label="Checkers">
-        <div class="sig is-signed"><span class="sig-role">Checker A (you)</span><span class="sig-line">Joined</span></div>
-        <div class="sig"><span class="sig-role">Checker B</span><span class="sig-line">Not joined yet</span></div>
-      </div>
-      <h1>Waiting for your partner</h1>
-      <p>This table has two seats. Send the invite link to one other person; the first case starts when they join.</p>
-      <div class="panel">
-        <label class="small muted" for="invite-url">Invite link for Checker B</label>
-        <div class="invite">
-          <input id="invite-url" type="text" readonly value="https://example.fly.dev/join/Hk3v9QmT2xLwP7">
-          <button class="btn" type="button">Copy invite link</button>
-        </div>
-        <p class="hint">Testing on your own? Open the link in a second Chrome profile. Tabs in the same browser count as the same person.</p>
-      </div>
-    </div></main>
-  </div>
-  <p class="ref-note">After copying, the button text becomes "Copied" for 2 seconds. Table code = first 4 characters of the table id, uppercase, display only.</p>
-</section>
-
-<!-- ============ STATE 3: JOIN ============ -->
-<section class="ref-state">
-  <p class="ref-label">State 3 · Invite link opened by a new browser (GET never claims the seat)</p>
-  <div class="ref-frame">
-    <main><div class="wrap">
-      <span class="eyebrow">Invitation</span>
-      <h1>You're invited to check records</h1>
-      <p>Checker A has started table <strong>HK3V</strong>. Join as Checker B to check six short cases together. Neither of you sees the other's answers until you have both signed.</p>
-      <div class="actions">
-        <button class="btn" type="button">Join as Checker B</button>
-        <a class="btn btn-secondary" href="/">Start my own table instead</a>
-      </div>
-      <hr style="margin:32px 0;border:0;border-top:1px solid var(--line)" class="ref-divider">
-      <p class="ref-label" style="padding:0;margin:0 0 8px">Variant · table already full</p>
-      <div class="notice"><strong>This table already has two checkers.</strong> Each table holds exactly two people. You can start a new table and invite someone.</div>
-      <a class="btn" href="/">Start a new table</a>
-    </div></main>
-  </div>
-</section>
-
-<!-- ============ STATE 4: CHECKING ============ -->
-<section class="ref-state">
-  <p class="ref-label">State 4 · Checking (Case 3; partner has signed, you have not)</p>
-  <div class="ref-frame">
-    <main><div class="wrap">
-      <div class="table-meta"><span>Table <strong>HK3V</strong></span><span>You are <strong>Checker A</strong></span><span>Case <strong>3</strong> of 6</span><span class="conn">Connected</span></div>
-      <ol class="progress" aria-label="Progress, case 3 of 6"><li class="is-done"><span class="sr-only">Case </span>1<span class="sr-only">, done</span></li><li class="is-done"><span class="sr-only">Case </span>2<span class="sr-only">, done</span></li><li class="is-current" aria-current="step"><span class="sr-only">Case </span>3<span class="sr-only">, current</span></li><li><span class="sr-only">Case </span>4</li><li><span class="sr-only">Case </span>5</li><li><span class="sr-only">Case </span>6</li></ol>
-      <div class="signoff" aria-label="Sign-off">
-        <div class="sig"><span class="sig-role">Checker A (you)</span><span class="sig-line">Awaiting signature</span></div>
-        <div class="sig is-signed"><span class="sig-role">Checker B</span><span class="sig-line"><span aria-hidden="true">✓</span> Signed</span><span class="sig-note">Sealed until you sign</span></div>
-      </div>
-      <h1>Case 3</h1>
-      <p class="muted">Compare the order with the prepared record. Your partner cannot see your answers until you have both signed.</p>
-
-      <div class="records">
-        <section class="record" aria-labelledby="order-h">
-          <div class="record-head"><h2 id="order-h">Order</h2><span class="kind">Medication chart</span></div>
-          <dl>
-            <dt>Patient</dt><dd>SIM-037</dd>
-            <dt>Medicine</dt><dd>Training Medicine C</dd>
-            <dt>Dose</dt><dd>1 training unit</dd>
-            <dt>Route</dt><dd>Intravenous (into a vein)</dd>
-            <dt>Scheduled time</dt><dd>08:00</dd>
-          </dl>
-        </section>
-        <section class="record record-label" aria-labelledby="prep-h">
-          <div class="record-head"><h2 id="prep-h">Prepared record</h2><span class="kind">Pharmacy label ℞</span></div>
-          <dl>
-            <dt>Medicine</dt><dd>Training Medicine C</dd>
-            <dt>Dose</dt><dd>1 training unit</dd>
-            <dt>Route</dt><dd>Intravenous (into a vein)</dd>
-            <dt>Patient</dt><dd>SIM-073</dd>
-            <dt>Scheduled time</dt><dd>20:00</dd>
-          </dl>
-          <div class="label-foot" aria-hidden="true"><span class="barcode"></span><span class="code">TRAINING LABEL · NOT FOR USE</span></div>
-        </section>
-      </div>
-
-      <form class="check" aria-labelledby="check-h">
-        <div class="check-head">
-          <h2 id="check-h">Independent double check</h2>
-          <p>Checker A · choose one answer for every line, then sign.</p>
-        </div>
-        <div class="check-body">
-          <fieldset class="field"><legend>Patient</legend>
-            <div class="choices">
-              <label class="choice"><input type="radio" name="patient" value="match"> Matches</label>
-              <label class="choice"><input type="radio" name="patient" value="mismatch" checked> Does not match</label>
-            </div>
-          </fieldset>
-          <fieldset class="field"><legend>Medicine</legend>
-            <div class="choices">
-              <label class="choice"><input type="radio" name="medicine" value="match" checked> Matches</label>
-              <label class="choice"><input type="radio" name="medicine" value="mismatch"> Does not match</label>
-            </div>
-          </fieldset>
-          <fieldset class="field"><legend>Dose</legend>
-            <div class="choices">
-              <label class="choice"><input type="radio" name="dose" value="match"> Matches</label>
-              <label class="choice"><input type="radio" name="dose" value="mismatch"> Does not match</label>
-            </div>
-          </fieldset>
-          <fieldset class="field"><legend>Route</legend>
-            <div class="choices">
-              <label class="choice"><input type="radio" name="route" value="match"> Matches</label>
-              <label class="choice"><input type="radio" name="route" value="mismatch"> Does not match</label>
-            </div>
-          </fieldset>
-          <fieldset class="field"><legend>Scheduled time</legend>
-            <div class="choices">
-              <label class="choice"><input type="radio" name="time" value="match"> Matches</label>
-              <label class="choice"><input type="radio" name="time" value="mismatch"> Does not match</label>
-            </div>
-          </fieldset>
-          <fieldset class="field overall"><legend>Overall</legend>
-            <div class="choices">
-              <label class="choice"><input type="radio" name="overall" value="match"> Records match</label>
-              <label class="choice"><input type="radio" name="overall" value="discrepancy"> Discrepancy found</label>
-            </div>
-          </fieldset>
-          <div class="form-error" role="alert">Choose an answer for every line before signing. Missing: Dose, Route, Scheduled time, Overall.</div>
-          <div class="sign">
-            <button class="btn" type="submit">Sign and submit</button>
-            <span class="sign-label">Signing seals your check. You can't change it afterwards, and your partner sees it only once they have signed too.</span>
+    <div id="recs">
+      <div class="records" id="recgrid">
+        <section class="card" aria-label="Order: medication chart">
+          <div class="rec-h"><div class="ttl">Order · medication chart<small>PRN (when required) medicines</small></div><div class="idbox">MRN 4472816<br>WILLIAMS, Arthur<br>DOB 02/09/1943</div></div>
+          <div class="adr"><span class="k">Allergies &amp; adverse reactions</span><span><b>Nil known</b> · checked RN J. Tan 10/11</span></div>
+          <div class="grid4">
+            <div class="wide"><span class="k">Medicine (generic name)</span><span class="v">morphine (oral liquid)</span></div>
+            <div><span class="k">Route</span><span class="v">Oral</span></div>
+            <div><span class="k">Dose</span><span class="v">2.5 mg</span></div>
+            <div><span class="k">Frequency</span><span class="v"><span class="ev" data-evidence="admin_record">4-hourly PRN</span></span></div>
+            <div><span class="k">Max PRN / 24 h</span><span class="v">15 mg</span></div>
+            <div><span class="k">Indication</span><span class="v">Pain</span></div>
+            <div><span class="k">Prescriber</span><span class="sig">S. Okafor</span></div>
           </div>
-        </div>
+          <table class="admin">
+            <caption>Administration record</caption>
+            <thead><tr><th>Date</th><th>Time</th><th>Dose</th><th>Route</th><th>Given</th><th>Witness</th></tr></thead>
+            <tbody>
+              <tr><td>11/11</td><td>01:30</td><td>2.5 mg</td><td>PO</td><td>JT</td><td>MK</td></tr>
+              <tr><td>11/11</td><td><span class="ev" data-evidence="admin_record">07:30</span></td><td>2.5 mg</td><td>PO</td><td>JT</td><td>MK</td></tr>
+              <tr class="empty"><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <section class="card" aria-label="Prepared medicine">
+          <div class="rec-h prep"><div class="ttl">Prepared medicine<small>Drawn up by RN Jo, 08:10</small></div></div>
+          <div class="prep-body">
+            <div class="label"><div class="stripe"></div><div class="in">
+              <div class="gen">MORPHINE HYDROCHLORIDE</div>
+              <div class="form">oral solution</div>
+              <div class="str">1 mg/mL</div>
+              <div class="row"><span class="s8">S8 · CONTROLLED DRUG</span><span class="train">TRAINING LABEL</span></div>
+            </div></div>
+            <div class="qty">
+              <svg viewBox="0 0 300 60" width="100%" height="56" role="img" aria-label="Oral syringe filled to 2.5 millilitres">
+                <rect x="40" y="18" width="200" height="24" rx="3" fill="#fff" stroke="#8b8270" stroke-width="2"/>
+                <rect x="42" y="20" width="98" height="20" fill="#f2e6c9"/>
+                <rect x="240" y="24" width="28" height="12" rx="2" fill="#efe9dc" stroke="#8b8270" stroke-width="2"/>
+                <rect x="268" y="16" width="8" height="28" rx="2" fill="#8b8270"/>
+                <rect x="140" y="20" width="6" height="20" fill="#5b5446"/>
+                <rect x="146" y="28" width="94" height="4" fill="#8b8270"/>
+                <rect x="20" y="26" width="20" height="8" rx="2" fill="#8b8270"/>
+                <g stroke="#5b5446" stroke-width="1.5"><line x1="42" y1="18" x2="42" y2="10"/><line x1="81" y1="18" x2="81" y2="12"/><line x1="120" y1="18" x2="120" y2="10"/><line x1="159" y1="18" x2="159" y2="12"/><line x1="198" y1="18" x2="198" y2="10"/><line x1="237" y1="18" x2="237" y2="12"/></g>
+                <g font-family="ui-monospace,Menlo,Consolas,monospace" font-size="10" fill="#5b5446"><text x="38" y="8">0</text><text x="116" y="8">2</text><text x="194" y="8">4</text></g>
+                <text x="44" y="56" font-family="system-ui,sans-serif" font-size="10" fill="#5b5446">mL · ORAL SYRINGE</text>
+              </svg>
+              <span class="k">Quantity prepared</span><span class="vol">2.5 mL</span>
+            </div>
+            <div class="forbox"><span class="k">Prepared for</span>WILLIAMS, Arthur · DOB 02/09/1943<br>MRN 4472816 · Bed 14<br><span class="k" style="margin-top:4px">For</span>PRN request 08:15</div>
+          </div>
+        </section>
+      </div>
+
+      <!-- CHECKING: answer area -->
+      <form class="answer" data-state="checking" onsubmit="return false" aria-label="Your independent check">
+        <section class="card pad part">
+          <h2>1 · Compare the records</h2>
+          <p class="sub">Does the prepared medicine match the order? Checker A can't see your answers until you've both signed.</p>
+          <fieldset class="q"><legend>Patient</legend><div class="hint">Name, date of birth and MRN on the label, band and chart</div>
+            <div class="seg"><label><input type="radio" name="patient" checked>✓ Matches</label><label class="no"><input type="radio" name="patient">⚑ Doesn't match</label></div></fieldset>
+          <fieldset class="q"><legend>Medicine</legend><div class="hint">Medicine name on the order and on the label</div>
+            <div class="seg"><label><input type="radio" name="medicine" checked>✓ Matches</label><label class="no"><input type="radio" name="medicine">⚑ Doesn't match</label></div></fieldset>
+          <fieldset class="q"><legend>Dose</legend><div class="hint">Ordered dose vs strength × quantity prepared</div>
+            <div class="seg"><label><input type="radio" name="dose" checked>✓ Matches</label><label class="no"><input type="radio" name="dose">⚑ Doesn't match</label></div></fieldset>
+          <fieldset class="q"><legend>Route &amp; form</legend><div class="hint">Ordered route vs the form and device prepared</div>
+            <div class="seg"><label><input type="radio" name="route" checked>✓ Matches</label><label class="no"><input type="radio" name="route">⚑ Doesn't match</label></div></fieldset>
+          <fieldset class="q"><legend>Time on record</legend><div class="hint">Order times or PRN vs the “prepared for” time</div>
+            <div class="seg"><label><input type="radio" name="time" checked>✓ Matches</label><label class="no"><input type="radio" name="time">⚑ Doesn't match</label></div></fieldset>
+          <p class="note">These five checks compare the order with what was prepared. Whether a dose should be given now — for example, how long since the last dose, or an allergy — belongs in your next step and evidence.</p>
+        </section>
+        <section class="card pad part">
+          <h2>2 · Decide</h2>
+          <fieldset class="opts"><legend>Next step in this scenario</legend>
+            <label class="opt"><input type="radio" name="action" checked><b>Continue with the remaining checks</b><span>Nothing here stops this dose. Carry on with this scenario's remaining bedside checks. This is not permission to give a real medicine.</span></label>
+            <label class="opt"><input type="radio" name="action"><b>Stop and re-prepare</b><span>The order is fine, but what was prepared isn't. Prepare it again and re-check.</span></label>
+            <label class="opt"><input type="radio" name="action"><b>Pause and clarify</b><span>Don't give this dose now. Sort it out with your facilitator, the nurse in charge or the prescriber.</span></label>
+          </fieldset>
+          <fieldset class="opts evlist"><legend>Evidence: what decided it?</legend>
+            <label class="opt"><input type="radio" name="ev" checked>The order and the prepared medicine match on all five checks</label>
+            <label class="opt"><input type="radio" name="ev">The total amount prepared (strength × quantity)</label>
+            <label class="opt"><input type="radio" name="ev">The patient identifiers (name, date of birth, MRN)</label>
+            <label class="opt"><input type="radio" name="ev">The administration record (when the last dose was given)</label>
+            <label class="opt"><input type="radio" name="ev">The allergy record</label>
+            <label class="opt"><input type="radio" name="ev">The route or form prepared</label>
+            <label class="opt"><input type="radio" name="ev">What the patient said</label>
+          </fieldset>
+          <div class="sign"><button class="btn" type="button">Sign and submit</button><p>Signing seals your check. You can't change it afterwards.</p></div>
+          <div class="err" role="alert" hidden>You marked a mismatch, so ‘Continue with the remaining checks’ doesn't fit. Choose another next step.</div>
+        </section>
       </form>
 
-      <details class="glossary">
-        <summary>Field guide</summary>
-        <dl>
-          <dt>Patient</dt><dd>The simulated patient's identifier.</dd>
-          <dt>Medicine</dt><dd>The medicine's name as written. All names are training placeholders.</dd>
-          <dt>Dose</dt><dd>The amount, in fictional training units.</dd>
-          <dt>Route</dt><dd>How the medicine is given.</dd>
-          <dt>Scheduled time</dt><dd>The time written on the record, on a 24-hour clock.</dd>
-          <dt>Oral</dt><dd>By mouth.</dd>
-          <dt>Intravenous</dt><dd>Into a vein.</dd>
-        </dl>
-      </details>
-    </div></main>
-  </div>
-  <p class="ref-note">Radios start unselected; two are checked here only to show the selected style. Errors appear only after a rejected submit, and only describe the learner's own selections. Other server messages (same box): "Overall must agree with your field answers: you marked a field as not matching, so choose Discrepancy found." / "Overall must agree with your field answers: every field matches, so choose Records match." / "Couldn't reach the server. Your choices are kept; try again."</p>
-</section>
-
-<!-- ============ STATE 5: SIGNED, WAITING ============ -->
-<section class="ref-state">
-  <p class="ref-label">State 5 · You signed, partner has not</p>
-  <div class="ref-frame">
-    <main><div class="wrap">
-      <div class="table-meta"><span>Table <strong>HK3V</strong></span><span>You are <strong>Checker A</strong></span><span>Case <strong>4</strong> of 6</span><span class="conn is-reconnecting">Reconnecting…</span></div>
-      <ol class="progress" aria-label="Progress, case 4 of 6"><li class="is-done"><span class="sr-only">Case </span>1<span class="sr-only">, done</span></li><li class="is-done"><span class="sr-only">Case </span>2<span class="sr-only">, done</span></li><li class="is-done"><span class="sr-only">Case </span>3<span class="sr-only">, done</span></li><li class="is-current" aria-current="step"><span class="sr-only">Case </span>4<span class="sr-only">, current</span></li><li><span class="sr-only">Case </span>5</li><li><span class="sr-only">Case </span>6</li></ol>
-      <div class="signoff" aria-label="Sign-off">
-        <div class="sig is-signed"><span class="sig-role">Checker A (you)</span><span class="sig-line"><span aria-hidden="true">✓</span> Signed</span><span class="sig-note">Sealed until both sign</span></div>
-        <div class="sig"><span class="sig-role">Checker B</span><span class="sig-line">Awaiting signature</span></div>
+      <!-- SIGNED: sealed answers -->
+      <div class="answer" data-state="signed">
+        <section class="card pad">
+          <h2>✓ Signed at 08:17 · your check is sealed</h2>
+          <ul class="sealed">
+            <li><span>Patient</span><span>Matches</span></li><li><span>Medicine</span><span>Matches</span></li><li><span>Dose</span><span>Matches</span></li><li><span>Route &amp; form</span><span>Matches</span></li><li><span>Time on record</span><span>Matches</span></li>
+            <li><span>Next step</span><span>Continue with the remaining checks</span></li><li><span>Evidence</span><span>All five checks match</span></li>
+          </ul>
+          <p class="fine">Signed means saved, not checked for correctness.</p>
+        </section>
+        <section class="card pad">
+          <div class="coach"><span class="ava" data-sprite="lee" data-scale="2.4"></span><div><b>Lee</b><br>Checker A is still checking. While you wait: which record did you look at last?</div></div>
+          <p class="note">The debrief opens on both screens as soon as Checker A signs. You don't need to refresh.</p>
+        </section>
       </div>
-      <div class="notice" role="status"><strong>Signed.</strong> Your check is sealed. Both checks open together when Checker B signs. If they closed their browser, they can come back to this table from the same browser.</div>
-      <form class="check" aria-label="Your check (sealed)">
-        <div class="check-head"><h2>Independent double check</h2><p>Checker A · sealed</p></div>
-        <div class="check-body">
-          <fieldset class="field" disabled><legend>Patient</legend>
-            <div class="choices">
-              <label class="choice"><input type="radio" name="p5" value="match" checked> Matches</label>
-              <label class="choice"><input type="radio" name="p5" value="mismatch"> Does not match</label>
-            </div>
-          </fieldset>
-          <fieldset class="field overall" disabled><legend>Overall</legend>
-            <div class="choices">
-              <label class="choice"><input type="radio" name="o5" value="match"> Records match</label>
-              <label class="choice"><input type="radio" name="o5" value="discrepancy" checked> Discrepancy found</label>
-            </div>
-          </fieldset>
-        </div>
-      </form>
-    </div></main>
-  </div>
-  <p class="ref-note">The two record cards stay visible above the sealed form (omitted here). All six fieldsets are disabled; only two shown. "Reconnecting…" appears while EventSource reconnects, then returns to "Connected".</p>
-</section>
 
-<!-- ============ STATE 6: REVEALED ============ -->
-<section class="ref-state">
-  <p class="ref-label">State 6 · Revealed (Case 3: complementary finds — each found one of two discrepancies)</p>
-  <div class="ref-frame">
-    <main><div class="wrap">
-      <div class="table-meta"><span>Table <strong>HK3V</strong></span><span>You are <strong>Checker A</strong></span><span>Case <strong>3</strong> of 6</span><span class="conn">Connected</span></div>
-      <ol class="progress" aria-label="Progress, case 3 of 6"><li class="is-done"><span class="sr-only">Case </span>1<span class="sr-only">, done</span></li><li class="is-done"><span class="sr-only">Case </span>2<span class="sr-only">, done</span></li><li class="is-current" aria-current="step"><span class="sr-only">Case </span>3<span class="sr-only">, current</span></li><li><span class="sr-only">Case </span>4</li><li><span class="sr-only">Case </span>5</li><li><span class="sr-only">Case </span>6</li></ol>
-      <span class="eyebrow">Both checks opened</span>
-      <h1>Case 3 · Results</h1>
-      <ul class="summary" aria-label="Summary">
-        <li class="tag tag-neutral">You gave different answers</li>
-        <li class="tag tag-bad">Checker A: not fully correct</li>
-        <li class="tag tag-bad">Checker B: not fully correct</li>
-      </ul>
-      <section class="pair" aria-labelledby="pair-h">
-        <span class="eyebrow" id="pair-h">Pair review</span>
-        <p>Together you found every discrepancy, but each check on its own was incomplete.</p>
-        <p class="detail">Missed — A: Scheduled time; B: Patient. Flagged but matching — A: none; B: none.</p>
+      <!-- toolbox -->
+      <section class="card toolbox" data-state="checking signed" aria-label="Toolbox">
+        <h2>Toolbox <span class="fine">· general notes, the same in every case</span></h2>
+        <details open><summary>Medicine card: Morphine (oral liquid) <span class="hr-tag">APINCHS: N</span><span class="fine">Schedule 8</span></summary>
+          <dl>
+            <dt>What it is</dt><dd>A strong opioid pain medicine. In Australia it is a Schedule 8 controlled drug.</dd>
+            <dt>What to watch</dt><dd>Read the strength on the bottle before working out the volume: oral morphine liquid comes in more than one strength. Check the time since the last dose and any 24-hour maximum on the chart. Too much can make breathing slow and shallow.</dd>
+            <dt>Sources</dt><dd><a href="#">ACSQHC · APINCHS</a> · <a href="#">SESLHD S8 policy</a> · v2.0.0 · <span class="review">Draft · not yet source checked</span></dd>
+          </dl>
+        </details>
+        <details><summary>Before you start: units, total amount, PRN, reading the chart</summary><p class="fine">(Same seven notes as on the waiting screen.)</p></details>
       </section>
-      <table class="reveal">
-        <caption>Line by line</caption>
-        <thead><tr><th scope="col">Field</th><th scope="col">Records</th><th scope="col">Checker A (you)</th><th scope="col">Checker B</th></tr></thead>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== STATE: summary ===================== -->
+<section data-state="summary">
+  <div class="status" role="status"><span>Table <b class="mono">FHJE</b></span><span>Training complete · 6 of 6 cases</span><span class="conn">Connected</span></div>
+  <div class="card sumhead" style="margin-top:0">
+    <span class="ava" data-sprite="lee" data-scale="2.8"></span>
+    <div><p class="kicker">Training summary · You (Checker B)</p><h1>What you found in six cases</h1><p>Mismatches, false alarms and next steps are counted separately, and agreeing is kept apart from being right.</p></div>
+  </div>
+  <div class="tiles">
+    <div class="card tile"><div class="n">3 of 4</div><div class="l">mismatches you found</div><div class="bar"><i style="width:75%"></i></div></div>
+    <div class="card tile"><div class="n">1 of 26</div><div class="l">matching items you marked as mismatches</div><div class="bar amb"><i style="width:3.8%"></i></div></div>
+    <div class="card tile"><div class="n">4 of 6</div><div class="l">next steps and evidence that fit</div><div class="bar"><i style="width:66.7%"></i></div></div>
+    <div class="card tile"><div class="n">3 of 6</div><div class="l">cases fully in line with the reference</div><div class="bar"><i style="width:50%"></i></div></div>
+  </div>
+  <div class="two">
+    <div class="card pad">
+      <table class="tbl">
+        <caption>By check (you)</caption>
+        <thead><tr><th>Check</th><th>Mismatches found</th><th>Matching items marked as mismatches</th></tr></thead>
         <tbody>
-          <tr>
-            <th scope="row">Patient</th>
-            <td data-label="Records"><strong>Do not match</strong><span class="vals">SIM-037 / SIM-073</span></td>
-            <td data-label="Checker A (you)">Does not match<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
-            <td data-label="Checker B">Matches<span class="res res-bad"><span aria-hidden="true">✗</span> Incorrect</span></td>
-          </tr>
-          <tr>
-            <th scope="row">Medicine</th>
-            <td data-label="Records">Match</td>
-            <td data-label="Checker A (you)">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
-            <td data-label="Checker B">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
-          </tr>
-          <tr>
-            <th scope="row">Dose</th>
-            <td data-label="Records">Match</td>
-            <td data-label="Checker A (you)">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
-            <td data-label="Checker B">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
-          </tr>
-          <tr>
-            <th scope="row">Route</th>
-            <td data-label="Records">Match</td>
-            <td data-label="Checker A (you)">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
-            <td data-label="Checker B">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
-          </tr>
-          <tr>
-            <th scope="row">Scheduled time</th>
-            <td data-label="Records"><strong>Do not match</strong><span class="vals">08:00 / 20:00</span></td>
-            <td data-label="Checker A (you)">Matches<span class="res res-bad"><span aria-hidden="true">✗</span> Incorrect</span></td>
-            <td data-label="Checker B">Does not match<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
-          </tr>
-          <tr class="overall-row">
-            <th scope="row">Overall</th>
-            <td data-label="Records"><strong>Discrepancy</strong></td>
-            <td data-label="Checker A (you)">Discrepancy found<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
-            <td data-label="Checker B">Discrepancy found<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
-          </tr>
+          <tr><td>Patient</td><td data-l="Mismatches found">1 of 1</td><td data-l="False marks">0 of 5</td></tr>
+          <tr><td>Medicine</td><td data-l="Mismatches found"><span class="na">No opportunity this time</span></td><td data-l="False marks">0 of 6</td></tr>
+          <tr><td>Dose</td><td data-l="Mismatches found">1 of 2</td><td data-l="False marks">1 of 4</td></tr>
+          <tr><td>Route &amp; form</td><td data-l="Mismatches found">1 of 1</td><td data-l="False marks">0 of 5</td></tr>
+          <tr><td>Time on record</td><td data-l="Mismatches found"><span class="na">No opportunity this time</span></td><td data-l="False marks">0 of 6</td></tr>
         </tbody>
       </table>
-      <section class="explain" aria-labelledby="explain-h">
-        <h3 id="explain-h">What the records show</h3>
-        <p>The prepared record has two discrepancies: the patient is SIM-073 instead of SIM-037, and the time is 20:00 instead of 08:00. Finding one discrepancy does not end the check: this record had two.</p>
-      </section>
-      <div class="actions">
-        <button class="btn" type="button">Next case</button>
-        <span class="small muted">Either checker can move you both on.</span>
-      </div>
-    </div></main>
+      <p class="fine">Next steps: 4 of 6 fit · right next step alone 4 of 6 · right evidence alone 5 of 6.<br>Checker A: 3 of 4 mismatches · 0 of 26 false marks · 5 of 6 next steps · 4 of 6 cases fully in line.</p>
+    </div>
+    <div class="card pad">
+      <h2>Between you</h2>
+      <dl class="dl mt">
+        <dt>Found together</dt><dd><b>3 of 4</b> mismatches</dd>
+        <dt>Both missed</dt><dd>1 — <a href="#">Case 6 · Dose</a> (200 micrograms ordered, 5 mg prepared)</dd>
+        <dt>Only one of you</dt><dd>0 mismatches</dd>
+        <dt>Next step fit</dt><dd>Both: Cases 2, 3, 6 · Only Checker A: <a href="#">Case 1</a>, <a href="#">Case 4</a> · Only you: <a href="#">Case 5</a></dd>
+        <dt>Same answer</dt><dd>29 of 30 checks. Agreeing isn't the same as being right.</dd>
+      </dl>
+    </div>
   </div>
-  <p class="ref-note">Pair review sentences (brief §6, first that applies): "Both checks were complete and correct." / "Checker A's check was complete; Checker B's was not." / "You both missed the same discrepancy: Dose." / "Together you found every discrepancy, but each check on its own was incomplete." / "Neither check was complete." The detail line appears unless the first applies. Other summary tags: "You gave the same answer"; "Checker A: fully correct". On case 6 the button reads "See summary".</p>
+  <div class="card pad mt">
+    <h2>Worth practising next</h2>
+    <ol class="sugg">
+      <li>In 2 different situations, the total amount needed another look. Convert units, then multiply strength by quantity before you compare. <a href="#">Case 1</a> · <a href="#">Case 6</a></li>
+      <li>Worth reviewing: the administration record. Compare the current date and time, the last dose given and the interval on this order. <a href="#">Case 4</a></li>
+    </ol>
+    <p class="caveat">These notes describe this practice only. Small numbers can mislead. This summary describes the completed cases shown here. Small numbers, repeated cases and use of the same browser may affect interpretation. Results do not establish clinical competence or show that the exercise improves patient outcomes.</p>
+  </div>
+  <div class="card pad mt">
+    <table class="tbl">
+      <caption>Case by case</caption>
+      <thead><tr><th>Case</th><th>Patient</th><th>Mismatches</th><th>Found by</th><th>Next step fit</th><th>Same answer?</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td data-l="Patient">Margaret Ellis</td><td data-l="Mismatches">none</td><td data-l="Found by">—</td><td data-l="Next step fit">Only Checker A</td><td data-l="Same answer?">No</td></tr>
+        <tr><td>2</td><td data-l="Patient">John Smyth</td><td data-l="Mismatches">Patient</td><td data-l="Found by">Both</td><td data-l="Next step fit">Both</td><td data-l="Same answer?">No (different next step)</td></tr>
+        <tr><td>3</td><td data-l="Patient">Lina Haddad</td><td data-l="Mismatches">Dose</td><td data-l="Found by">Both</td><td data-l="Next step fit">Both</td><td data-l="Same answer?">Yes</td></tr>
+        <tr><td>4</td><td data-l="Patient">Arthur Williams</td><td data-l="Mismatches">none</td><td data-l="Found by">—</td><td data-l="Next step fit">Only Checker A</td><td data-l="Same answer?">No</td></tr>
+        <tr><td>5</td><td data-l="Patient">Grace Nguyen</td><td data-l="Mismatches">none</td><td data-l="Found by">—</td><td data-l="Next step fit">Only you</td><td data-l="Same answer?">No</td></tr>
+        <tr><td>6</td><td data-l="Patient">Peter O'Neill</td><td data-l="Mismatches">Route &amp; form, Dose</td><td data-l="Found by">Route &amp; form: both · Dose: neither</td><td data-l="Next step fit">Both</td><td data-l="Same answer?"><b>Yes — and you both missed Dose</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card pad mt" style="margin-bottom:40px">
+    <div class="btns"><button class="btn" type="button">Start the new situations →</button><span class="fine">Three new patients. Same rules: check on your own first. Your training results stay as they are.</span></div>
+  </div>
 </section>
 
-<!-- ============ STATE 7: AGREED BUT WRONG ============ -->
-<section class="ref-state">
-  <p class="ref-label">State 7 · Revealed (Case 2: same answer, both missed the same discrepancy)</p>
-  <div class="ref-frame">
-    <main><div class="wrap">
-      <span class="eyebrow">Both checks opened</span>
-      <h1>Case 2 · Results</h1>
-      <ul class="summary" aria-label="Summary">
-        <li class="tag tag-neutral">You gave the same answer</li>
-        <li class="tag tag-bad">Checker A: not fully correct</li>
-        <li class="tag tag-bad">Checker B: not fully correct</li>
-      </ul>
-      <div class="notice notice-agreed-wrong"><strong>You agreed, but the records show a different result.</strong> Agreement is not the same as accuracy: two checks can miss the same thing.</div>
-      <section class="pair" aria-labelledby="pair7-h">
-        <span class="eyebrow" id="pair7-h">Pair review</span>
-        <p>You both missed the same discrepancy: Dose.</p>
-        <p class="detail">Missed — A: Dose; B: Dose. Flagged but matching — A: none; B: none.</p>
-      </section>
-      <table class="reveal">
-        <caption>Line by line</caption>
-        <thead><tr><th scope="col">Field</th><th scope="col">Records</th><th scope="col">Checker A (you)</th><th scope="col">Checker B</th></tr></thead>
+<!-- ===================== STATE: transfer-intro (first transfer case, top of page) ===================== -->
+<section data-state="transfer-intro">
+  <div class="status" role="status"><span>Table <b class="mono">FHJE</b></span>
+    <span class="seat"><span class="badge" aria-hidden="true">A</span>Checker A <span class="pill wait">Checking…</span></span>
+    <span class="seat"><span class="badge b" aria-hidden="true">B</span><b>You</b> (Checker B) <span class="pill wait">Checking…</span></span>
+    <span>New situation <b>1</b> of 3 <span class="dots" aria-hidden="true"><i class="now"></i><i></i><i></i></span></span><span class="conn">Connected</span></div>
+  <div class="card pad" style="border-left:5px solid var(--primary-2)">
+    <p class="kicker">New situations · transfer</p>
+    <h2>New patients and different numbers. Check exactly as before.</h2>
+    <p>These three are counted separately from training, so you can see whether the method carries over to something you haven't seen.</p>
+  </div>
+  <div class="casehead mt"><p class="kicker" style="margin:0">New situation 1 of 3</p><h1>A liquid dose</h1><span class="review">Draft · not yet source checked</span></div>
+  <section class="card bed" aria-label="Patient">
+    <div class="portrait" data-sprite="patient" data-hair="#a8743f" data-skin="#f0c9a0" data-gown="#b9cfe0" data-scale="4.5"></div>
+    <div>
+      <p class="kicker">Bed 18 · Banksia Ward</p><h2>Helen BROWN</h2><div class="meta">69 years · Back pain after a fall</div>
+      <div class="bubble">“The pain's getting worse. Can I have something?”</div>
+      <div class="bandrow"><span class="kicker" style="margin:0">ID band</span><div class="band"><div class="panel"><div><div class="who">BROWN, Helen</div><div class="ids">DOB 30/04/1957 · F<br>MRN 4474012</div></div><div class="barcode" aria-hidden="true"></div></div></div></div>
+    </div>
+    <div class="clock"><div><div class="d">Wed 11 Nov 2026</div><div class="t">10:00</div><div class="d">Ward time</div></div><span class="tag">⚑ Schedule 8 medicine: this ward's policy requires two checkers.</span></div>
+  </section>
+  <p class="fine" style="margin-bottom:40px">The records, the two-part check and the debrief are laid out exactly as in training (see the <b>checking</b> and <b>debrief</b> states).</p>
+</section>
+
+<!-- ===================== STATE: end ===================== -->
+<section data-state="end">
+  <div class="card sumhead">
+    <span class="ava" data-sprite="lee" data-scale="2.8"></span>
+    <div><p class="kicker">Table FHJE · practice complete · 11 Nov 2026</p><h1>End review</h1><p>Bring this to your debrief with your facilitator. Training and new situations are shown separately.</p></div>
+  </div>
+  <div class="two">
+    <div class="card pad">
+      <table class="tbl"><caption>Training · six cases (you)</caption>
+        <thead><tr><th>Measure</th><th>You</th><th>Checker A</th></tr></thead>
         <tbody>
-          <tr>
-            <th scope="row">Patient</th>
-            <td data-label="Records">Match</td>
-            <td data-label="Checker A (you)">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
-            <td data-label="Checker B">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
-          </tr>
-          <tr>
-            <th scope="row">Medicine</th>
-            <td data-label="Records">Match</td>
-            <td data-label="Checker A (you)">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
-            <td data-label="Checker B">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
-          </tr>
-          <tr>
-            <th scope="row">Dose</th>
-            <td data-label="Records"><strong>Do not match</strong><span class="vals">2 / 0.2 training units</span></td>
-            <td data-label="Checker A (you)">Matches<span class="res res-bad"><span aria-hidden="true">✗</span> Incorrect</span></td>
-            <td data-label="Checker B">Matches<span class="res res-bad"><span aria-hidden="true">✗</span> Incorrect</span></td>
-          </tr>
-          <tr>
-            <th scope="row">Route</th>
-            <td data-label="Records">Match</td>
-            <td data-label="Checker A (you)">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
-            <td data-label="Checker B">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
-          </tr>
-          <tr>
-            <th scope="row">Scheduled time</th>
-            <td data-label="Records">Match</td>
-            <td data-label="Checker A (you)">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
-            <td data-label="Checker B">Matches<span class="res res-ok"><span aria-hidden="true">✓</span> Correct</span></td>
-          </tr>
-          <tr class="overall-row">
-            <th scope="row">Overall</th>
-            <td data-label="Records"><strong>Discrepancy</strong></td>
-            <td data-label="Checker A (you)">Records match<span class="res res-bad"><span aria-hidden="true">✗</span> Incorrect</span></td>
-            <td data-label="Checker B">Records match<span class="res res-bad"><span aria-hidden="true">✗</span> Incorrect</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div></main>
-  </div>
-  <p class="ref-note">The red callout appears only when both sets of six judgements are identical and wrong. The explanation and Next button follow as in State 6.</p>
-</section>
-
-<!-- ============ STATE 8: FINAL REVIEW ============ -->
-<section class="ref-state">
-  <p class="ref-label">State 8 · Final review after case 6</p>
-  <div class="ref-frame">
-    <main><div class="wrap">
-      <ol class="progress" aria-label="Progress, all six cases done"><li class="is-done"><span class="sr-only">Case </span>1<span class="sr-only">, done</span></li><li class="is-done"><span class="sr-only">Case </span>2<span class="sr-only">, done</span></li><li class="is-done"><span class="sr-only">Case </span>3<span class="sr-only">, done</span></li><li class="is-done"><span class="sr-only">Case </span>4<span class="sr-only">, done</span></li><li class="is-done"><span class="sr-only">Case </span>5<span class="sr-only">, done</span></li><li class="is-done"><span class="sr-only">Case </span>6<span class="sr-only">, done</span></li></ol>
-      <span class="eyebrow">Check complete</span>
-      <h1>All six cases checked</h1>
-      <p class="lead">Here is how your two independent checks compared.</p>
-      <ul class="stats">
-        <li class="stat"><span class="num">6/6</span><span class="lbl">Cases completed</span></li>
-        <li class="stat"><span class="num">3/6</span><span class="lbl">Checker A (you): fully correct</span></li>
-        <li class="stat"><span class="num">3/6</span><span class="lbl">Checker B: fully correct</span></li>
-        <li class="stat"><span class="num">1</span><span class="lbl">Case you both missed</span></li>
-      </ul>
-      <table class="reveal">
-        <caption>Case by case</caption>
-        <thead><tr><th scope="col">Case</th><th scope="col">You (A)</th><th scope="col">Partner (B)</th><th scope="col">Same answer</th><th scope="col">Teaching point</th></tr></thead>
+          <tr><td>Mismatches found</td><td data-l="You">3 of 4</td><td data-l="Checker A">3 of 4</td></tr>
+          <tr><td>Matching items marked as mismatches</td><td data-l="You">1 of 26</td><td data-l="Checker A">0 of 26</td></tr>
+          <tr><td>Next steps and evidence that fit</td><td data-l="You">4 of 6</td><td data-l="Checker A">5 of 6</td></tr>
+          <tr><td>Found together</td><td data-l="You" colspan="2">3 of 4 · both missed 1 (Case 6 · Dose)</td></tr>
+        </tbody></table>
+    </div>
+    <div class="card pad">
+      <table class="tbl"><caption>New situations · three cases (you)</caption>
+        <thead><tr><th>Situation</th><th>Practised</th><th>Result</th></tr></thead>
         <tbody>
-          <tr>
-            <th scope="row"><a href="#">Case 1</a></th>
-            <td data-label="You (A)"><span class="res res-ok" style="margin:0"><span aria-hidden="true">✓</span> Correct</span></td>
-            <td data-label="Partner (B)"><span class="res res-ok" style="margin:0"><span aria-hidden="true">✓</span> Correct</span></td>
-            <td data-label="Same answer">Yes</td>
-            <td data-label="Teaching point">Checking does not mean there must always be a discrepancy.</td>
-          </tr>
-          <tr>
-            <th scope="row"><a href="#">Case 2</a></th>
-            <td data-label="You (A)"><span class="res res-bad" style="margin:0"><span aria-hidden="true">✗</span> Missed dose</span></td>
-            <td data-label="Partner (B)"><span class="res res-bad" style="margin:0"><span aria-hidden="true">✗</span> Missed dose</span></td>
-            <td data-label="Same answer">Yes</td>
-            <td data-label="Teaching point">A misplaced decimal point makes a tenfold difference.</td>
-          </tr>
-          <tr>
-            <th scope="row"><a href="#">Case 3</a></th>
-            <td data-label="You (A)"><span class="res res-bad" style="margin:0"><span aria-hidden="true">✗</span> Missed time</span></td>
-            <td data-label="Partner (B)"><span class="res res-bad" style="margin:0"><span aria-hidden="true">✗</span> Missed patient</span></td>
-            <td data-label="Same answer">No</td>
-            <td data-label="Teaching point">Finding one discrepancy does not end the check.</td>
-          </tr>
-          <tr>
-            <th scope="row"><a href="#">Case 4</a></th>
-            <td data-label="You (A)"><span class="res res-ok" style="margin:0"><span aria-hidden="true">✓</span> Correct</span></td>
-            <td data-label="Partner (B)"><span class="res res-bad" style="margin:0"><span aria-hidden="true">✗</span> Flagged route</span></td>
-            <td data-label="Same answer">No</td>
-            <td data-label="Teaching point">Expecting a problem is not evidence of one.</td>
-          </tr>
-          <tr>
-            <th scope="row"><a href="#">Case 5</a></th>
-            <td data-label="You (A)"><span class="res res-ok" style="margin:0"><span aria-hidden="true">✓</span> Correct</span></td>
-            <td data-label="Partner (B)"><span class="res res-ok" style="margin:0"><span aria-hidden="true">✓</span> Correct</span></td>
-            <td data-label="Same answer">Yes</td>
-            <td data-label="Teaching point">Compare the stated routes.</td>
-          </tr>
-          <tr>
-            <th scope="row"><a href="#">Case 6</a></th>
-            <td data-label="You (A)"><span class="res res-bad" style="margin:0"><span aria-hidden="true">✗</span> Missed dose</span></td>
-            <td data-label="Partner (B)"><span class="res res-ok" style="margin:0"><span aria-hidden="true">✓</span> Correct</span></td>
-            <td data-label="Same answer">No</td>
-            <td data-label="Teaching point">Together is not the same as each check being complete.</td>
-          </tr>
-        </tbody>
-      </table>
-      <p class="small muted">These counts describe this table only. They are not a measure of clinical competence.</p>
-      <div class="actions">
-        <a class="btn" href="/">Start a new table</a>
-        <a class="btn btn-secondary" href="/tables">My tables</a>
-      </div>
-    </div></main>
+          <tr><td>1 · A liquid dose</td><td data-l="Practised">Total amount</td><td data-l="Result"><span class="mk ok">✓ Applied it</span></td></tr>
+          <tr><td>2 · Overnight pain relief</td><td data-l="Practised">Administration record</td><td data-l="Result"><span class="mk no">Still practising</span> — you paused, but the dose was due from 03:40</td></tr>
+          <tr><td>3 · A different antibiotic</td><td data-l="Practised">Allergies</td><td data-l="Result"><span class="mk ok">✓ Applied it</span></td></tr>
+        </tbody></table>
+      <p class="fine">Next steps and evidence that fit: you 2 of 3 · Checker A 3 of 3.</p>
+    </div>
   </div>
-  <p class="ref-note">Each Case link opens that case's reveal. Result cells: "Correct", or "Missed &lt;field&gt;" / "Flagged &lt;field&gt;" (several joined with commas).</p>
+  <div class="card pad mt">
+    <div class="talk" style="margin-top:0"><h3>For your debrief</h3><p style="margin:4px 0 0">When you agreed but the reference answer differed, which check did you both skip?</p></div>
+  </div>
+  <div class="card pad mt">
+    <table class="tbl"><caption>Earlier practice in this browser</caption>
+      <thead><tr><th>Date</th><th>Table</th><th>Mismatches found</th><th>False marks</th><th>Next steps fit</th><th>New situations</th><th>Note</th></tr></thead>
+      <tbody><tr><td>10 Nov 2026</td><td data-l="Table">KQ2M</td><td data-l="Mismatches found">2 of 4</td><td data-l="False marks">3 of 26</td><td data-l="Next steps fit">3 of 6</td><td data-l="New situations">1 of 3</td><td data-l="Note">Same case set as before — memory may help</td></tr></tbody>
+    </table>
+    <p class="fine">Practice records in this browser. They don't identify you or follow you across devices. Your partner can't see this history.</p>
+    <p class="caveat">This summary describes the completed cases shown here. Small numbers, repeated cases and use of the same browser may affect interpretation. Results do not establish clinical competence or show that the exercise improves patient outcomes.</p>
+  </div>
+  <div class="btns mt" style="margin-bottom:40px"><button class="btn" type="button" onclick="window.print()">Print or save as PDF</button><a class="btn ghost" href="#">My tables</a></div>
 </section>
 
-<!-- ============ STATE 9: MY TABLES ============ -->
-<section class="ref-state">
-  <p class="ref-label">State 9 · My tables ( /tables )</p>
-  <div class="ref-frame">
-    <main><div class="wrap">
-      <h1>My tables</h1>
-      <p class="muted">Tables this browser has joined. The app recognises you by this browser's cookie, so these tables open only here.</p>
-      <ul class="item-list">
-        <li><span><strong>Table HK3V</strong> · Checker A · Case 3 of 6</span><a href="#">Open</a></li>
-        <li><span><strong>Table Q7PD</strong> · Checker B · Completed</span><a href="#">Review</a></li>
-        <li><span><strong>Table M2XA</strong> · Checker A · Waiting for partner</span><a href="#">Open</a></li>
-      </ul>
-      <p class="ref-label" style="padding:0;margin:24px 0 8px">Variant · empty</p>
-      <p class="muted">No tables in this browser yet. <a href="/">Create a table</a></p>
-    </div></main>
+<!-- ===================== STATE: sources (prose page; /guide/ and /readme/ use the same layout) ===================== -->
+<article class="card prose" data-state="sources">
+  <p class="kicker">Scope and sources</p>
+  <h1>What this simulation is, and where its content comes from</h1>
+  <p class="fine">Case bank 2.0.0-draft · 6 training cases and 3 new situations · all currently <span class="review">Draft · not yet source checked</span></p>
+  <h2>Scope and limitations</h2>
+  <p>Second Pair of Eyes is a small-group educational simulation for practising medication-record comparison, evidence-based discussion and clarification. All patient scenarios are fictional. It does not provide prescribing advice, authorise medication administration, replace local policies or professional supervision, or certify clinical competence. A correct response means agreement with the reference answer for this scenario, not proof that a real-world medication decision is safe.</p>
+  <h2>Content review</h2>
+  <p>Each case displays its content version, references and review status. “Sources checked” means the stated content has been checked against the listed sources; it does not mean the case has received independent professional review. Cases not yet reviewed by a nursing educator or pharmacist are labelled accordingly.</p>
+  <div class="legend">
+    <span class="review">Draft · not yet source checked</span><span>Written for teaching; claims not yet checked against sources.</span>
+    <span class="review">Sources checked · not yet reviewed by a nursing educator or pharmacist</span><span>Every claim checked against the listed sources by the author.</span>
+    <span class="review ok">Reviewed by a registered nurse, 2026-11-20</span><span>Reviewed by the person named by role and date.</span>
   </div>
-</section>
+  <h2>References and affiliation</h2>
+  <p>External publications inform selected aspects of this project. Referencing WHO, INACSL, ISMP or the Australian Commission on Safety and Quality in Health Care does not imply their endorsement, accreditation or approval of this website. Source material may apply to a particular jurisdiction, population or formulation.</p>
+  <h2>Feedback and AI</h2>
+  <p>Scores and learning summaries are calculated from your responses using predefined reference answers and feedback rules. They are not generated by a live AI medical adviser. Where AI assisted development or content drafting, its outputs were not treated as an authoritative clinical source.</p>
+  <h2>Learning records</h2>
+  <p>An anonymous browser identifier links your practice records in this browser. It does not verify your identity or follow you across devices. Your partner sees your answers for a case only after you have both signed it. Your earlier practice history is not shared with your partner. The site also records simple usage events, such as opening a medicine card, to evaluate the teaching design. Do not enter real patient or personal health information.</p>
+  <h2>Sources</h2>
+  <h3>Independent checking</h3>
+  <ul>
+    <li>ISMP Canada. <a href="#">Definitions of Terms: Independent Double Check</a>. Used for: why your partner's answer is hidden. Limits: hiding answers doesn't guarantee independence.</li>
+    <li>Westbrook JI, et al. <a href="#">Randomised controlled simulation trial of independent double-checking</a>. BMJ Qual Saf 2026. Used for: the Case 4 note on early-career nurses.</li>
+  </ul>
+  <h3>Charts and records</h3>
+  <ul>
+    <li>ACSQHC. <a href="#">National Inpatient Medication Chart User Guide</a> (2019). Used for: the structure of orders and administration records. Limits: simplified here, not copied; not every hospital's current policy.</li>
+  </ul>
+  <h3>Medicines</h3>
+  <ul>
+    <li>TGA. <a href="#">PI/CMI search facility</a>. Used for: product facts. <span class="review">Not yet verified</span></li>
+  </ul>
+  <p class="fine">Full list generated from the case bank.</p>
+</article>
 
-<!-- ============ STATE 10: /readme/ ============ -->
-<section class="ref-state">
-  <p class="ref-label">State 10 · /readme/ (server-rendered try-it box + full README)</p>
-  <div class="ref-frame">
-    <main><div class="wrap">
-      <section class="panel try-box" aria-labelledby="try-h">
-        <h2 id="try-h">Try it in two browsers</h2>
-        <ol class="steps">
-          <li>Open this site in two Chrome profiles or two browsers. An incognito window works but forgets who you are when it closes; use normal profiles if you want to come back tomorrow.</li>
-          <li>In the first, choose Play, then Create a table, then Copy invite link.</li>
-          <li>Open the link in the second and choose Join. Check each case on your own; both answers appear once you have both signed.</li>
-        </ol>
-        <a class="btn" href="/">Play</a>
-      </section>
-      <article class="prose">
-        <h1>Second Pair of Eyes</h1>
-        <p>README.md rendered here in full: every heading and paragraph, in the HTML the server sends.</p>
-        <h2>What good means here</h2>
-        <p>Example paragraph with a <a href="#">source link</a> and <code>inline code</code>.</p>
-        <ul><li>Enforced: …</li><li>Judged: …</li></ul>
-      </article>
-    </div></main>
-  </div>
-</section>
+</main>
 
+<script>
+/* Pixel sprites as data: 16×16 grids + palettes, rendered as SVG (copy this renderer and the maps). */
+const MAPS = {
+  lee: [
+    ".......hh.......","......hhhh......","....hhhhhhhh....","...hhhhhhhhhh...",
+    "...hssssssssh...","...hssssssssh...","...hsessssesh...","....pssssssp....",
+    "....sssmmsss....",".....ssssss.....","......ssss......","..ccccsssscccc..",
+    "..cccccssccccc..",".cccwcccccclccc.",".cccwccccccllcc.",".cccccccccccccc."],
+  patient: [
+    "................","................","......ssss......","....ssssssss....",
+    "...gssssssssg...","...gssssssssg...","...gsessssesg...","....pssssssp....",
+    "....sggmmggs....",".....ssssss.....","......ssss......","..bbbbsssbbbbb..",
+    "..bbBbbssbbBbb..",".bbbbbbBbbbbbbb.",".bBbbbbbbbbbBbb.",".bbbbbBbbbbbbbb."]
+};
+const BASE = {
+  lee:     {h:"#5a3a24", s:"#f0c9a0", e:"#1f2a2e", p:"#e8a08a", m:"#a9553f", c:"#0f5257", w:"#ffffff", l:"#d99a2b"},
+  patient: {g:"#c9c4bb", s:"#eac3a1", e:"#1f2a2e", p:"#e3a08c", m:"#9c5a47", b:"#a9c7dc", B:"#5d87a6"}
+};
+function shade(hex, f){const n=parseInt(hex.slice(1),16);const r=Math.round(((n>>16)&255)*f),g=Math.round(((n>>8)&255)*f),b=Math.round((n&255)*f);return "#"+[r,g,b].map(x=>x.toString(16).padStart(2,"0")).join("");}
+function sprite(name, opts){
+  const pal = Object.assign({}, BASE[name]);
+  if (name === "patient"){ if (opts.hair) pal.g = opts.hair; if (opts.skin) pal.s = opts.skin; if (opts.gown){ pal.b = opts.gown; pal.B = shade(opts.gown, .62); } }
+  let rects = "";
+  MAPS[name].forEach((row, y) => [...row].forEach((ch, x) => { if (ch !== "." && pal[ch]) rects += `<rect x="${x}" y="${y}" width="1" height="1" fill="${pal[ch]}"/>`; }));
+  const size = Math.round(16 * (opts.scale || 2));
+  return `<svg class="px" viewBox="0 0 16 16" width="${size}" height="${size}" aria-hidden="true" focusable="false">${rects}</svg>`;
+}
+document.querySelectorAll("[data-sprite]").forEach(el => {
+  el.innerHTML = sprite(el.dataset.sprite, {hair: el.dataset.hair, skin: el.dataset.skin, gown: el.dataset.gown, scale: parseFloat(el.dataset.scale || "2")});
+});
+
+/* Reference-only state switcher. Do not copy. */
+function show(state){
+  document.querySelectorAll("[data-state]").forEach(el => {
+    const on = el.dataset.state.split(" ").includes(state);
+    el.style.display = on ? "" : "none";
+  });
+  document.body.classList.toggle("reveal", state === "debrief");
+  const recs = document.getElementById("recs"), grid = document.getElementById("dgrid"), recgrid = document.getElementById("recgrid");
+  if (grid) grid.style.display = state === "debrief" ? "grid" : "block";
+  if (recgrid) recgrid.style.gridTemplateColumns = state === "debrief" ? "minmax(0,1fr)" : "";
+  document.querySelectorAll("[data-go]").forEach(b => b.setAttribute("aria-pressed", b.dataset.go === state));
+}
+document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => show(b.dataset.go)));
+show(new URLSearchParams(location.search).get("state") || "checking");
+</script>
 </body>
 </html>
