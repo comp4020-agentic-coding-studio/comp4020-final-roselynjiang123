@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { readSseEvents } from "./support/client.ts";
-import { CASE1_ANSWER_CORRECT, createAndJoinTable, createClient, currentRound, baseUrl } from "./support/game.ts";
+import { correctAnswerFor, createAndJoinTable, createClient, currentRound, baseUrl } from "./support/game.ts";
 
-// Brief §9 item 2 (SSE half) and the SSE-snapshot half of §7/§9 item 10
-// (restart/reconnect recovery is covered in spec/restart.test.ts, commit f,
-// since it needs the actual process to restart).
+// T03 Membership (SSE half), T14 SSE.
 describe("SSE snapshots, reconnect and concurrency guards", () => {
   it("nonmembers cannot open the SSE stream", async () => {
     const { tableId } = await createAndJoinTable();
@@ -20,11 +18,11 @@ describe("SSE snapshots, reconnect and concurrency guards", () => {
     expect((first as any).table.id).toBe(tableId);
   });
 
-  it("SSE events before reveal carry no partner answers or answer key", async () => {
+  it("T14: SSE events before reveal carry no partner answers, result or debrief fields", async () => {
     const { a, tableId } = await createAndJoinTable();
     const sseRes = await a.get(`/api/tables/${tableId}/events`);
     const [event] = await readSseEvents(sseRes, 1);
-    expect(JSON.stringify(event)).not.toMatch(/mismatchFields|teachingPoint/);
+    expect(JSON.stringify(event)).not.toMatch(/"answerKey"|"acceptedPairs"|"debrief"|"result"/);
   });
 
   it("a submission by one member pushes a fresh snapshot to the other member's SSE stream", async () => {
@@ -33,25 +31,27 @@ describe("SSE snapshots, reconnect and concurrency guards", () => {
     const eventsPromise = readSseEvents(sseRes, 2); // initial connect snapshot + the push after A submits
 
     const snapshot = await (await a.get(`/api/tables/${tableId}`)).json();
-    const roundId = currentRound(snapshot).id;
-    await a.post(`/api/tables/${tableId}/rounds/${roundId}/submissions`, { answer: CASE1_ANSWER_CORRECT });
+    const round = currentRound(snapshot);
+    await a.post(`/api/tables/${tableId}/rounds/${round.id}/submissions`, correctAnswerFor(round.case.caseId));
 
     const events = await eventsPromise;
     const pushed = currentRound(events[1] as any);
     expect(pushed.partner.submitted).toBe(true);
   });
 
-  it("forged identity in the request body does not bypass session identity", async () => {
+  it("an unknown key in a submission body (e.g. a forged identity) is rejected, not silently dropped", async () => {
+    // req.identity always comes from the session cookie (src/session.mjs),
+    // never from req.body -- validateSubmissionV2's allowlist rejects any
+    // extra top-level key outright, so there is no code path through which
+    // a client-supplied "identity" field could reach repo.submitAnswer().
     const { a, tableId } = await createAndJoinTable();
     const snapshot = await (await a.get(`/api/tables/${tableId}`)).json();
-    const roundId = currentRound(snapshot).id;
-    const res = await a.post(`/api/tables/${tableId}/rounds/${roundId}/submissions`, {
-      answer: CASE1_ANSWER_CORRECT,
+    const round = currentRound(snapshot);
+    const res = await a.post(`/api/tables/${tableId}/rounds/${round.id}/submissions`, {
+      ...correctAnswerFor(round.case.caseId),
       identity: "someone-else",
     });
-    expect(res.status).toBe(200);
-    const after = await res.json();
-    expect(currentRound(after).mine.submitted).toBe(true);
+    expect(res.status).toBe(400);
   });
 
   it("a write without a matching Origin is rejected", async () => {

@@ -1,13 +1,13 @@
 import { spawn, type ChildProcess } from "node:child_process";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { readSseEvents } from "./support/client.ts";
 import { createClient } from "./support/client.ts";
 
-// Brief §9 items 9-10: restart and reconnect. This spawns its own instance
-// of the actual app process (not the shared APP_URL instance spec/global-setup.ts
+// T13 Persistence, T14 SSE (the restart half). Spawns its own instance of
+// the actual app process (not the shared APP_URL instance spec/global-setup.ts
 // found) against a private temp SQLite file, so it can kill -SIGTERM and
 // restart it -- something the shared instance under test by every other
 // spec file must stay up for.
@@ -50,7 +50,19 @@ async function stopApp(): Promise<void> {
   await exited;
 }
 
-describe("restart and reconnect (brief §9 items 9-10)", () => {
+// This file spawns its own process rather than using the shared baseUrl
+// spec/support/game.ts binds to, so it reads the real bank directly to
+// build a correct submission for round 1's case (always C1, brief §5's
+// fixed bank order), the same read-only access spec/support/game.ts uses.
+async function correctAnswerForC1() {
+  const bankPath = new URL("../content/case-bank.v2.json", import.meta.url).pathname;
+  const bank = JSON.parse(await readFile(bankPath, "utf8"));
+  const c1 = bank.cases.find((c: any) => c.caseId === "C1");
+  const pair = c1.answerKey.acceptedPairs[0];
+  return { fields: { ...c1.answerKey.fields }, action: pair.action, evidenceId: pair.evidenceId };
+}
+
+describe("restart and reconnect (T13, T14)", () => {
   it("an incomplete table resumes and completed records remain after a process restart", async () => {
     dir = await mkdtemp(join(tmpdir(), "spe-restart-"));
     const dbPath = join(dir, "test.db");
@@ -74,12 +86,12 @@ describe("restart and reconnect (brief §9 items 9-10)", () => {
     const joinRes = await b.post(`/api/tables/${tableId}/join`, {});
     expect(joinRes.status, "join should succeed").toBe(200);
 
-    const CORRECT = { patient: "match", medicine: "match", dose: "match", route: "match", time: "match", overall: "match" };
+    const answer = await correctAnswerForC1();
     const snapshot = await (await a.get(`/api/tables/${tableId}`)).json();
     const round1 = snapshot.rounds[0];
-    const submitA = await a.post(`/api/tables/${tableId}/rounds/${round1.id}/submissions`, { answer: CORRECT });
+    const submitA = await a.post(`/api/tables/${tableId}/rounds/${round1.id}/submissions`, answer);
     expect(submitA.status, "A's submission should succeed").toBe(200);
-    const submitB = await b.post(`/api/tables/${tableId}/rounds/${round1.id}/submissions`, { answer: CORRECT });
+    const submitB = await b.post(`/api/tables/${tableId}/rounds/${round1.id}/submissions`, answer);
     expect(submitB.status, "B's submission should succeed").toBe(200);
 
     const beforeRestart = await (await a.get(`/api/tables/${tableId}`)).json();
@@ -90,10 +102,12 @@ describe("restart and reconnect (brief §9 items 9-10)", () => {
 
     const afterRestart = await (await a.get(`/api/tables/${tableId}`)).json();
     expect(afterRestart.rounds[0].revealed).toBe(true);
-    expect(afterRestart.rounds[0].reveal.aFullyCorrect).toBe(true);
-    // table is incomplete (one of six cases done) and resumable
+    expect(afterRestart.rounds[0].result.A.fullyCorrect).toBe(true);
+    // table is incomplete (one of nine rounds done) and resumable, still at
+    // the training stage
     expect(afterRestart.rounds.length).toBe(1);
-    expect(afterRestart.table.status).not.toBe("completed");
+    expect(afterRestart.table.stage).toBe("training");
+    expect(afterRestart.table.stage).not.toBe("completed");
 
     await stopApp();
   });
@@ -122,7 +136,7 @@ describe("restart and reconnect (brief §9 items 9-10)", () => {
     const [event] = await readSseEvents(sseRes, 1);
     expect((event as any).table.id).toBe(tableId);
     expect((event as any).seats.B.joined).toBe(true);
-    expect(JSON.stringify(event)).not.toMatch(/mismatchFields|teachingPoint/);
+    expect(JSON.stringify(event)).not.toMatch(/"answerKey"|"acceptedPairs"|"debrief"|"result"/);
 
     await stopApp();
   });

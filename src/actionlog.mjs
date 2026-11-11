@@ -20,8 +20,12 @@ export function logAction({ tableId, seat, action, round }) {
   if (seat !== "A" && seat !== "B") {
     throw new RangeError(`logAction: seat must be "A" or "B", got "${seat}"`);
   }
-  if (!Number.isInteger(round) || round < 1) {
-    throw new RangeError(`logAction: round must be a positive integer, got ${round}`);
+  // 0 is valid only for "create": v2 creates a table with no round yet
+  // (brief §5 -- round 1 is created when B joins), so a create log line has
+  // no round number to report yet.
+  const minRound = action === "create" ? 0 : 1;
+  if (!Number.isInteger(round) || round < minRound) {
+    throw new RangeError(`logAction: round must be an integer >= ${minRound} for action "${action}", got ${round}`);
   }
   console.log(`${new Date().toISOString()} | ${tableCode(tableId)} | ${seat} | ${action} | ${round}`);
 }

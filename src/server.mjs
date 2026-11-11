@@ -7,10 +7,11 @@ import { createRepo } from "./repo.mjs";
 import { createSseHub } from "./sse.mjs";
 import { sessionMiddleware, requireSameOrigin } from "./session.mjs";
 import { serializeSnapshot } from "./serializer.mjs";
-import { validateAnswer } from "./scoring.mjs";
+import { validateSubmissionV2 } from "./submissionValidator.mjs";
 import { randomToken } from "./ids.mjs";
 import { renderMarkdown } from "./markdown.mjs";
 import { logAction } from "./actionlog.mjs";
+import { loadBank } from "./bank.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(__dirname, "..");
@@ -22,19 +23,19 @@ const OUTCOME_STATUS = {
   stale: 409,
 };
 
-export function createApp(db) {
-  const repo = createRepo(db);
+export function createApp(db, bank) {
+  const repo = createRepo(db, bank);
   const sse = createSseHub();
   const app = express();
-  // Behind Fly's proxy (brief §7a).
+  // Behind Fly's proxy (brief §3).
   app.set("trust proxy", 1);
   app.use(express.json({ limit: "16kb" }));
   app.use(sessionMiddleware(repo));
 
   const publicDir = join(repoRoot, "public");
   if (existsSync(publicDir)) {
-    // Static assets only: never the case module, the database, test
-    // fixtures, or any repository file outside public/ (brief §5, §9 #4).
+    // Static assets only: never the bank file, fixtures, test files, or any
+    // repository file outside public/ (brief §4 item 10).
     app.use(express.static(publicDir));
   }
 
@@ -62,7 +63,7 @@ export function createApp(db) {
   });
 
   // Reveals no paths or data; just proves the DB opens and a trivial query
-  // succeeds (brief §7, endpoint list).
+  // succeeds (brief §9, endpoint list).
   app.get("/healthz", (_req, res) => {
     try {
       db.prepare("SELECT 1").get();
@@ -76,7 +77,7 @@ export function createApp(db) {
     res.set("Cache-Control", "no-store");
     const rows = repo.listTablesForIdentity(req.identity);
     res.json({
-      tables: rows.map((r) => ({ tableId: r.table_id, status: r.status, seat: r.seat })),
+      tables: rows.map((r) => ({ tableId: r.table_id, status: r.status, stage: r.stage, seat: r.seat })),
     });
   });
 
@@ -85,10 +86,10 @@ export function createApp(db) {
     const tableId = randomToken();
     const { seat, roundIndex, snapshot } = repo.createTable(tableId, req.identity);
     logAction({ tableId, seat, action: "create", round: roundIndex });
-    res.status(201).json(serializeSnapshot(snapshot));
+    res.status(201).json(serializeSnapshot(snapshot, bank));
   });
 
-  // GET must not consume a seat (brief §4 step 3): this route only reports
+  // GET must not consume a seat (brief §4 item 2): this route only reports
   // whether the table is joinable, never full table state for a non-member.
   app.get("/api/tables/:id", (req, res) => {
     res.set("Cache-Control", "no-store");
@@ -106,7 +107,7 @@ export function createApp(db) {
       });
       return;
     }
-    res.json(serializeSnapshot(snapshot));
+    res.json(serializeSnapshot(snapshot, bank));
   });
 
   app.post("/api/tables/:id/join", requireSameOrigin, (req, res) => {
@@ -118,7 +119,7 @@ export function createApp(db) {
     }
     logAction({ tableId: req.params.id, seat: result.seat, action: "join", round: result.roundIndex });
     sse.notify(req.params.id);
-    res.json(serializeSnapshot(result.snapshot));
+    res.json(serializeSnapshot(result.snapshot, bank));
   });
 
   app.post("/api/tables/:id/rounds/:roundId/submissions", requireSameOrigin, (req, res) => {
@@ -128,46 +129,63 @@ export function createApp(db) {
       res.status(403).json({ error: "forbidden" });
       return;
     }
-    const error = validateAnswer(req.body?.answer);
+    // Validated against the round's own frozen option lists (field keys,
+    // actions, evidence options), not the live bank -- so a bank edit
+    // between round creation and submission can never change what counts
+    // as a valid answer for an in-flight round (brief §6.1).
+    const roundSnapshot = repo.getSnapshot(id, req.identity)?.rounds.find((r) => r.id === roundId);
+    if (!roundSnapshot) {
+      res.status(404).json({ error: "no such round" });
+      return;
+    }
+    const error = validateSubmissionV2(req.body, roundSnapshot.case);
     if (error) {
       res.status(400).json({ error });
       return;
     }
-    const result = repo.submitAnswer(id, roundId, req.identity, req.body.answer);
+    const result = repo.submitAnswer(id, roundId, req.identity, req.body);
     if (result.outcome !== "ok") {
       res.status(OUTCOME_STATUS[result.outcome] ?? 400).json({ error: result.outcome });
       return;
     }
-    // Never pass req.body.answer, or anything derived from it, to logAction:
-    // its signature has no parameter for answer content (src/actionlog.mjs).
+    // Never pass req.body, or anything derived from it, to logAction: its
+    // signature has no parameter for answer content (src/actionlog.mjs).
     logAction({ tableId: id, seat: result.seat, action: "sign", round: result.roundIndex });
     if (result.revealed) {
       logAction({ tableId: id, seat: result.seat, action: "reveal", round: result.roundIndex });
     }
     sse.notify(id);
-    res.json(serializeSnapshot(result.snapshot));
+    res.json(serializeSnapshot(result.snapshot, bank));
   });
 
   app.post("/api/tables/:id/next", requireSameOrigin, (req, res) => {
     res.set("Cache-Control", "no-store");
     const { id } = req.params;
     const fromRoundId = req.body?.fromRoundId;
-    if (typeof fromRoundId !== "string" || fromRoundId.length === 0) {
-      res.status(400).json({ error: "fromRoundId is required" });
+    const fromStage = req.body?.fromStage;
+    const hasRoundId = typeof fromRoundId === "string" && fromRoundId.length > 0;
+    const hasStage = typeof fromStage === "string" && fromStage.length > 0;
+    if (hasRoundId === hasStage) {
+      // Exactly one of the two is required (brief §4 item 7): neither, or
+      // both, is a malformed request.
+      res.status(400).json({ error: "exactly one of fromRoundId or fromStage is required" });
       return;
     }
-    const result = repo.advance(id, req.identity, fromRoundId);
+    const result = repo.advance(id, req.identity, { fromRoundId, fromStage });
     if (result.outcome !== "ok") {
       res.status(OUTCOME_STATUS[result.outcome] ?? 400).json({ error: result.outcome });
       return;
     }
-    logAction({ tableId: id, seat: result.seat, action: "next", round: result.roundIndex });
+    if (result.roundIndex != null) {
+      logAction({ tableId: id, seat: result.seat, action: "next", round: result.roundIndex });
+    }
     sse.notify(id);
-    res.json(serializeSnapshot(result.snapshot));
+    res.json(serializeSnapshot(result.snapshot, bank));
   });
 
   // SSE: authorise membership, then send a fresh database-derived snapshot
-  // on connect and on every subsequent notify() for this table (brief §7).
+  // on connect and on every subsequent notify() for this table (brief §4
+  // item 3).
   app.get("/api/tables/:id/events", (req, res) => {
     const { id } = req.params;
     if (!repo.isMember(id, req.identity)) {
@@ -187,7 +205,7 @@ export function createApp(db) {
     const send = () => {
       const snapshot = repo.getSnapshot(id, req.identity);
       if (!snapshot) return;
-      res.write(`data: ${JSON.stringify(serializeSnapshot(snapshot))}\n\n`);
+      res.write(`data: ${JSON.stringify(serializeSnapshot(snapshot, bank))}\n\n`);
     };
     send();
 
@@ -206,13 +224,19 @@ export function createApp(db) {
 export function start() {
   const port = Number(process.env.PORT ?? 8080);
   const db = openDatabase(resolveDatabasePath());
-  const { app } = createApp(db);
+  // BANK_PATH lets T10 (spec/snapshots.test.ts) point a second process at an
+  // edited copy of the bank against the same database file, to prove a
+  // round's frozen snapshot doesn't change when the bank does. Production
+  // and normal local runs never set it, so they always load the real file.
+  const bankPath = process.env.BANK_PATH ?? join(repoRoot, "content", "case-bank.v2.json");
+  const bank = loadBank(bankPath);
+  const { app } = createApp(db, bank);
 
   const server = app.listen(port, "0.0.0.0", () => {
     console.log(`listening on 0.0.0.0:${port}`);
   });
 
-  // Fly stops idle machines; close the database cleanly (brief §7a).
+  // Fly stops idle machines; close the database cleanly (brief §3).
   const shutdown = () => {
     server.close(() => {
       db.close();
