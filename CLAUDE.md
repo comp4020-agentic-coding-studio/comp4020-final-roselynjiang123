@@ -40,6 +40,10 @@ Scope and contract: [build brief](docs/build-brief.md). Visual spec:
 - NEVER say or imply a pair review result makes a medication safe; agreement,
   accuracy and a combined pair result are three separate concepts. judged:
   spec test 7 (pair-review categories), human review of pair-review copy.
+- MUST log one stdout line per accepted action (create, join, sign, reveal,
+  next): ISO time, table code, seat, action, round. NEVER log cookie
+  tokens, session IDs or answer values; `logAction()`'s signature has no
+  parameter for them (src/actionlog.mjs). judged: spec/actionlog.test.ts.
 
 ## Process rule
 

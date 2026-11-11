@@ -49,24 +49,30 @@ export function createRepo(db) {
 
   // Creates a table, claims seat A, and starts round 1 -- one transaction so
   // a table is never observed without its creator's seat or its first round.
+  // seat/roundIndex are returned (not derived by the caller) so the route
+  // layer's action log (src/actionlog.mjs) never has to query for them.
   const createTable = db.transaction((tableId, identity) => {
     stmt.insertTable.run(tableId);
     stmt.insertMember.run(tableId, "A", identity);
     stmt.insertRound.run(uuid(), tableId, 1, JSON.stringify(caseSnapshot(1)));
-    return getSnapshot(tableId, identity);
+    return { seat: "A", roundIndex: 1, snapshot: getSnapshot(tableId, identity) };
   });
 
   // Claims seat B, or resumes an existing membership (brief §4 step 3: "A
   // GET must not consume a seat" -- this is the POST that does, and it is
   // idempotent for the same identity). Returns a typed outcome rather than
   // throwing, so the route layer can map it to the right HTTP status without
-  // string-matching an error message.
+  // string-matching an error message. A table only ever has a second seat to
+  // join while round 1 is current (brief §4 step 4: no solo progress before
+  // both members exist), so roundIndex is always 1 here.
   const joinTable = db.transaction((tableId, identity) => {
     const table = stmt.getTable.get(tableId);
     if (!table) return { outcome: "not_found" };
 
     const existing = stmt.memberByIdentity.get(tableId, identity);
-    if (existing) return { outcome: "ok", snapshot: getSnapshot(tableId, identity) };
+    if (existing) {
+      return { outcome: "ok", seat: existing.seat, roundIndex: 1, snapshot: getSnapshot(tableId, identity) };
+    }
 
     const members = stmt.membersForTable.all(tableId);
     if (members.length >= 2) return { outcome: "full" };
@@ -74,7 +80,7 @@ export function createRepo(db) {
     stmt.insertMember.run(tableId, "B", identity);
     stmt.setTableStatus.run("playing", tableId);
     stmt.bumpTableVersion.run(tableId);
-    return { outcome: "ok", snapshot: getSnapshot(tableId, identity) };
+    return { outcome: "ok", seat: "B", roundIndex: 1, snapshot: getSnapshot(tableId, identity) };
   });
 
   // Records one member's immutable submission for a round. If both members
@@ -82,7 +88,11 @@ export function createRepo(db) {
   // snapshot read can never observe "two submissions, not yet revealed"
   // (brief §6: "Only a round with two immutable submissions is revealed").
   // INSERT OR IGNORE makes a duplicate identical POST harmless and a changed
-  // repeat a no-op rather than an overwrite (brief §9 item 6).
+  // repeat a no-op rather than an overwrite (brief §9 item 6). `revealed`
+  // tells the route layer whether *this* call was the one that completed the
+  // reveal, so it logs a "reveal" line only once, not on every later replay
+  // (a replay cannot reach this far: once revealed_at is set, the "stale"
+  // check above rejects further submissions to the same round).
   const submitAnswer = db.transaction((tableId, roundId, identity, answer) => {
     const round = stmt.roundById.get(roundId);
     if (!round || round.table_id !== tableId) return { outcome: "not_found" };
@@ -97,20 +107,29 @@ export function createRepo(db) {
 
     stmt.insertSubmission.run(uuid(), roundId, identity, JSON.stringify(answer));
     const submissions = stmt.submissionsForRound.all(roundId);
-    if (submissions.length === 2) {
+    const revealed = submissions.length === 2;
+    if (revealed) {
       stmt.revealRound.run(roundId);
       if (current.round_index === CASE_COUNT) {
         stmt.setTableStatus.run("completed", tableId);
       }
     }
     stmt.bumpTableVersion.run(tableId);
-    return { outcome: "ok", snapshot: getSnapshot(tableId, identity) };
+    return {
+      outcome: "ok",
+      seat: member.seat,
+      roundIndex: current.round_index,
+      revealed,
+      snapshot: getSnapshot(tableId, identity),
+    };
   });
 
   // Advances from a revealed round to the next case. Idempotent per
   // fromRoundId: a second concurrent call for the same already-applied
   // fromRoundId returns the current snapshot rather than creating a second
-  // round (brief §6, §9 item 8).
+  // round (brief §6, §9 item 8). roundIndex logged is always fromRoundId's
+  // own round (the round being advanced away from), whichever branch below
+  // returns.
   const advance = db.transaction((tableId, identity, fromRoundId) => {
     const member = stmt.memberByIdentity.get(tableId, identity);
     if (!member) return { outcome: "forbidden" };
@@ -123,20 +142,35 @@ export function createRepo(db) {
       // fromRoundId never was current for this table.
       const target = stmt.roundById.get(fromRoundId);
       if (target && target.table_id === tableId && target.round_index < current.round_index) {
-        return { outcome: "ok", snapshot: getSnapshot(tableId, identity) };
+        return {
+          outcome: "ok",
+          seat: member.seat,
+          roundIndex: target.round_index,
+          snapshot: getSnapshot(tableId, identity),
+        };
       }
       return { outcome: "stale" };
     }
     if (!current.revealed_at) return { outcome: "stale" };
 
     if (current.round_index >= CASE_COUNT) {
-      return { outcome: "ok", snapshot: getSnapshot(tableId, identity) };
+      return {
+        outcome: "ok",
+        seat: member.seat,
+        roundIndex: current.round_index,
+        snapshot: getSnapshot(tableId, identity),
+      };
     }
 
     const nextIndex = current.round_index + 1;
     stmt.insertRound.run(uuid(), tableId, nextIndex, JSON.stringify(caseSnapshot(nextIndex)));
     stmt.bumpTableVersion.run(tableId);
-    return { outcome: "ok", snapshot: getSnapshot(tableId, identity) };
+    return {
+      outcome: "ok",
+      seat: member.seat,
+      roundIndex: current.round_index,
+      snapshot: getSnapshot(tableId, identity),
+    };
   });
 
   // The one allowlist-based read path (brief §7): builds exactly what a

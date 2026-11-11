@@ -10,6 +10,7 @@ import { serializeSnapshot } from "./serializer.mjs";
 import { validateAnswer } from "./scoring.mjs";
 import { randomToken } from "./ids.mjs";
 import { renderMarkdown } from "./markdown.mjs";
+import { logAction } from "./actionlog.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(__dirname, "..");
@@ -82,7 +83,8 @@ export function createApp(db) {
   app.post("/api/tables", requireSameOrigin, (req, res) => {
     res.set("Cache-Control", "no-store");
     const tableId = randomToken();
-    const snapshot = repo.createTable(tableId, req.identity);
+    const { seat, roundIndex, snapshot } = repo.createTable(tableId, req.identity);
+    logAction({ tableId, seat, action: "create", round: roundIndex });
     res.status(201).json(serializeSnapshot(snapshot));
   });
 
@@ -114,6 +116,7 @@ export function createApp(db) {
       res.status(OUTCOME_STATUS[result.outcome] ?? 400).json({ error: result.outcome });
       return;
     }
+    logAction({ tableId: req.params.id, seat: result.seat, action: "join", round: result.roundIndex });
     sse.notify(req.params.id);
     res.json(serializeSnapshot(result.snapshot));
   });
@@ -135,6 +138,12 @@ export function createApp(db) {
       res.status(OUTCOME_STATUS[result.outcome] ?? 400).json({ error: result.outcome });
       return;
     }
+    // Never pass req.body.answer, or anything derived from it, to logAction:
+    // its signature has no parameter for answer content (src/actionlog.mjs).
+    logAction({ tableId: id, seat: result.seat, action: "sign", round: result.roundIndex });
+    if (result.revealed) {
+      logAction({ tableId: id, seat: result.seat, action: "reveal", round: result.roundIndex });
+    }
     sse.notify(id);
     res.json(serializeSnapshot(result.snapshot));
   });
@@ -152,6 +161,7 @@ export function createApp(db) {
       res.status(OUTCOME_STATUS[result.outcome] ?? 400).json({ error: result.outcome });
       return;
     }
+    logAction({ tableId: id, seat: result.seat, action: "next", round: result.roundIndex });
     sse.notify(id);
     res.json(serializeSnapshot(result.snapshot));
   });
