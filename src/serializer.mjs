@@ -66,6 +66,12 @@ export function serializeSnapshot(snapshot, bank) {
         .map((sid) => bank.sources.find((s) => s.id === sid))
         .filter(Boolean),
     },
+    // Public, case-independent bank content the summary screen needs to word
+    // its suggestions (brief §8.3's `suggestions[tag]` templates and the
+    // capability tag labels) -- a plain pass-through, not clinical answer
+    // content, so safe before and after reveal alike.
+    capabilityTags: bank.capabilityTags,
+    suggestionsText: bank.suggestions,
   };
 
   if (table.stage === "training_summary" || table.stage === "transfer" || table.stage === "completed") {
@@ -122,6 +128,12 @@ function serializeRound(round, viewerIdentity, seatOf, liveCasesById) {
       : { submitted: false },
     partner: { submitted: Boolean(partner) },
     revealed,
+    // Not secret (brief §6.2 only lists answerKey/acceptedPairs/feedback/
+    // claims/result/the partner's submission): a plain timestamp, exposed so
+    // the end-review screen can say when the table finished without
+    // inventing a date (brief §5's "end" screen, reference's "practice
+    // complete · {date}").
+    revealedAt: round.revealed_at,
     withdrawnNotice,
   };
 

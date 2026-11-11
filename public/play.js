@@ -14,6 +14,27 @@ let submitting = false;
 let lastSeatsJoined = { A: false, B: false };
 let lastPartnerSubmitted = false;
 let lastRevealedCount = 0;
+// The most recent full snapshot, kept so a suggestion/case link (which opens
+// a past round's debrief, brief §8.3: "Each suggestion links to its cases'
+// debriefs") can return to wherever the live table actually stands, without
+// re-fetching. Set at the top of every real render(); never read inside
+// renderHistoryDebrief's own markup, only by its "Back" button.
+let lastSnapshot = null;
+
+// Summary caveat (brief §11 "Summary caveat", shown under every summary).
+const SUMMARY_CAVEAT =
+  "This summary describes the completed cases shown here. Small numbers, repeated cases and use of the same browser may affect interpretation. Results do not establish clinical competence or show that the exercise improves patient outcomes.";
+
+// Event delegation (brief §8.3's debrief links): attached once to the
+// persistent #app root, not re-attached per render, since innerHTML
+// replacement only replaces root's children, never root itself.
+root.addEventListener("click", (e) => {
+  if (!(e.target instanceof Element)) return;
+  const link = e.target.closest("[data-round-id]");
+  if (!link) return;
+  e.preventDefault();
+  openCaseDebrief(link.getAttribute("data-round-id"));
+});
 
 function otherSeat(seat) {
   return seat === "A" ? "B" : "A";
@@ -81,14 +102,17 @@ function phasePosition(snapshot, current) {
 }
 
 function render(snapshot) {
+  lastSnapshot = snapshot;
   const current = snapshot.rounds[snapshot.rounds.length - 1];
   const seatsBothJoined = snapshot.seats.A.joined && snapshot.seats.B.joined;
 
   let nextMode;
   if (!seatsBothJoined) {
     nextMode = "waiting";
-  } else if (snapshot.table.stage === "training_summary" || snapshot.table.stage === "completed") {
+  } else if (snapshot.table.stage === "training_summary") {
     nextMode = "summary";
+  } else if (snapshot.table.stage === "completed") {
+    nextMode = "end";
   } else if (current.revealed) {
     nextMode = "debrief";
   } else if (current.mine.submitted) {
@@ -118,6 +142,24 @@ function render(snapshot) {
   else if (mode === "signed") renderSigned(snapshot, current);
   else if (mode === "debrief") renderDebrief(snapshot, current);
   else if (mode === "summary") renderSummary(snapshot);
+  else if (mode === "end") renderEnd(snapshot);
+}
+
+// Transfer-intro banner (reference state "transfer-intro", brief §5's
+// "transfer-intro banner + checking/signed/debrief" row): shown once, above
+// the first new-situation round only (brief: "These three are counted
+// separately from training, so you can see whether the method carries over
+// to something you haven't seen"), never repeated for T2/T3.
+function transferIntroHtml(snapshot, current) {
+  const isFirstTransferRound = current.case.phase === "transfer" && current.index === snapshot.trainingCaseCount + 1;
+  if (!isFirstTransferRound) return "";
+  return `
+    <div class="card pad" style="border-left:5px solid var(--primary-2)">
+      <p class="kicker">New situations · transfer</p>
+      <h2>New patients and different numbers. Check exactly as before.</h2>
+      <p>These three are counted separately from training, so you can see whether the method carries over to something you haven't seen.</p>
+    </div>
+  `;
 }
 
 function maybeAnnounce(snapshot, current, revealedCount) {
@@ -325,6 +367,7 @@ function renderChecking(snapshot, current) {
 
   root.innerHTML = `
     ${statusStripHtml(snapshot, current, `${pos.label} ${progressDotsHtml(pos.index, pos.total)}`)}
+    ${transferIntroHtml(snapshot, current)}
     <div class="casehead"><p class="kicker" style="margin:0">${pos.label}</p><h1>${escapeHtml(caseDef.title)}</h1><span class="review">Draft · not yet source checked</span></div>
     ${patientStripHtml(caseDef)}
     ${recordsHtml(caseDef)}
@@ -412,6 +455,7 @@ function renderSigned(snapshot, current) {
 
   root.innerHTML = `
     ${statusStripHtml(snapshot, current, `${pos.label} ${progressDotsHtml(pos.index, pos.total)}`)}
+    ${transferIntroHtml(snapshot, current)}
     <div class="casehead"><p class="kicker" style="margin:0">${pos.label}</p><h1>${escapeHtml(caseDef.title)}</h1><span class="review">Draft · not yet source checked</span></div>
     ${patientStripHtml(caseDef)}
     ${recordsHtml(caseDef)}
@@ -463,14 +507,14 @@ function comparisonTableHtml(debrief) {
   `;
 }
 
-function renderDebrief(snapshot, current) {
+// Debrief body (brief §8.2 steps 1-7), shared between the live post-reveal
+// screen (renderDebrief, with a Next button) and a suggestion/case link's
+// read-only history view (openCaseDebrief, with a Back link instead) -- one
+// markup source so the two can never drift apart.
+function debriefBodyHtml(current) {
   const caseDef = current.case;
-  const pos = phasePosition(snapshot, current);
   const debrief = current.debrief;
-  const isLastInPhase = caseDef.phase === "training" ? current.index === snapshot.trainingCaseCount : current.index === snapshot.trainingCaseCount + snapshot.transferCaseCount;
-
-  root.innerHTML = `
-    ${statusStripHtml(snapshot, current, `${pos.label} ${progressDotsHtml(pos.index, pos.total)}`)}
+  return `
     <section class="card result" aria-labelledby="res-h">
       <p class="kicker">Both signed · ${escapeHtml(caseDef.title)} debrief</p>
       <h2 id="res-h">${escapeHtml(debrief.resultStrip.headline)}</h2>
@@ -501,22 +545,35 @@ function renderDebrief(snapshot, current) {
         .map((s) => `<a href="/sources/#${escapeHtml(s.id)}">${escapeHtml(s.org)} · ${escapeHtml(s.title)}</a>`)
         .join(" · ")}</p>
       ${current.withdrawnNotice ? `<div class="note" role="alert">This case version has been withdrawn. ${escapeHtml(current.withdrawnNotice)}</div>` : ""}
-      <div class="sign" style="border-style:solid"><button class="btn" type="button" id="next">${isLastInPhase ? "See summary →" : "Next case →"}</button><p>Either of you can move on. The other screen follows.</p></div>
     </section>
   `;
+}
 
-  // Evidence highlighting (U09, brief §8.2's "Materials show evidence
-  // highlights after reveal"): mark the page as revealed so CSS can target
-  // `.reveal .ev` (brief's own rule name for this), and add .ev-hit to
-  // exactly the elements whose data-evidence matches one of this case's
-  // accepted evidence ids, so a highlight rule can select those, not every
-  // .ev on the page. Only recordsHtml()'s elements carry data-evidence on
-  // this screen (the debrief doesn't repeat the patient strip).
+// Evidence highlighting (U09, brief §8.2's "Materials show evidence
+// highlights after reveal"): mark the page as revealed so CSS can target
+// `.reveal .ev`, and add .ev-hit to exactly the elements whose data-evidence
+// matches one of this case's accepted evidence ids.
+function applyEvidenceHighlights(current) {
   root.classList.add("reveal");
-  const hitIds = new Set(debrief.evidenceHighlightIds);
+  const hitIds = new Set(current.debrief.evidenceHighlightIds);
   root.querySelectorAll("[data-evidence]").forEach((el) => {
     if (hitIds.has(el.dataset.evidence)) el.classList.add("ev-hit");
   });
+}
+
+function renderDebrief(snapshot, current) {
+  const caseDef = current.case;
+  const pos = phasePosition(snapshot, current);
+  const isLastInPhase = caseDef.phase === "training" ? current.index === snapshot.trainingCaseCount : current.index === snapshot.trainingCaseCount + snapshot.transferCaseCount;
+
+  root.innerHTML = `
+    ${statusStripHtml(snapshot, current, `${pos.label} ${progressDotsHtml(pos.index, pos.total)}`)}
+    ${debriefBodyHtml(current)}
+    <section class="card pad">
+      <div class="sign" style="border-style:solid"><button class="btn" type="button" id="next">${isLastInPhase ? "See summary →" : "Next case →"}</button><p>Either of you can move on. The other screen follows.</p></div>
+    </section>
+  `;
+  applyEvidenceHighlights(current);
 
   document.getElementById("next").addEventListener("click", async () => {
     const button = document.getElementById("next");
@@ -530,63 +587,356 @@ function renderDebrief(snapshot, current) {
   });
 }
 
-function fractionText(pair, label) {
-  return `${label}: ${pair[0]} of ${pair[1]}`;
+// Read-only history view of one already-revealed round's debrief, opened
+// from a summary suggestion or case-by-case link (brief §8.3: "Each
+// suggestion links to its cases' debriefs"). Reuses the live snapshot
+// already held in lastSnapshot rather than a second fetch -- every revealed
+// round's debrief is already present in it.
+function openCaseDebrief(roundId) {
+  const snapshot = lastSnapshot;
+  const round = snapshot?.rounds.find((r) => r.id === roundId);
+  if (!round || !round.revealed) return;
+  root.innerHTML = `
+    <p class="fine"><a href="#" id="back-to-summary">← Back to summary</a></p>
+    ${debriefBodyHtml(round)}
+  `;
+  applyEvidenceHighlights(round);
+  document.getElementById("back-to-summary").addEventListener("click", (e) => {
+    e.preventDefault();
+    mode = null;
+    render(lastSnapshot);
+  });
 }
 
-function summaryBlockHtml(summary, heading) {
-  if (!summary) return "";
-  const fieldRows = Object.entries(summary.perField)
-    .map(([key, v]) => `<li>${escapeHtml(key)}: ${fractionText(v.found, "found")}; ${fractionText(v.falseMarks, "false marks")}</li>`)
+// U10 "fractions, simple bars and tables" (brief §8.3, §10.2): every ratio
+// a sessionSummary() returns is [n, d]; this is the one place that turns a
+// zero denominator into "No opportunity this time" rather than 0%, 100%,
+// NaN or undefined (brief §8.3's explicit rule) -- resultsAndSummary.mjs
+// stays pure and UI-copy-free, so the wording decision lives here instead.
+function fractionHtml(pair) {
+  if (!pair || pair[1] === 0) return '<span class="na">No opportunity this time</span>';
+  return `${pair[0]} of ${pair[1]}`;
+}
+
+function barHtml(pair, amb) {
+  const pct = pair && pair[1] > 0 ? (pair[0] / pair[1]) * 100 : 0;
+  return `<div class="bar${amb ? " amb" : ""}"><i style="width:${pct}%"></i></div>`;
+}
+
+// "Both" / "Neither" / "Only you" / "Only Checker {X}", viewer-relative
+// (reference's summary/end tables word coverage this way, not by raw seat
+// letter) -- used for both per-case "found by"/"next step fit" cells and
+// the pair decisions breakdown.
+function coverageDescription(value, viewerSeat) {
+  if (value === "both") return "Both";
+  if (value === "neither") return "Neither";
+  const onlySeat = value === "onlyA" ? "A" : "B";
+  return onlySeat === viewerSeat ? "Only you" : `Only Checker ${onlySeat}`;
+}
+
+function caseLinkHtml(round, snapshot) {
+  if (!round) return "";
+  const label =
+    round.case.phase === "training" ? `Case ${round.index}` : `Situation ${round.index - snapshot.trainingCaseCount}`;
+  return `<a href="#" data-round-id="${escapeHtml(round.id)}">${escapeHtml(label)}</a>`;
+}
+
+function summaryTilesHtml(summary) {
+  const tiles = [
+    { n: summary.mismatchesFound, l: "mismatches you found", amb: false },
+    { n: summary.matchingMarkedMismatch, l: "matching items you marked as mismatches", amb: true },
+    { n: summary.decisions.accepted, l: "next steps and evidence that fit", amb: false },
+    { n: summary.fullyCorrectCases, l: "cases fully in line with the reference", amb: false },
+  ];
+  return `<div class="tiles">${tiles
+    .map((t) => `<div class="card tile"><div class="n">${fractionHtml(t.n)}</div><div class="l">${escapeHtml(t.l)}</div>${barHtml(t.n, t.amb)}</div>`)
+    .join("")}</div>`;
+}
+
+function perFieldTableHtml(summary, fieldLabels) {
+  const rows = Object.entries(summary.perField)
+    .map(
+      ([key, v]) =>
+        `<tr><td>${escapeHtml(fieldLabels[key]?.label ?? key)}</td><td data-l="Mismatches found">${fractionHtml(v.found)}</td><td data-l="False marks">${fractionHtml(v.falseMarks)}</td></tr>`,
+    )
     .join("");
-  const suggestions = summary.suggestions
-    .map((s) => (s.kind === "none" ? "" : `<li>${s.kind === "multi" ? `In ${s.distinctCases.length} different situations` : "Worth reviewing"}: ${escapeHtml(s.tag ?? "")}</li>`))
-    .join("");
+  return `<table class="tbl"><caption>By check (you)</caption><thead><tr><th>Check</th><th>Mismatches found</th><th>Matching items marked as mismatches</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function decisionsFineHtml(summary, partnerSummary, partnerSeat) {
+  const d = summary.decisions;
+  const total = summary.casesCounted;
+  const p = partnerSummary;
+  return `<p class="fine">Next steps: ${d.accepted[0]} of ${total} fit · right next step alone ${d.actionOnly[0]} of ${total} · right evidence alone ${d.evidenceOnly[0]} of ${total}.<br>Checker ${partnerSeat}: ${p.mismatchesFound[0]} of ${p.mismatchesFound[1]} mismatches · ${p.matchingMarkedMismatch[0]} of ${p.matchingMarkedMismatch[1]} false marks · ${p.decisions.accepted[0]} of ${p.casesCounted} next steps · ${p.fullyCorrectCases[0]} of ${p.casesCounted} cases fully in line.</p>`;
+}
+
+function betweenYouHtml(summary, roundByCaseId, snapshot, viewerSeat, fieldLabels) {
+  const partnerSeat = otherSeat(viewerSeat);
+  const sharedMissItems = [];
+  for (const round of Object.values(roundByCaseId)) {
+    for (const key of round.result.pair.sharedMisses) sharedMissItems.push({ round, key });
+  }
+  const sharedMissDetail = sharedMissItems
+    .map(({ round, key }) => `${caseLinkHtml(round, snapshot)} (${escapeHtml(fieldLabels[key]?.label ?? key)})`)
+    .join(", ");
+
+  const group = (coverageKey, label) => {
+    const caseIds = summary.pair.decisions[coverageKey];
+    if (!caseIds || caseIds.length === 0) return "";
+    const links = caseIds.map((cid) => caseLinkHtml(roundByCaseId[cid], snapshot)).join(", ");
+    return `${label}: ${links}`;
+  };
+  const onlyPartnerKey = viewerSeat === "A" ? "onlyB" : "onlyA";
+  const onlyYouKey = viewerSeat === "A" ? "onlyA" : "onlyB";
+  const decisionParts =
+    [group("both", "Both"), group(onlyPartnerKey, `Only Checker ${partnerSeat}`), group(onlyYouKey, "Only you")]
+      .filter(Boolean)
+      .join(" · ") || "Neither of you";
+
   return `
-    <section class="card pad">
-      <h2>${escapeHtml(heading)}</h2>
-      <ul>
-        <li>${fractionText(summary.mismatchesFound, "Mismatches found")}</li>
-        <li>${fractionText(summary.matchingMarkedMismatch, "False marks")}</li>
-        <li>${fractionText(summary.decisions.accepted, "Decisions accepted")}</li>
-        <li>${fractionText(summary.fullyCorrectCases, "Fully correct cases")}</li>
-      </ul>
-      <h3>Per field</h3>
-      <ul>${fieldRows}</ul>
-      ${suggestions ? `<h3>Suggestions</h3><ul>${suggestions}</ul>` : ""}
-      <p class="fine">These notes describe this practice only. Small numbers can mislead.</p>
-    </section>
+    <h2>Between you</h2>
+    <dl class="dl mt">
+      <dt>Found together</dt><dd><b>${fractionHtml(summary.pair.foundTogether)}</b> mismatches</dd>
+      <dt>Both missed</dt><dd>${summary.pair.sharedMisses === 0 ? "0 mismatches" : `${summary.pair.sharedMisses} — ${sharedMissDetail}`}</dd>
+      <dt>Only one of you</dt><dd>${summary.pair.complementary} mismatches</dd>
+      <dt>Next step fit</dt><dd>${decisionParts}</dd>
+      <dt>Same answer</dt><dd>${fractionHtml(summary.pair.fieldAgreement)} checks. Agreeing isn't the same as being right.</dd>
+    </dl>
   `;
 }
 
+// Suggestions (brief §8.3): text comes only from the bank's own
+// `suggestions[tag]` templates (snapshot.suggestionsText, a plain pass-
+// through of bank.suggestions), with {k} filled from the already-computed
+// distinct-case count -- no wording invented here.
+function suggestionsHtml(summary, snapshot, roundByCaseId) {
+  const real = summary.suggestions.filter((s) => s.kind !== "none");
+  if (real.length === 0) return `<li>${escapeHtml(snapshot.suggestionsText.none)}</li>`;
+  return real
+    .map((s) => {
+      const template = s.kind === "multi" ? snapshot.suggestionsText[s.tag].multi : snapshot.suggestionsText[s.tag].one;
+      const text = template.replace("{k}", String(s.distinctCases.length));
+      const links = s.distinctCases.map((cid) => caseLinkHtml(roundByCaseId[cid], snapshot)).join(" · ");
+      return `<li>${escapeHtml(text)} ${links}</li>`;
+    })
+    .join("");
+}
+
+function summaryCaveatHtml(snapshot) {
+  return `<p class="caveat">${escapeHtml(snapshot.suggestionsText.limited)} ${escapeHtml(SUMMARY_CAVEAT)}</p>`;
+}
+
+function sameAnswerText(result, fieldLabels) {
+  const allFieldsAgree = result.pair.fieldAgreement[0] === result.pair.fieldAgreement[1];
+  const decisionSame = result.A.decision.action === result.B.decision.action && result.A.decision.evidenceId === result.B.decision.evidenceId;
+  if (allFieldsAgree && decisionSame) {
+    if (result.pair.sharedMisses.length > 0) {
+      return `Yes — and you both missed ${fieldLabels[result.pair.sharedMisses[0]]?.label ?? result.pair.sharedMisses[0]}`;
+    }
+    return "Yes";
+  }
+  return allFieldsAgree ? "No (different next step)" : "No";
+}
+
+function caseByCaseTableHtml(phase, snapshot, fieldLabels, viewerSeat) {
+  const rounds = snapshot.rounds.filter((r) => r.case.phase === phase && r.revealed);
+  const rows = rounds
+    .map((r) => {
+      const result = r.result;
+      const mismatchKeys = Object.keys(result.pair.coverage);
+      const mismatchesText = mismatchKeys.length === 0 ? "none" : mismatchKeys.map((k) => fieldLabels[k]?.label ?? k).join(", ");
+      const foundBy =
+        mismatchKeys.length === 0
+          ? "—"
+          : mismatchKeys.length === 1
+            ? coverageDescription(result.pair.coverage[mismatchKeys[0]], viewerSeat)
+            : mismatchKeys
+                .map((k) => `${fieldLabels[k]?.label ?? k}: ${coverageDescription(result.pair.coverage[k], viewerSeat).toLowerCase()}`)
+                .join(", ");
+      const nextStepFit = coverageDescription(result.pair.decisionCoverage, viewerSeat);
+      const sameAnswer = sameAnswerText(result, fieldLabels);
+      const label = phase === "training" ? r.index : r.index - snapshot.trainingCaseCount;
+      return `<tr>
+        <td>${label}</td>
+        <td data-l="Patient">${escapeHtml(nameOf(r.case.patient))}</td>
+        <td data-l="Mismatches">${escapeHtml(mismatchesText)}</td>
+        <td data-l="Found by">${escapeHtml(foundBy)}</td>
+        <td data-l="Next step fit">${escapeHtml(nextStepFit)}</td>
+        <td data-l="Same answer?">${escapeHtml(sameAnswer)}</td>
+      </tr>`;
+    })
+    .join("");
+  return `<table class="tbl"><caption>Case by case</caption><thead><tr><th>Case</th><th>Patient</th><th>Mismatches</th><th>Found by</th><th>Next step fit</th><th>Same answer?</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+// training_summary stage (reference state "summary", brief §5/§8.3/U10):
+// full tiles + per-field table + between-you breakdown + suggestions +
+// case-by-case table, all for the training phase only (the transfer phase
+// has no mid-game summary screen -- brief §5's stage table shows no
+// summary stop between rounds 7-9, only training_summary and the final
+// end review).
 function renderSummary(snapshot) {
-  const stage = snapshot.table.stage;
-  const isTrainingSummary = stage === "training_summary";
   const viewerSeat = snapshot.viewer?.seat;
+  const partnerSeat = otherSeat(viewerSeat);
+  const summary = snapshot.trainingSummary[viewerSeat];
+  const partnerSummary = snapshot.trainingSummary.partner;
+  const fieldLabels = snapshot.rounds[0]?.case.fields ?? {};
+  const roundByCaseId = Object.fromEntries(
+    snapshot.rounds.filter((r) => r.case.phase === "training").map((r) => [r.case.caseId, r]),
+  );
 
   root.innerHTML = `
-    ${statusStripHtml(snapshot, null, isTrainingSummary ? "Training summary" : "End review")}
-    <h1>${isTrainingSummary ? "Training summary" : "All done"}</h1>
-    <p class="lead">This summary describes the completed cases shown here. Small numbers, repeated cases and use of the same browser may affect interpretation. Results do not establish clinical competence or show that the exercise improves patient outcomes.</p>
-    ${summaryBlockHtml(snapshot.trainingSummary?.[viewerSeat], "Your training summary")}
-    ${snapshot.transferSummary ? summaryBlockHtml(snapshot.transferSummary[viewerSeat], "Your transfer summary") : ""}
-    <div class="actions mt">
-      ${isTrainingSummary ? '<button class="btn" type="button" id="start-transfer">Start the new situations</button>' : '<a class="btn" href="/">Start a new table</a><a class="btn ghost" href="/tables">My tables</a>'}
+    ${statusStripHtml(snapshot, null, `Training complete · ${snapshot.trainingSummary.completedCount} of ${snapshot.trainingSummary.totalCount}`)}
+    <div class="card sumhead" style="margin-top:0">
+      <span class="ava" data-sprite="lee" data-scale="2.8"></span>
+      <div><p class="kicker">Training summary · You (Checker ${escapeHtml(viewerSeat)})</p><h1>What you found in six cases</h1><p>Mismatches, false alarms and next steps are counted separately, and agreeing is kept apart from being right.</p></div>
+    </div>
+    ${summaryTilesHtml(summary)}
+    <div class="two">
+      <div class="card pad">
+        ${perFieldTableHtml(summary, fieldLabels)}
+        ${decisionsFineHtml(summary, partnerSummary, partnerSeat)}
+      </div>
+      <div class="card pad">
+        ${betweenYouHtml(summary, roundByCaseId, snapshot, viewerSeat, fieldLabels)}
+      </div>
+    </div>
+    <div class="card pad mt">
+      <h2>Worth practising next</h2>
+      <ol class="sugg">${suggestionsHtml(summary, snapshot, roundByCaseId)}</ol>
+      ${summaryCaveatHtml(snapshot)}
+    </div>
+    <div class="card pad mt">
+      ${caseByCaseTableHtml("training", snapshot, fieldLabels, viewerSeat)}
+    </div>
+    <div class="card pad mt" style="margin-bottom:40px">
+      <div class="btns"><button class="btn" type="button" id="start-transfer">Start the new situations →</button><span class="fine">Three new patients. Same rules: check on your own first. Your training results stay as they are.</span></div>
     </div>
   `;
 
-  if (isTrainingSummary) {
-    document.getElementById("start-transfer").addEventListener("click", async () => {
-      const button = document.getElementById("start-transfer");
-      button.disabled = true;
-      const result = await apiFetch(`/api/tables/${tableId}/next`, {
-        method: "POST",
-        body: JSON.stringify({ fromStage: "training_summary" }),
-      });
-      if (result.ok) render(result.body);
-      else button.disabled = false;
+  document.getElementById("start-transfer").addEventListener("click", async () => {
+    const button = document.getElementById("start-transfer");
+    button.disabled = true;
+    const result = await apiFetch(`/api/tables/${tableId}/next`, {
+      method: "POST",
+      body: JSON.stringify({ fromStage: "training_summary" }),
     });
+    if (result.ok) render(result.body);
+    else button.disabled = false;
+  });
+}
+
+function earlierPracticePlaceholderHtml() {
+  return `
+    <table class="tbl" id="earlier-practice">
+      <caption>Earlier practice in this browser</caption>
+      <thead><tr><th>Date</th><th>Table</th><th>Mismatches found</th><th>False marks</th><th>Next steps fit</th><th>New situations</th><th>Note</th></tr></thead>
+      <tbody><tr><td colspan="7" class="muted">Loading…</td></tr></tbody>
+    </table>
+    <p class="fine">Practice records in this browser. They don't identify you or follow you across devices. Your partner can't see this history.</p>
+    <p class="caveat">${escapeHtml(SUMMARY_CAVEAT)}</p>
+  `;
+}
+
+// §8.4 "earlier practice in this browser": fetched separately from the main
+// snapshot (it is per-identity history across OTHER tables, not this
+// table's own state, so it has no place in the SSE-pushed snapshot and
+// would otherwise leak into every table's payload for no reason).
+async function loadEarlierPractice(currentTableId, bankMajorVersion, bankVersion) {
+  const result = await apiFetch(`/api/me/history?exclude=${encodeURIComponent(currentTableId)}`);
+  const tbody = document.querySelector("#earlier-practice tbody");
+  if (!tbody) return; // navigated away before this resolved
+  if (!result.ok || result.body.history.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="muted">No earlier practice in this browser yet.</td></tr>`;
+    return;
   }
+  tbody.innerHTML = result.body.history
+    .map((h) => {
+      const date = h.completedAt ? new Date(h.completedAt).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" }) : "—";
+      const sameCaseSet = h.bankVersion === bankVersion;
+      const note = sameCaseSet
+        ? "Same case set as before (memory may help)"
+        : h.bankMajorVersion !== bankMajorVersion
+          ? "Earlier version"
+          : "";
+      return `<tr>
+        <td>${escapeHtml(date)}</td>
+        <td data-l="Table">${escapeHtml(h.code)}</td>
+        <td data-l="Mismatches found">${fractionHtml(h.trainingMismatchesFound)}</td>
+        <td data-l="False marks">${fractionHtml(h.trainingFalseMarks)}</td>
+        <td data-l="Next steps fit">${fractionHtml(h.trainingDecisionsAccepted)}</td>
+        <td data-l="New situations">${fractionHtml(h.transferDecisionsAccepted)}</td>
+        <td data-l="Note">${escapeHtml(note)}</td>
+      </tr>`;
+    })
+    .join("");
+}
+
+// completed stage (reference state "end", brief §5/§8.4): training and
+// transfer recapped separately, §8.4's earlier-practice table, and print.
+// No fabricated "talk it through" discussion prompt here -- the reference
+// mockup's end-screen discussion text isn't sourced from the bank for a
+// whole-session topic (only per-case `feedback.discussion` exists, already
+// shown on each case's own debrief), so inventing one would break the
+// "never invent... motivations" rule; this is reported as a reference/
+// behaviour difference rather than guessed at.
+function renderEnd(snapshot) {
+  const viewerSeat = snapshot.viewer?.seat;
+  const partnerSeat = otherSeat(viewerSeat);
+  const trainingSummary = snapshot.trainingSummary[viewerSeat];
+  const trainingPartner = snapshot.trainingSummary.partner;
+  const transferSummary = snapshot.transferSummary?.[viewerSeat];
+  const transferPartner = snapshot.transferSummary?.partner;
+  const transferRounds = snapshot.rounds.filter((r) => r.case.phase === "transfer");
+  const lastRound = snapshot.rounds[snapshot.rounds.length - 1];
+  const completedDate = lastRound?.revealedAt
+    ? new Date(lastRound.revealedAt).toLocaleDateString("en-AU", { day: "numeric", month: "short", year: "numeric" })
+    : "";
+
+  const transferRows = transferRounds
+    .map((r) => {
+      const tagLabel = snapshot.capabilityTags.find((t) => t.id === r.result.decisionTag)?.label ?? r.result.decisionTag;
+      const applied = r.result[viewerSeat].fullyCorrect;
+      const situationNum = r.index - snapshot.trainingCaseCount;
+      const situationTitle = r.case.title.replace(/^New situation \d+ · /, "");
+      return `<tr><td>${situationNum} · ${escapeHtml(situationTitle)}</td><td data-l="Practised">${escapeHtml(tagLabel)}</td><td data-l="Result">${applied ? '<span class="mk ok">✓ Applied it</span>' : '<span class="mk no">Still practising</span>'}</td></tr>`;
+    })
+    .join("");
+
+  root.innerHTML = `
+    ${statusStripHtml(snapshot, null, "End review")}
+    <div class="card sumhead">
+      <span class="ava" data-sprite="lee" data-scale="2.8"></span>
+      <div><p class="kicker">Table ${escapeHtml(snapshot.table.code)} · practice complete${completedDate ? ` · ${escapeHtml(completedDate)}` : ""}</p><h1>End review</h1><p>Bring this to your debrief with your facilitator. Training and new situations are shown separately.</p></div>
+    </div>
+    <div class="two">
+      <div class="card pad">
+        <table class="tbl"><caption>Training · ${snapshot.trainingCaseCount} cases (you)</caption>
+          <thead><tr><th>Measure</th><th>You</th><th>Checker ${escapeHtml(partnerSeat)}</th></tr></thead>
+          <tbody>
+            <tr><td>Mismatches found</td><td data-l="You">${fractionHtml(trainingSummary.mismatchesFound)}</td><td data-l="Checker">${fractionHtml(trainingPartner.mismatchesFound)}</td></tr>
+            <tr><td>Matching items marked as mismatches</td><td data-l="You">${fractionHtml(trainingSummary.matchingMarkedMismatch)}</td><td data-l="Checker">${fractionHtml(trainingPartner.matchingMarkedMismatch)}</td></tr>
+            <tr><td>Next steps and evidence that fit</td><td data-l="You">${fractionHtml(trainingSummary.decisions.accepted)}</td><td data-l="Checker">${fractionHtml(trainingPartner.decisions.accepted)}</td></tr>
+            <tr><td>Found together</td><td data-l="You" colspan="2">${fractionHtml(trainingSummary.pair.foundTogether)}${trainingSummary.pair.sharedMisses > 0 ? ` · both missed ${trainingSummary.pair.sharedMisses}` : ""}</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card pad">
+        <table class="tbl"><caption>New situations · ${snapshot.transferCaseCount} cases (you)</caption>
+          <thead><tr><th>Situation</th><th>Practised</th><th>Result</th></tr></thead>
+          <tbody>${transferRows}</tbody>
+        </table>
+        ${transferSummary ? `<p class="fine">Next steps and evidence that fit: you ${transferSummary.decisions.accepted[0]} of ${transferSummary.casesCounted} · Checker ${escapeHtml(partnerSeat)} ${transferPartner.decisions.accepted[0]} of ${transferPartner.casesCounted}.</p>` : ""}
+      </div>
+    </div>
+    <div class="card pad mt">
+      ${earlierPracticePlaceholderHtml()}
+    </div>
+    <div class="btns mt" style="margin-bottom:40px"><button class="btn" type="button" id="print-btn">Print or save as PDF</button><a class="btn ghost" href="/tables">My tables</a></div>
+  `;
+
+  document.getElementById("print-btn").addEventListener("click", () => window.print());
+  loadEarlierPractice(snapshot.table.id, snapshot.table.bankMajorVersion, snapshot.table.bankVersion);
 }
 
 function connectSse() {
