@@ -1,0 +1,46 @@
+Second Pair of Eyes -- persistence check (Round D)
+Run date: 2026-11-11
+Target: https://comp4020-final-roselynjiang123.fly.dev
+Method: scripts/persistence-check.mjs (new this round). "create" drives two
+real cookie jars (A, B) over HTTP against the deployed app to create a
+table and complete two training rounds (both seats sign, both revealed,
+round 1 advanced to round 2 via /next), then prints a fingerprint: table
+id/code/stage/status, and per round: index, caseId, revealed,
+mine/partnerSubmitted, result.decisionTag, result.pair.identical.
+"fetch" re-GETs the same table with seat A's cookie and prints the same
+fingerprint, to be diffed against the first.
+
+Table created: VAOQ (full id and both session cookies captured locally,
+not reproduced here -- cookies are session secrets).
+
+BEFORE (just after creating the table and completing 2 rounds):
+  stage: training, status: playing
+  round 1: C1, revealed=true, both submitted, decisionTag=total_dose, pair.identical=true
+  round 2: C2, revealed=true, both submitted, decisionTag=identity, pair.identical=true
+
+Action 1: `mise exec -- flyctl machine restart 891e4e5f443298 -a comp4020-final-roselynjiang123`
+  -> "Machine 891e4e5f443298 restarted successfully!"
+
+AFTER RESTART (re-fetched with seat A's cookie):
+  stage: training, status: playing
+  round 1: C1, revealed=true, both submitted, decisionTag=total_dose, pair.identical=true
+  round 2: C2, revealed=true, both submitted, decisionTag=identity, pair.identical=true
+  Diff against BEFORE: none (verified programmatically, exit 0).
+
+Action 2: `mise exec -- flyctl deploy --remote-only --ha=false -a comp4020-final-roselynjiang123`
+  (same commit as the running deploy, to isolate "does a redeploy preserve
+  the volume" from "did this particular code change break something")
+  -> deploy succeeded, machine reached a healthy state, smoke/health checks
+  passed.
+
+AFTER REDEPLOY (re-fetched with seat A's cookie):
+  stage: training, status: playing
+  round 1: C1, revealed=true, both submitted, decisionTag=total_dose, pair.identical=true
+  round 2: C2, revealed=true, both submitted, decisionTag=identity, pair.identical=true
+  Diff against BEFORE: none (verified programmatically, exit 0).
+
+Conclusion: the table, both rounds' submissions and both rounds' reveal
+results (decision tag and pair-identical result) were byte-for-byte
+unchanged across a machine restart and a full redeploy. No secrets
+(session cookies, table ids beyond the display code) are included in this
+file.
