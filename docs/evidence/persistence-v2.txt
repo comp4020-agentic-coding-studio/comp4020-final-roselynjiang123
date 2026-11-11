@@ -39,8 +39,38 @@ AFTER REDEPLOY (re-fetched with seat A's cookie):
   round 2: C2, revealed=true, both submitted, decisionTag=identity, pair.identical=true
   Diff against BEFORE: none (verified programmatically, exit 0).
 
-Conclusion: the table, both rounds' submissions and both rounds' reveal
-results (decision tag and pair-identical result) were byte-for-byte
-unchanged across a machine restart and a full redeploy. No secrets
-(session cookies, table ids beyond the display code) are included in this
-file.
+Conclusion (first table, VAOQ): the table, both rounds' submissions and
+both rounds' reveal results (decision tag and pair-identical result) were
+byte-for-byte unchanged across a machine restart and a full redeploy. No
+secrets (session cookies, table ids beyond the display code) are included
+in this file.
+
+--------------------------------------------------------------------------
+
+SECOND TABLE (TZOK), created after the above, same method, to confirm
+the first table's survival wasn't a one-off and that two independent
+tables on the same volume don't interfere with each other:
+
+Table created: TZOK (2 training rounds completed, same shape as VAOQ).
+
+BEFORE:
+  stage: training, status: playing
+  round 1: C1, revealed=true, both submitted, decisionTag=total_dose, pair.identical=true
+  round 2: C2, revealed=true, both submitted, decisionTag=identity, pair.identical=true
+
+Action 1: `mise exec -- flyctl machine restart 891e4e5f443298 -a comp4020-final-roselynjiang123`
+  -> "Machine 891e4e5f443298 restarted successfully!"
+
+AFTER RESTART: both TZOK and VAOQ re-fetched; both identical to their
+BEFORE fingerprints (diffed programmatically, exit 0 for each).
+
+Action 2: `mise exec -- flyctl deploy --remote-only --ha=false -a comp4020-final-roselynjiang123`
+  -> deploy succeeded, machine reached a healthy state.
+
+AFTER REDEPLOY: both TZOK and VAOQ re-fetched again; both still identical
+to their original fingerprints.
+
+Conclusion: two independently created tables, both with two completed and
+revealed rounds, both survived a machine restart and a redeploy with zero
+change to their stage, submissions or results, and without affecting each
+other. No secrets included in this file.
