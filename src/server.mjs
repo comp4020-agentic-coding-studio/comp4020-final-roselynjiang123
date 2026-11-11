@@ -12,6 +12,7 @@ import { randomToken } from "./ids.mjs";
 import { renderMarkdown } from "./markdown.mjs";
 import { logAction } from "./actionlog.mjs";
 import { loadBank } from "./bank.mjs";
+import { sourcesPageHtml } from "./pages.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(__dirname, "..");
@@ -60,6 +61,23 @@ export function createApp(db, bank) {
     const rendered = renderMarkdown(readme);
     const template = readFileSync(join(repoRoot, "public", "readme.html"), "utf8");
     res.type("html").send(template.replace("@README@", rendered));
+  });
+
+  // /guide/ (brief §9: "teacher guide"): facts-only markdown the student
+  // edits directly, same server-side-markdown pattern as /readme/.
+  app.get("/guide/", (_req, res) => {
+    const guide = readFileSync(join(repoRoot, "docs", "guide.md"), "utf8");
+    const rendered = renderMarkdown(guide);
+    const template = readFileSync(join(repoRoot, "public", "guide.html"), "utf8");
+    res.type("html").send(template.replace("@GUIDE@", rendered));
+  });
+
+  // /sources/ (brief §9: "scope, review legend, grouped sources from the
+  // bank"): rendered from the live bank, not a frozen snapshot -- sources
+  // are public, non-clinical, bank-wide metadata (not per-round secret
+  // content), so there is nothing to freeze per round here.
+  app.get("/sources/", (_req, res) => {
+    res.type("html").send(sourcesPageHtml(bank));
   });
 
   // Reveals no paths or data; just proves the DB opens and a trivial query
