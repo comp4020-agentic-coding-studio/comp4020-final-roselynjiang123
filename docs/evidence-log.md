@@ -17,3 +17,10 @@ conflict was reported to the student, against brief §1's "explain the
 concrete conflict before changing scope or architecture" (ADR 0001 already
 recorded the revert itself, but not this process violation) | CLAUDE.md (new
 rule, below) | (this round's tidy-up commit)
+2026-11-11 | scripts/smoke-deployed.mjs started its timer after awaiting the
+second submitter's own POST response, not before sending it; since the
+server calls sse.notify() before that response is sent, the SSE push and the
+old timer's start point raced back over two TCP connections in the same
+tick, producing a near-zero/negative "median 0ms" that measured a race, not
+network latency | scripts/smoke-deployed.mjs, docs/evidence/latency.txt
+(before Round 4)

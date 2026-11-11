@@ -1,3 +1,8 @@
+Superseded: see "Method fix" below for the corrected method and the current
+numbers. The runs under this first heading used a timer start point that
+made a near-zero result inevitable rather than measured; kept for the
+record, not as current evidence.
+
 Measured against https://comp4020-final-roselynjiang123.fly.dev with
 scripts/smoke-deployed.mjs, per brief §9 item 12: milliseconds from the
 second submission's POST response to the first client's SSE reveal
@@ -44,3 +49,41 @@ run 10: -1ms
 
 median: 0ms
 max: 1ms
+
+Method fix, 2026-11-11 (before Round 4): a 0ms median is not a network
+measurement, so scripts/smoke-deployed.mjs's timer now starts immediately
+before sending the second POST (not after awaiting its response) and stops
+when the first client's SSE reveal snapshot arrives -- elapsed time from
+submitting to seeing the update, as brief §7 actually asks for.
+
+What the old runs above measured instead: the timer started only after
+`await`ing the second submitter's own POST response, i.e. after that
+request's round trip had already finished. The server calls sse.notify()
+before sending that response (src/server.mjs), so the SSE push and the old
+timer's start point left the server in the same event-loop tick and raced
+back over two independent TCP connections. The near-zero and negative
+values above are which of two already-in-flight responses happened to win
+that race, not how long an update takes to become visible -- the "direct
+inspection" of B's own request RTT mentioned above (~240ms) was the real
+network time; the old method just never put that number on the clock it
+reported.
+
+Rerun against the same deployed instance, new method:
+
+run 1: 202ms
+run 2: 44ms
+run 3: 47ms
+run 4: 55ms
+run 5: 37ms
+run 6: 48ms
+run 7: 47ms
+run 8: 93ms
+run 9: 43ms
+run 10: 44ms
+
+median: 47ms
+max: 202ms
+
+Well inside the "about one second" target in brief §7. Run 1's 202ms is the
+first request after an idle period (Fly machine/connection warm-up); the
+other nine sit in the 37-93ms range typical of this deployment's RTT.

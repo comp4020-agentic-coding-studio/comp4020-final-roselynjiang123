@@ -2,8 +2,21 @@
 // Manual smoke test against a deployed instance (brief §9 item 12), not run
 // by `pnpm check`. Two independent cookie jars create and join a table, both
 // submit case 1 with a matching Origin, and this measures milliseconds from
-// the second submission's POST response to the first client's SSE reveal
-// snapshot. Ten runs; prints median and max.
+// just before the second submission's POST is sent to the first client's SSE
+// reveal snapshot arriving. Ten runs; prints median and max.
+//
+// This is the second version of this script. The first started its timer
+// after awaiting the second POST's response -- i.e. after that request's own
+// round trip had already completed -- then measured to the SSE reveal. The
+// server calls sse.notify() before sending the second submitter's HTTP
+// response (src/server.mjs), so that timer's start point and the SSE push
+// left the server in the same tick and raced back over two independent TCP
+// connections; whichever happened to arrive first made the measured gap
+// near-zero or negative. That measured which of two already-in-flight
+// responses won a race, not how long an update takes to become visible.
+// Starting the timer before the second POST is sent measures the thing
+// brief §7 actually asks about: elapsed time from submitting to seeing the
+// update, over the full round trip.
 //
 // Usage: node scripts/smoke-deployed.mjs <url>
 
@@ -88,12 +101,12 @@ async function oneRun() {
   const revealPromise = waitForReveal(sseRes);
 
   await a.post(`/api/tables/${tableId}/rounds/${roundId}/submissions`, { answer: CORRECT });
-  const secondSubmitResponseTime = Date.now();
+
+  const beforeSecondSubmit = Date.now();
   await b.post(`/api/tables/${tableId}/rounds/${roundId}/submissions`, { answer: CORRECT });
-  const afterSecondSubmit = Date.now();
 
   const revealTime = await revealPromise;
-  return revealTime - afterSecondSubmit;
+  return revealTime - beforeSecondSubmit;
 }
 
 const RUNS = 10;
