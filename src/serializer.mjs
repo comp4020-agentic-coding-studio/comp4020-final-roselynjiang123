@@ -52,6 +52,20 @@ export function serializeSnapshot(snapshot, bank) {
     // round yet to freeze it into, and the knowledge card isn't part of any
     // one case's graded content.
     knowledgeCard: bank.knowledgeCard,
+    // setting.pairNote (brief §6.1: "appears on the waiting screen and in
+    // the Guide with links to its setting.pairNoteSourceIds") resolved to
+    // full source objects here, the one allowlist path, rather than making
+    // the client re-resolve ids against a source list it would otherwise
+    // need fetched separately.
+    setting: {
+      ward: bank.setting.ward,
+      hospital: bank.setting.hospital,
+      description: bank.setting.description,
+      pairNote: bank.setting.pairNote,
+      pairNoteSources: (bank.setting.pairNoteSourceIds ?? [])
+        .map((sid) => bank.sources.find((s) => s.id === sid))
+        .filter(Boolean),
+    },
   };
 
   if (table.stage === "training_summary" || table.stage === "transfer" || table.stage === "completed") {

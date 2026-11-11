@@ -56,6 +56,10 @@ export function validateBank(bank) {
     }
   };
 
+  for (const sid of bank.setting?.pairNoteSourceIds ?? []) {
+    if (!sourceIds.has(sid)) errors.push(`setting.pairNoteSourceIds: unknown source "${sid}"`);
+  }
+
   for (const card of bank.medicineCards ?? []) {
     for (const sid of card.sourceIds ?? []) {
       if (!sourceIds.has(sid)) errors.push(`medicineCard "${card.id}": unknown sourceIds entry "${sid}"`);

@@ -23,6 +23,18 @@ function nameOf(patient) {
   return `${patient.givenName} ${patient.familyName}`;
 }
 
+// Pair note with its source link (brief §6.1: "appears on the waiting
+// screen and in the Guide with links to its setting.pairNoteSourceIds;
+// every source link points to /sources/#<sourceId>"). v2.1 reference copy:
+// one link per source, "Source: {org}".
+function pairNoteHtml(setting) {
+  if (!setting) return "";
+  const links = (setting.pairNoteSources ?? [])
+    .map((s) => ` <a href="/sources/#${escapeHtml(s.id)}">Source: ${escapeHtml(s.org)}</a>`)
+    .join("");
+  return `${escapeHtml(setting.pairNote)}${links}`;
+}
+
 // Status strip (v2.1 reference, U02: table code, seat badges A/B with
 // Signed/Checking, case n of 6 or new situation n of 3, connection). One
 // polite live region (U15): SSE updates re-render this element's content
@@ -150,7 +162,7 @@ function renderWaiting(snapshot) {
           <span class="ava" data-sprite="lee" data-scale="2.4"></span>
           <div><b>Lee · clinical facilitator</b><br>Morning. Six patients, six medicines. Check each one on your own — don't tell your partner what you find until you've both signed. Mistakes here are how we learn; nothing you choose reaches a real patient.</div>
         </div>
-        <p class="note">On real wards, independent double checks are kept for selected high-risk medicines and tasks. In this practice you check every medicine twice so you can practise independent judgement.</p>
+        <p class="note">${pairNoteHtml(snapshot.setting)}</p>
       </div>
       <div class="card pad">
         <h2>Before you start</h2>

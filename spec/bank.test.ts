@@ -42,6 +42,21 @@ describe("T12 bank validation (content/case-bank.v2.json)", () => {
     const errors = validateBank(bad);
     expect(errors.some((e: string) => e.includes("unknown medicineCardIds"))).toBe(true);
   });
+
+  it("an unknown source id in setting.pairNoteSourceIds fails validation", () => {
+    const bad = clone(realBank);
+    expect(bad.setting.pairNoteSourceIds.length).toBeGreaterThan(0);
+    bad.setting.pairNoteSourceIds = ["S-does-not-exist"];
+    const errors = validateBank(bad);
+    expect(errors.some((e: string) => e.includes("pairNoteSourceIds") && e.includes("unknown source"))).toBe(true);
+  });
+
+  it("the real bank's setting.pairNoteSourceIds all resolve to real sources", () => {
+    const sourceIds = new Set(realBank.sources.map((s: any) => s.id));
+    for (const sid of realBank.setting.pairNoteSourceIds) {
+      expect(sourceIds.has(sid), `setting.pairNoteSourceIds has unknown id "${sid}"`).toBe(true);
+    }
+  });
 });
 
 describe("T11 review status", () => {
