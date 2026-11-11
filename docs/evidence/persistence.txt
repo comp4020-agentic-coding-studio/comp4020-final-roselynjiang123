@@ -13,8 +13,8 @@ Commands run:
 
   node persistence-check.mjs https://comp4020-final-roselynjiang123.fly.dev create
     -> TABLE_ID=NgWJUlnZCAfawlWykQHZV1DfjqU4M8Rr
-       COOKIE_A=spe_session=C9x1fhnleDlm-rh1lrIdgkKzSztAcryQ
-       COOKIE_B=spe_session=KA2ftY9yeGFte6vYb5iaVzXhYaCS6AUO
+       COOKIE_A=spe_session=<redacted, anonymous per-browser session token>
+       COOKIE_B=spe_session=<redacted, anonymous per-browser session token>
 
   mise exec -- flyctl machine restart 891e4e5f443298 -a comp4020-final-roselynjiang123
     -> "Machine 891e4e5f443298 restarted successfully!"
