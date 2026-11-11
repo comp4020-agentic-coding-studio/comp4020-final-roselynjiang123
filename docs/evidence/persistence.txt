@@ -47,3 +47,32 @@ Conclusion: an accepted submission and its reveal survive both a machine
 restart and a full image redeploy with no data loss, as brief §9 item 9 and
 the brief's "all accepted progress persists through restart and redeploy"
 definition of done require.
+
+---
+
+Session token revocation (commit 7d03310's redaction, 2026-11-11T11:16:37
++11:00 / 2026-11-11T00:16:37Z, addressed here), no values printed.
+
+Method: a one-off, non-committed script run against the live database on
+the deployed machine, via `mise exec -- flyctl ssh console -a
+comp4020-final-roselynjiang123 -C "node -e '...'"`. The script opened
+`/data/app.db` with `better-sqlite3` (the same package and path the app
+itself uses, confirmed via `printenv DATABASE_PATH` on the machine first)
+and ran `DELETE FROM sessions WHERE created_at < ?` with the cutoff
+2026-11-11T00:16:37.000Z (7d03310's commit time, converted to UTC to match
+`sessions.created_at`'s storage format). The `sessions` table has no
+`UNIQUE`/`FOREIGN KEY` on `table_members.identity` or `submissions.identity`
+back to it (confirmed by reading `src/db.mjs`'s schema before running
+anything), so deleting a session row only revokes that token's ability to
+authenticate (`sessionMiddleware` rejects a presented cookie once
+`repo.sessionExists()` returns false and silently mints a new, unrelated
+identity); it does not touch `tables`, `table_members`, `rounds` or
+`submissions`, so no table data, round history or accepted answer was
+affected. Before deleting, a read-only count confirmed 57 of 113 session
+rows had `created_at` before the cutoff; the delete reported 57 rows
+changed, and a post-delete count confirmed 56 rows remain in `sessions`
+and all 49 existing `tables` rows are still present.
+
+Result: 57 session tokens (every one created before 7d03310's commit time)
+no longer authenticate. No git history was rewritten; this is a live
+database change only, on the already-deployed app.

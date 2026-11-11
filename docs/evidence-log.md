@@ -182,3 +182,13 @@ test actually enforces them) | CLAUDE.md (new rules for brief §1 items 2-3
 and §4 items 3, 11; corrected "judged" to "enforced" throughout; named
 T10, T15, T17 where previously untested-by-name) | (this round's CLAUDE.md
 commit)
+2026-11-12 | `docs/evidence/persistence.txt` (redacted by `7d03310`,
+2026-11-11) recorded that credential-shaped session cookie values had been
+committed in `660af8e` and then redacted from the evidence file, but the
+tokens themselves were never revoked on the live database -- a student
+request caught that the live sessions those values authenticated were
+still valid, since redacting a file does not revoke a credential | live
+database on the deployed Fly app (sessions created before 7d03310's
+commit time deleted via a one-off script, not committed), docs/evidence/
+persistence.txt (count and method recorded, no values) | (this round's
+revocation step, no commit -- a database change, not a code change)
