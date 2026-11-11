@@ -26,7 +26,17 @@ if (!url) {
   process.exit(1);
 }
 
-const CORRECT = { patient: "match", medicine: "match", dose: "match", route: "match", time: "match", overall: "match" };
+// v2 submission shape (brief §7): five fields + exactly one action + one
+// evidenceId, read from the live case bank's own case 1 (C1) accepted
+// answer, not hand-written -- so this script tracks the bank's actual
+// field keys and an actually-accepted pair instead of a stale, separately
+// maintained v1 constant (the v1 `{ ..., overall: "match" }` shape this
+// script used to post is rejected outright by the v2 validator).
+const { readFile } = await import("node:fs/promises");
+const bank = JSON.parse(await readFile(new URL("../content/case-bank.v2.json", import.meta.url), "utf8"));
+const c1 = bank.cases.find((c) => c.caseId === "C1");
+const acceptedPair = c1.answerKey.acceptedPairs[0];
+const CORRECT = { fields: { ...c1.answerKey.fields }, action: acceptedPair.action, evidenceId: acceptedPair.evidenceId };
 
 function createClient(baseUrl) {
   const client = { cookie: null };
@@ -100,10 +110,10 @@ async function oneRun() {
   const sseRes = await a.get(`/api/tables/${tableId}/events`);
   const revealPromise = waitForReveal(sseRes);
 
-  await a.post(`/api/tables/${tableId}/rounds/${roundId}/submissions`, { answer: CORRECT });
+  await a.post(`/api/tables/${tableId}/rounds/${roundId}/submissions`, CORRECT);
 
   const beforeSecondSubmit = Date.now();
-  await b.post(`/api/tables/${tableId}/rounds/${roundId}/submissions`, { answer: CORRECT });
+  await b.post(`/api/tables/${tableId}/rounds/${roundId}/submissions`, CORRECT);
 
   const revealTime = await revealPromise;
   return revealTime - beforeSecondSubmit;

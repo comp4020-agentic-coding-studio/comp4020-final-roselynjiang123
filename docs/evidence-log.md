@@ -130,3 +130,14 @@ from the repo root, where both paths already exist on disk, so the gap only
 shows up against the actual built image. Caught by watching `mise exec --
 flyctl deploy`'s first attempt crash-loop and reading `flyctl logs` |
 Dockerfile (two added `COPY` lines) | (Round D of E deploy commit)
+2026-11-12 | `scripts/smoke-deployed.mjs` still posted the v1 submission
+shape (`{ answer: { patient: "match", ..., overall: "match" } }`) to the
+v2 `/submissions` route, which the v2 validator rejects outright (needs
+`fields`/`action`/`evidenceId`) -- the script was never updated when the
+engine moved to v2, so every run would have failed its first submission
+with a 400 before reaching the part that measures latency. Caught before
+running it against the real deployment, by reading the route's actual
+validator (`validateSubmissionV2`) against the script's hardcoded body.
+Fixed to read case C1's own `answerKey` from the live bank and post its
+first accepted pair instead of a hand-written v1 constant | scripts/
+smoke-deployed.mjs | (Round D of E deploy commit)

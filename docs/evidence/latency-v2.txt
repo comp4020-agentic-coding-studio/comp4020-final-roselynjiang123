@@ -1,0 +1,18 @@
+Second Pair of Eyes -- deployed latency smoke test (Round D)
+Run date: 2026-11-11
+Target: https://comp4020-final-roselynjiang123.fly.dev
+Method: scripts/smoke-deployed.mjs, 10 runs. Measures ms from just before the second submitter's POST to the first client's SSE reveal event (fixed for the race in the script's own header comment).
+
+run 1: 226ms
+run 2: 66ms
+run 3: 73ms
+run 4: 80ms
+run 5: 86ms
+run 6: 88ms
+run 7: 59ms
+run 8: 81ms
+run 9: 75ms
+run 10: 77ms
+
+median: 80ms
+max: 226ms
