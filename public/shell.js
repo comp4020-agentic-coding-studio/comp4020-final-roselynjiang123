@@ -10,29 +10,27 @@ export function renderShell(activeNav) {
     "afterbegin",
     `
     <a class="skip" href="#main">Skip to content</a>
-    <header class="topbar">
-      <div class="wrap">
-        <a class="brand" href="/">
-          <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect x="12" y="2" width="17" height="22" rx="4" fill="#7fc4ba"/><path d="M22 6v7l2.5-1.7L27 13V6z" fill="#0f5257"/><rect x="3" y="8" width="18" height="22" rx="4" fill="#fff"/><rect x="4.5" y="9.5" width="15" height="19" rx="3" fill="#0f5257"/><path d="M7.5 19.5l3.2 3.2 6-7" stroke="#fff" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          Second Pair of Eyes
-        </a>
-        <span class="ctx">Adult ward · Paired medication-check practice</span>
-        <nav class="nav" aria-label="Main">
-          ${navItem("/", "Play")}
-          ${navItem("/tables", "My tables")}
-          ${navItem("/guide/", "Guide")}
-          ${navItem("/sources/", "Sources")}
-          ${navItem("/readme/", "Readme")}
-        </nav>
-      </div>
-    </header>
+    <header class="topbar"><div class="wrap">
+      <a class="brand" href="/">
+        <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true"><rect x="12" y="2" width="17" height="22" rx="4" fill="#7fc4ba"/><path d="M22 6v7l2.5-1.7L27 13V6z" fill="#0f5257"/><rect x="3" y="8" width="18" height="22" rx="4" fill="#fff"/><rect x="4.5" y="9.5" width="15" height="19" rx="3" fill="#0f5257"/><path d="M7.5 19.5l3.2 3.2 6-7" stroke="#fff" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Second Pair of Eyes
+      </a>
+      <span class="ctx">Adult ward · Paired medication-check practice</span>
+      <nav class="nav" aria-label="Main">
+        ${navItem("/", "Play")}
+        ${navItem("/tables", "My tables")}
+        ${navItem("/guide/", "Guide")}
+        ${navItem("/sources/", "Sources")}
+        ${navItem("/readme/", "Readme")}
+      </nav>
+    </div></header>
     <div class="notice"><div class="wrap">Educational simulation · Fictional patients · Not for clinical decision-making. <a href="/sources/">View scope and sources</a></div></div>
-    <main id="main"><div class="wrap" id="app"></div></main>
+    <main class="wrap" id="main"><div id="app"></div></main>
     `,
   );
   document.body.insertAdjacentHTML(
     "beforeend",
-    `<p class="sr-only" aria-live="polite" id="announcer"></p>`,
+    `<p class="sr" aria-live="polite" id="announcer"></p>`,
   );
 }
 

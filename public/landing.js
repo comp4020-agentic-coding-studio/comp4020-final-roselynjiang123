@@ -1,4 +1,5 @@
 import { renderShell, appRoot, apiFetch } from "./shell.js";
+import { myTablesCardHtml } from "./my-tables.js";
 
 renderShell("/");
 
@@ -15,9 +16,9 @@ appRoot().innerHTML = `
         <li>Using the <b>records and the patient's words</b> — the administration record and the allergy box — even when the order and the medicine match.</li>
         <li>Choosing a <b>next step with evidence</b>, and telling agreement apart from being right.</li>
       </ol>
-      <div class="btns mt"><button class="btn" type="button" id="create">Create a practice table</button><a class="btn ghost" href="/tables">My tables</a></div>
+      <div class="btns mt"><button class="btn" type="button" id="create">Create a practice table</button><a class="btn ghost" href="#my-tables">My tables</a></div>
       <p class="fine mt">About 20–25 minutes · two people, two browsers · fictional patients · content status: draft (<a href="/sources/">see Sources</a>)</p>
-      <div class="form-error" role="alert" id="error" hidden></div>
+      <div class="err" role="alert" id="error" hidden></div>
     </div>
     <div>
       <h2>How it works</h2>
@@ -30,7 +31,14 @@ appRoot().innerHTML = `
       <p class="note">A private window loses your place when it closes. Your records stay in this browser only.</p>
     </div>
   </div>
+  <div class="card pad mt" id="my-tables">
+    <h2>My tables</h2>
+    <p class="fine">Tables this browser has joined. The app recognises you by this browser's cookie, so these tables open only here.</p>
+    <div id="my-tables-body"><p class="fine">Loading…</p></div>
+  </div>
 `;
+
+document.getElementById("my-tables-body").innerHTML = await myTablesCardHtml();
 
 document.getElementById("create").addEventListener("click", async () => {
   const button = document.getElementById("create");
