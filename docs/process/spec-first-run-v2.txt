@@ -1,0 +1,71 @@
+spec/bank.test.ts, spec/submission-validator-v2.test.ts,
+spec/round-results.test.ts and spec/session-summary.test.ts (brief §12
+acceptance IDs T04, T06, T07, T08, T11, T12) run against commit 5d76e2a
+(before src/bank.mjs, src/submissionValidator.mjs, src/resultsAndSummary.mjs
+or src/debrief.mjs existed). Captured before any of those four modules
+were implemented.
+
+
+ RUN  v5.0.1 /home/roselyn/comp4020/comp4020-final-roselynjiang123
+
+ ❯ spec/session-summary.test.ts (0 test)
+ ❯ spec/bank.test.ts (0 test)
+ ❯ spec/submission-validator-v2.test.ts (0 test)
+ ❯ spec/round-results.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  spec/bank.test.ts [ spec/bank.test.ts ]
+Error: Cannot find module '../src/bank.mjs' imported from /home/roselyn/comp4020/comp4020-final-roselynjiang123/spec/bank.test.ts
+ ❯ spec/bank.test.ts:3:1
+      1| import { describe, expect, it } from "vitest";
+      2| import { readFileSync } from "node:fs";
+      3| import { loadBank, validateBank } from "../src/bank.mjs";
+       | ^
+      4|
+      5| // T11 Review status, T12 Bank validation. Tests load the real
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  spec/round-results.test.ts [ spec/round-results.test.ts ]
+Error: Cannot find module '../src/resultsAndSummary.mjs' imported from /home/roselyn/comp4020/comp4020-final-roselynjiang123/spec/round-results.test.ts
+ ❯ spec/round-results.test.ts:3:1
+      1| import { describe, expect, it } from "vitest";
+      2| import { readFileSync } from "node:fs";
+      3| import { roundResult } from "../src/resultsAndSummary.mjs";
+       | ^
+      4|
+      5| // T06 Round results: every example in scoring-fixtures.json -> exampl…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  spec/session-summary.test.ts [ spec/session-summary.test.ts ]
+Error: Cannot find module '../src/resultsAndSummary.mjs' imported from /home/roselyn/comp4020/comp4020-final-roselynjiang123/spec/session-summary.test.ts
+ ❯ spec/session-summary.test.ts:3:1
+      1| import { describe, expect, it } from "vitest";
+      2| import { readFileSync } from "node:fs";
+      3| import { roundResult, sessionSummary } from "../src/resultsAndSummary.…
+       | ^
+      4|
+      5| // T07 Session summaries, T08 Zero denominators and incomplete tables.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  spec/submission-validator-v2.test.ts [ spec/submission-validator-v2.test.ts ]
+Error: Cannot find module '../src/submissionValidator.mjs' imported from /home/roselyn/comp4020/comp4020-final-roselynjiang123/spec/submission-validator-v2.test.ts
+ ❯ spec/submission-validator-v2.test.ts:3:1
+      1| import { describe, expect, it } from "vitest";
+      2| import { readFileSync } from "node:fs";
+      3| import { validateSubmissionV2 } from "../src/submissionValidator.mjs";
+       | ^
+      4|
+      5| // T04 Validation (brief §7.1): missing/extra/unknown keys, unknown ev…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  4 failed (4)
+      Tests  no tests
+   Start at  19:23:17
+   Duration  225ms (worker 95%, environment 5%)
+
