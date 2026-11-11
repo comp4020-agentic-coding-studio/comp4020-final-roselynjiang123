@@ -59,19 +59,28 @@ describe("restart and reconnect (brief §9 items 9-10)", () => {
 
     await startApp(port, dbPath);
 
+    // Each setup call is asserted as it's made: an unasserted setup call that
+    // silently fails (e.g. every route 404ing, as it did against the Round 1
+    // skeleton -- docs/evidence-log.md) lets execution reach the real
+    // assertions below anyway, which can then pass vacuously on state that
+    // was never actually set up.
     const a = createClient(baseUrl);
     const createRes = await a.post("/api/tables", {});
+    expect(createRes.status, "table creation should succeed").toBe(201);
     const created = await createRes.json();
     const tableId = created.table.id;
 
     const b = createClient(baseUrl);
-    await b.post(`/api/tables/${tableId}/join`, {});
+    const joinRes = await b.post(`/api/tables/${tableId}/join`, {});
+    expect(joinRes.status, "join should succeed").toBe(200);
 
     const CORRECT = { patient: "match", medicine: "match", dose: "match", route: "match", time: "match", overall: "match" };
     const snapshot = await (await a.get(`/api/tables/${tableId}`)).json();
     const round1 = snapshot.rounds[0];
-    await a.post(`/api/tables/${tableId}/rounds/${round1.id}/submissions`, { answer: CORRECT });
-    await b.post(`/api/tables/${tableId}/rounds/${round1.id}/submissions`, { answer: CORRECT });
+    const submitA = await a.post(`/api/tables/${tableId}/rounds/${round1.id}/submissions`, { answer: CORRECT });
+    expect(submitA.status, "A's submission should succeed").toBe(200);
+    const submitB = await b.post(`/api/tables/${tableId}/rounds/${round1.id}/submissions`, { answer: CORRECT });
+    expect(submitB.status, "B's submission should succeed").toBe(200);
 
     const beforeRestart = await (await a.get(`/api/tables/${tableId}`)).json();
     expect(beforeRestart.rounds[0].revealed).toBe(true);
@@ -99,10 +108,12 @@ describe("restart and reconnect (brief §9 items 9-10)", () => {
 
     const a = createClient(baseUrl);
     const createRes = await a.post("/api/tables", {});
+    expect(createRes.status, "table creation should succeed").toBe(201);
     const created = await createRes.json();
     const tableId = created.table.id;
     const b = createClient(baseUrl);
-    await b.post(`/api/tables/${tableId}/join`, {});
+    const joinRes = await b.post(`/api/tables/${tableId}/join`, {});
+    expect(joinRes.status, "join should succeed").toBe(200);
 
     await stopApp();
     await startApp(port, dbPath);

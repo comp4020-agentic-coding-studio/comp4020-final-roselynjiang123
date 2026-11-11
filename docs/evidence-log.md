@@ -24,3 +24,10 @@ old timer's start point raced back over two TCP connections in the same
 tick, producing a near-zero/negative "median 0ms" that measured a race, not
 network latency | scripts/smoke-deployed.mjs, docs/evidence/latency.txt
 (before Round 4)
+2026-11-11 | spec/restart.test.ts's two tests made setup calls (create, join,
+submit) without asserting their responses, so a setup failure (e.g. every
+route 404ing, which is what happens against the Round 1 skeleton) let
+execution continue to the real assertions anyway -- proved by running these
+tests in a `git worktree` of a222b5e, where they now fail with "table
+creation should succeed: expected 404 to be 201" instead of passing
+vacuously | spec/restart.test.ts (before Round 4)
