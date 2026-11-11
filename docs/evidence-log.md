@@ -31,3 +31,32 @@ execution continue to the real assertions anyway -- proved by running these
 tests in a `git worktree` of a222b5e, where they now fail with "table
 creation should succeed: expected 404 to be 201" instead of passing
 vacuously | spec/restart.test.ts (before Round 4)
+2026-11-11 | CLAUDE.md rewritten for the v2 brief; removed because v2
+supersedes them, not because they were wrong: (1) "MUST reject malformed/
+missing/extra/inconsistent answers... spec test 5" -- the v1 answer shape
+(5 fields + `overall`) no longer exists; replaced by the v2 "Submission
+validation (brief §7)" rule (5 fields + `action` + `evidenceId`,
+consistency rule against `continue_checks`). (2) "MUST treat agreement and
+accuracy as separate concepts... spec test 7" and "MUST score every case
+for its actual discrepancy count (0-5 fields)... spec test 7" -- v1's
+match/mismatch pair-review scoring is replaced by v2's TP/FN/FP/TN +
+decision-acceptance scoring against the bank's `answerKey`; replaced by the
+v2 "Pure scoring and summaries (brief §8)" rule (fixtures-exact). (3)
+"NEVER say or imply a pair review result makes a medication safe... judged:
+spec test 7, human review of pair-review copy" -- v1's "pair review"
+concept is replaced by v2's debrief/summary; the same never-claim-clinical-
+effect constraint now lives in the product definition (brief §1) and is
+enforced by the §14 never-do list and the brief §11 copy requirements,
+rather than a standalone CLAUDE.md line, to fit the 100-line budget. (4)
+"MUST follow docs/reference/ui-reference.html markup/class names/copy
+exactly... human review against the reference at both marking viewports"
+-- re-pointed, not dropped: the v2 "Interface (brief §10.1)" rule names the
+same obligation against the new v2.1 reference and its `mock-only`
+exclusion. (5) "MUST keep /, /readme/ and /healthz passing exactly as the
+starter defines them... spec test 11, invariants.test.ts" -- not
+restated as its own line under the 100-line cap; spec/invariants.test.ts is
+unchanged and still runs under `pnpm check`, and T15 (brief §12) now covers
+the same server-rendered-HTML requirement across more pages (`/readme/`,
+`/guide/`, `/sources/`), so this is folded into "never commit a red check
+state" plus T15 rather than named separately | CLAUDE.md (v2 rewrite,
+Round A of E) | (this round's CLAUDE.md commit)
