@@ -60,3 +60,16 @@ the same server-rendered-HTML requirement across more pages (`/readme/`,
 `/guide/`, `/sources/`), so this is folded into "never commit a red check
 state" plus T15 rather than named separately | CLAUDE.md (v2 rewrite,
 Round A of E) | (this round's CLAUDE.md commit)
+2026-11-11 | Two mistakes caught by checking the server's actual JSON shape
+against what public/play.js reads (no headless browser available to render
+and catch these visually -- Playwright needs sudo for missing shared
+libraries, jsdom 30 doesn't execute `<script type="module">`): (1) the
+"Before you start" knowledge card had no data to render on the
+waiting_for_partner screen, since the serializer only put knowledgeCard
+inside each round's frozen case snapshot, and no round exists before B
+joins; (2) the status strip's progress dots and "Case n of 6" label used
+the round's global index (1..9 across training+transfer) against a fixed
+6-case total, which would mislabel every transfer round (e.g. round 7/9
+shown as "case 7 of 6", every dot "done") | src/serializer.mjs (top-level
+`knowledgeCard` field), public/play.js (`phasePosition()`) | (Round B of E
+commit, five-screens)
